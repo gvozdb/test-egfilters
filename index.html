@@ -173,8 +173,8 @@
             margin-top: 8px;
         }
         .filters-extra-checks .check-row {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 12px;
             padding-top: 8px;
         }
@@ -187,9 +187,17 @@
             border: 1px solid #eee;
             border-radius: 8px;
             padding: 8px 10px;
+            width: 100%;
         }
         body.filters-modal .filters .filters-extra-checks {
             display: block;
+        }
+
+        @media (min-width: 769px) {
+            body.filters-modal .filters .filters-grid .extra-select:not(.extra-select--sort) {
+                flex: 1 1 calc(50% - 12px);
+                max-width: calc(50% - 12px);
+            }
         }
 
         /* ====== GHOST (визуальный двойник на время модалки) ====== */
@@ -595,7 +603,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.004
+        Build: 0.0.005
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -894,6 +902,17 @@
         /* ====== GHOST while modal (чисто визуальный) ====== */
         function sanitizeGhost(root) {
             root.querySelectorAll(".exs-hidden").forEach(n => n.remove());
+            const removeJsClasses = (el) => {
+                if (el.classList && el.classList.length) {
+                    [...el.classList].forEach(cls => {
+                        if (cls.startsWith("js-")) {
+                            el.classList.remove(cls);
+                        }
+                    });
+                }
+            };
+            removeJsClasses(root);
+            root.querySelectorAll("*").forEach(el => removeJsClasses(el));
             root.querySelectorAll("input, select, textarea, button").forEach(el => {
                 el.removeAttribute("name");
                 el.setAttribute("disabled", "disabled");
@@ -1847,6 +1866,9 @@
                     btnSort.classList.add("is-active");
                 }
             }
+            scope.querySelectorAll('.filters-extra-checks input[type="checkbox"]').forEach(cb => {
+                cb.checked = cb.defaultChecked;
+            });
             submitAjax();
         });
 
