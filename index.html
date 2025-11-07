@@ -1,1408 +1,1837 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Extra Filters demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Extra Filters demo</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css">
-<script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js"></script>
 
-<style>
-/* базовый фон страницы */
-body {
-  background-color: #eee;
-  padding: 0;
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
+    <style>
+        /* ===================== FULL PROJECT CSS (4-space indents) ===================== */
 
-.container {
-    padding: 1rem;
-}
+        /* базовый фон страницы */
+        body {
+            background-color: #eee;
+            padding: 0;
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
 
-.build-version {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 2rem 0;
-    color: #a7a7a7;
-    font-size: 16px;
-    line-height: 1.4;
-}
+        .container {
+            padding: 1rem;
+        }
 
-/* ====== Контейнер фильтров ====== */
-.filters {
-  position: relative;
-  max-width: 1100px;
-  margin: 3rem auto;
-  padding: 1rem;
-  background: #fff;
-  border-radius: .7rem;
-}
-.filters-grid {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
+        .build-version {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            color: #a7a7a7;
+            font-size: 16px;
+            line-height: 1.4;
+        }
 
-/* заголовок/футер модалки скрыты в обычном режиме */
-.filters-header,.filters-footer,.filters-close{display:none}
+        /* ====== Контейнер фильтров ====== */
+        .filters {
+            position: relative;
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 1rem;
+            background: #fff;
+            border-radius: .7rem;
+        }
+        .filters-grid {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-/* Кнопка "Все фильтры" */
-.filters-open{
-  padding:8px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;
-  white-space: nowrap;
-}
+        /* ОДНА строка в панели и в GHOST на ≥769px */
+        @media (min-width: 769px) {
+            body:not(.filters-modal) .filters > .filters-grid,
+            body.filters-modal .filters-ghost > .filters-grid {
+                flex-wrap: nowrap;
+            }
+        }
 
-/* ====== Модалка (теперь на body) ====== */
-body.filters-modal .filters{
-  position:fixed; z-index:10000;
-  left:50%; top:50%; transform:translate(-50%,-50%);
-  background:#fff; width: min(700px, 90vw); max-height:max(700px, 80vh); margin:0; padding:0;
-  display:flex; flex-direction:column; overflow:hidden;
-}
-body.filters-modal .filters .filters-open{ display:none; }
+        /* заголовок/футер модалки скрыты в обычном режиме */
+        .filters-header,
+        .filters-footer,
+        .filters-close {
+            display: none;
+        }
 
-.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:9000; }
+        /* Кнопка "Все фильтры" (текст через span-префикс) */
+        .filters-open {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .filters-open-prefix {
+            display: inline;
+        }
+        /* прячем "Все " на ≤992px */
+        @media (max-width: 992px) {
+            .filters-open-prefix {
+                display: none;
+            }
+        }
 
-body.filters-modal .filters .filters-header{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; border-bottom:1px solid #eee; position:relative; z-index:1;
-}
-body.filters-modal .filters .filters-title{font-weight:600}
-body.filters-modal .filters .filters-close{
-  display:inline-flex; align-items:center; justify-content:center;
-  width:32px; height:32px; border-radius:8px; border:1px solid #eee; background:#fff; cursor:pointer
-}
-body.filters-modal .filters .filters-grid{ flex:1 1 auto; overflow:auto; padding:12px 16px; }
-body.filters-modal .filters .filters-footer{
-  display:flex; gap:8px; justify-content:space-between;
-  padding:12px 16px; border-top:1px solid #eee; background:#fff; position:relative; z-index:1;
-}
-.filters-btn{padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid #ddd; background:#fff}
-.filters-btn.primary{background:#2ecc71; border-color:#2ecc71; color:#fff}
+        /* ====== Модалка (через класс на body) ====== */
+        body.filters-modal .filters {
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            width: min(700px, 90vw);
+            max-height: max(700px, 80vh);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        body.filters-modal .filters .filters-open {
+            display: none;
+        }
 
-/* ====== Блок дополнительных чекбоксов — показывать только в модалке ====== */
-.filters-extra-checks{
-  display:none;
-  width:100%;
-  padding:8px 0 0;
-  border-top:1px dashed #eee;
-  margin-top:8px;
-}
-.filters-extra-checks .check-row{
-  display:flex; flex-wrap:wrap; gap:12px;
-  padding-top:8px;
-}
-.filters-extra-checks label{
-  display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
-  border:1px solid #eee; border-radius:8px; padding:8px 10px;
-}
-body.filters-modal .filters-extra-checks {
-    display: block;
-}
-body.filters-modal .filters-ghost .filters-extra-checks {
-    display: none;
-}
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            z-index: 9000;
+        }
 
-/* ====== GHOST (визуальный двойник на время модалки) ====== */
-.filters-ghost{
-  max-width:1100px; margin:3rem auto; padding:1rem; background:#fff; border-radius:.7rem;
-  opacity:.65; pointer-events:none; user-select:none;
-}
-.filters-ghost .exs-popover{display:none !important}
+        body.filters-modal .filters .filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            z-index: 1;
+        }
+        body.filters-modal .filters .filters-title {
+            font-weight: 600;
+        }
+        body.filters-modal .filters .filters-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            background: #fff;
+            cursor: pointer;
+        }
+        body.filters-modal .filters .filters-grid {
+            flex: 1 1 auto;
+            overflow: auto;
+            padding: 12px 16px;
+            flex-wrap: wrap; /* в модалке можно переносить */
+        }
+        body.filters-modal .filters .filters-footer {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-top: 1px solid #eee;
+            background: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        .filters-btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+        .filters-btn.primary {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: #fff;
+        }
 
-/* ====== extra-select ====== */
-.extra-select { position:relative; display:inline-flex; flex: 1 1 auto; min-width: 160px; }
-.extra-select--sort { flex: 0 0 auto; }
+        /* ====== Блок дополнительных чекбоксов — только в модалке ====== */
+        .filters-extra-checks {
+            display: none;
+            width: 100%;
+            padding: 8px 0 0;
+            border-top: 1px dashed #eee;
+            margin-top: 8px;
+        }
+        .filters-extra-checks .check-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 8px;
+        }
+        .filters-extra-checks label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        body.filters-modal .filters-extra-checks {
+            display: block;
+        }
 
-.exs-trigger{
-  width:100%;text-align:left;padding:10px 36px 10px 12px;border:1px solid #ccc;border-radius:8px;background:#fff;line-height:1.2;position:relative
-}
-.exs-trigger[aria-expanded="true"]{border-color:#2ecc71}
-.exs-trigger.is-active{border-color:#2ecc71;color:#2ecc71}
-.exs-trigger::after{
-  content:"";position:absolute;right:12px;top:50%;width:8px;height:8px;margin-top:-6px;
-  border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .15s ease
-}
-.exs-trigger[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:-2px}
+        /* ====== GHOST (визуальный двойник на время модалки) ====== */
+        .filters-ghost {
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 1rem;
+            background: #fff;
+            border-radius: .7rem;
+            opacity: .65;
+            pointer-events: none;
+            user-select: none;
+        }
+        .filters-ghost .exs-popover {
+            display: none !important;
+        }
 
-/* Сортировка выглядит как ссылка */
-.extra-select[data-field="sort"] .exs-trigger{
-  padding-right:24px;
-  border-color: transparent;
-  color:#0066cc;
-  text-decoration: underline;
-}
-.extra-select[data-field="sort"] .exs-trigger::after{ display:none; }
+        /* ====== extra-select ====== */
+        .extra-select {
+            position: relative;
+            display: inline-flex;
+            flex: 1 1 auto;
+            min-width: 160px;
+        }
+        .extra-select--sort {
+            flex: 0 0 auto;
+        }
 
-/* Поповер (десктоп) */
-.exs-popover{
-  position:absolute;z-index:11000;top:100%;left:0;right:0;margin-top:6px;padding:0;border:1px solid #ddd;border-radius:10px;background:#fff;
-  box-shadow:0 8px 24px rgba(0,0,0,.08);display:flex;flex-direction:column;overflow:hidden;
-  min-width: 280px;
-  opacity:1; transform:translateY(0);
-}
-.exs-popover[hidden]{display:none !important}
-.exs-body{max-height:280px;overflow:auto;padding:10px}
-.exs-popover label{display:flex;gap:8px;align-items:center;padding:6px 4px;cursor:pointer}
-.exs-actions{display:flex;justify-content:space-between;gap:8px;padding:10px;border-top:1px solid #eee;background:#fff}
+        .exs-trigger {
+            width: 100%;
+            text-align: left;
+            padding: 10px 36px 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+            line-height: 1.2;
+            position: relative;
 
-/* Моб. элементы */
-.exs-close{
-  display:none; position:absolute; right:5px; top:5px; z-index:2;
-  width:32px;height:32px;border-radius:10px;border:1px solid #eee;background:#fff;cursor:pointer;
-  color:#616161;font-family:'Tahoma';font-size:16px;font-weight:100;line-height:1
-}
-.exs-drag-handle{
-  display:none; position:absolute; left:0; right:0; top:0; height:40px; z-index:1;
-  touch-action:none; cursor:grab;
-}
-.exs-drag-handle::after{
-  content:""; position:absolute; left:50%; top:5px; width:46px; height:4px; margin-left:-23px;
-  border-radius:999px; background:#ddd;
-}
-.exs-header{display:none;padding:22px 14px 0;font-size:17px;font-weight:600;line-height:1;text-align:center}
+            /* один ряд, без переносов, аккуратное сжатие */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .exs-trigger[aria-expanded="true"] {
+            border-color: #2ecc71;
+        }
+        .exs-trigger.is-active {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        .exs-trigger::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            margin-top: -6px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform .15s ease;
+        }
+        .exs-trigger[aria-expanded="true"]::after {
+            transform: rotate(-135deg);
+            margin-top: -2px;
+        }
 
-/* Моб. bottom-sheet */
-@keyframes exsSlideUpBounce {
-  0% { transform: translateY(100%); }
-  75% { transform: translateY(-6%); }
-  100% { transform: translateY(0); }
-}
-@keyframes exsSlideDown {
-  from { transform: translateY(0); }
-  to   { transform: translateY(100%); }
-}
-@media (max-width:768px){
-  .exs-popover{
-    position:fixed; left:0; right:0; bottom:-160px; top:auto;
-    max-height:80vh; max-height:80dvh; height:auto;
-    border-radius:16px 16px 0 0; margin:0; padding-top:0; padding-bottom:160px;
-    will-change:transform;
-    touch-action:none;
-    z-index:11000;
-    display:flex; flex-direction:column;
-  }
-  .exs-popover[data-open="true"]{ animation: exsSlideUpBounce .25s cubic-bezier(.22,1,.36,1) both; }
-  .exs-popover[data-closing="true"]{ animation: exsSlideDown .18s ease both; }
-  .exs-header{display:block}
-  .exs-body{ max-height: calc(80dvh - 60px - 40px); overflow:auto; }
-  .exs-actions{position:relative;padding:10px 14px}
-  .exs-close{display:inline-flex;align-items:center;justify-content:center}
-  .exs-drag-handle{display:block}
-}
+        /* Сортировка выглядит как ссылка */
+        .extra-select[data-field="sort"] .exs-trigger {
+            padding-right: 24px;
+            border-color: transparent;
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        .extra-select[data-field="sort"] .exs-trigger::after {
+            display: none;
+        }
 
-/* overlay поповера: ВСЕГДА в <body>, выше модалки, ниже поповера */
-.exs-overlay{position:fixed;inset:0;background:rgba(0,0,0,.12);z-index:10990}
+        /* Поповер (десктоп) */
+        .exs-popover {
+            position: absolute;
+            z-index: 11000;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 6px;
+            padding: 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 280px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .exs-popover[hidden] {
+            display: none !important;
+        }
+        .exs-body {
+            max-height: 280px;
+            overflow: auto;
+            padding: 10px;
+        }
+        .exs-popover label {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 4px;
+            cursor: pointer;
+        }
+        .exs-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+            background: #fff;
+        }
 
-/* noUiSlider косметика */
-.noUi-target{border:0;box-shadow:none}
-.noUi-horizontal{height:6px}
-.noUi-connect{background:#2ecc71}
-.noUi-base,.noUi-connects{border-radius:3px;background:#eee}
-.noUi-handle{
-  border-radius:50%;width:18px !important;height:18px !important;right:-9px !important;top:-7px !important;border:2px solid #fff;background:#2ecc71;box-shadow:0 0 0 1px #2ecc71
-}
-.noUi-handle:before,.noUi-handle:after{display:none}
+        /* Моб. элементы */
+        .exs-close {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            z-index: 2;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            background: #fff;
+            cursor: pointer;
+            color: #616161;
+            font-family: 'Tahoma';
+            font-size: 16px;
+            font-weight: 100;
+            line-height: 1;
+        }
+        .exs-drag-handle {
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 40px;
+            z-index: 1;
+            touch-action: none;
+            cursor: grab;
+        }
+        .exs-drag-handle::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 5px;
+            width: 46px;
+            height: 4px;
+            margin-left: -23px;
+            border-radius: 999px;
+            background: #ddd;
+        }
+        .exs-header {
+            display: none;
+            padding: 22px 14px 0;
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+        }
 
-/* Цена — без горизонтального скролла */
-.exs-price-row{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
-.exs-price-field{display:flex;flex-direction:column;gap:6px}
-.exs-price-field input[type="number"]{
-  width:100%;padding:10px;border:1px solid #ddd;border-radius:8px; box-sizing:border-box;
-}
-.exs-range-plugin{margin:10px 4px 6px}
+        /* Моб. bottom-sheet */
+        @keyframes exsSlideUpBounce {
+            0% { transform: translateY(100%); }
+            75% { transform: translateY(-6%); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes exsSlideDown {
+            from { transform: translateY(0); }
+            to   { transform: translateY(100%); }
+        }
+        @media (max-width: 768px) {
+            .exs-popover {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: -160px;
+                top: auto;
+                max-height: 80vh;
+                max-height: 80dvh;
+                height: auto;
+                border-radius: 16px 16px 0 0;
+                margin: 0;
+                padding-top: 0;
+                padding-bottom: 160px;
+                will-change: transform;
+                touch-action: none;
+                z-index: 11000;
+                display: flex;
+                flex-direction: column;
+            }
+            .exs-popover[data-open="true"] { animation: exsSlideUpBounce .25s cubic-bezier(.22,1,.36,1) both; }
+            .exs-popover[data-closing="true"] { animation: exsSlideDown .18s ease both; }
+            .exs-header { display: block; }
+            .exs-body { max-height: calc(80dvh - 60px - 40px); overflow: auto; }
+            .exs-actions { position: relative; padding: 10px 14px; }
+            .exs-close { display: inline-flex; align-items: center; justify-content: center; }
+            .exs-drag-handle { display: block; }
+        }
 
-/* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ ====== */
+        /* overlay поповера: ВСЕГДА в <body>, выше модалки, ниже поповера */
+        .exs-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.12);
+            z-index: 10990;
+        }
 
-/* Базовый набор в панели: Даты, Формат, Способ, Цены, "Все фильтры", Сортировка и (по желанию) счётчик */
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="duration"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="duration"] {
-    display: none;
-}
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="dates"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="dates"] {
-    order:10; min-width: 180px;
-}
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="format"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="format"] {
-    order:20;
-}
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="transport"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="transport"] {
-    order:30;
-}
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="price"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="price"] {
-    order:40; min-width: 200px;
-}
-body:not(.filters-modal) .filters .filters-grid > .extra-select[data-field="sort"],
-body.filters-modal .filters-ghost .filters-grid > .extra-select[data-field="sort"] {
-    order:60;
-}
-body:not(.filters-modal) .filters .filters-grid > .filters-open,
-body.filters-modal .filters-ghost .filters-grid > .filters-open {
-    order:50; flex: 0 0 auto;
-}
-body:not(.filters-modal) .filters .filters-grid > .filters-count,
-body.filters-modal .filters-ghost .filters-grid > .filters-count {
-    display:none; order:70; margin-left:auto; white-space:nowrap; color:#616161; font-size:14px;
-}
+        /* noUiSlider косметика */
+        .noUi-target { border: 0; box-shadow: none; }
+        .noUi-horizontal { height: 6px; }
+        .noUi-connect { background: #2ecc71; }
+        .noUi-base, .noUi-connects { border-radius: 3px; background: #eee; }
+        .noUi-handle {
+            border-radius: 50%;
+            width: 18px !important;
+            height: 18px !important;
+            right: -9px !important;
+            top: -7px !important;
+            border: 2px solid #fff;
+            background: #2ecc71;
+            box-shadow: 0 0 0 1px #2ecc71;
+        }
+        .noUi-handle:before, .noUi-handle:after { display: none; }
 
-body.filters-modal .filters .filters-grid > .filters-count { display: none !important; }
+        /* Цена — поля в одной строке, суммарно 100% ширины */
+        .exs-price-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .exs-price-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1 1 0; /* оба поля делят строку поровну, суммарно 100% */
+        }
+        .exs-price-field input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .exs-range-plugin {
+            margin: 10px 4px 6px;
+        }
+        /* Очень узкие экраны — можно сложить в столбец */
+        @media (max-width: 420px) {
+            .exs-price-row {
+                flex-direction: column;
+            }
+        }
 
-/* Широкие: держим в одну линию, плавно сужаем */
-@media (min-width:993px){
-  body:not(.filters-modal) .filters .filters-grid,
-  body.filters-modal .filters-ghost .filters-grid {
-    flex-wrap: nowrap;
-  }
-  .extra-select {
-    min-width: 160px;
-  }
-}
+        /* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ (строка) ====== */
+        /* Базовый порядок: Даты, Формат, Способ, Цена, "Все фильтры", Разделитель (моб), Сортировка, Счётчик */
+        /* Панель И GHOST — синхронные правила */
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="duration"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="duration"] {
+            display: none; /* в панели нет длительности */
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="dates"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="dates"] {
+            order: 10;
+            min-width: 180px;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="format"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="format"] {
+            order: 20;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="transport"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="transport"] {
+            order: 30;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
+            order: 40;
+            min-width: 200px;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-open,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-open {
+            order: 50;
+            flex: 0 0 auto;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-break-m,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-break-m {
+            order: 55;
+            display: none;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="sort"],
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="sort"] {
+            order: 60;
+        }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-count,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-count {
+            order: 70;
+            margin-left: auto;
+            white-space: nowrap;
+            color: #616161;
+            font-size: 14px;
+        }
 
-/* До 992px: сжимаем и прячем Цена; кнопка меняет подпись через HTML data-атрибут */
-@media (max-width:992px){
-  .extra-select{ min-width:140px; }
-  .filters-grid > .extra-select[data-field="price"]{ display:none; }
+        /* Скрыть счётчик в МОДАЛКЕ (панельная сущность); GHOST не трогаем */
+        body.filters-modal .filters .filters-grid > .filters-count {
+            display: none !important;
+        }
 
-  /* текст "Фильтры" берём из data-compact-label, без JS */
-  .filters-grid .filters-open[data-compact-label]{
-    position:relative; color:transparent;
-  }
-  .filters-grid .filters-open[data-compact-label]::after{
-    content: attr(data-compact-label);
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    color:inherit; border-radius:inherit;
-  }
-}
+        /* Широкие: держим в одну линию, плавно сужаем */
+        @media (min-width: 993px) {
+            .extra-select { min-width: 160px; }
+        }
 
-/* Мобилки ≤768px: первая строка — Даты и Фильтры. Остальное скрыто, сортировку показываем второй строкой в той же сетке. Счётчик справа. */
-@media (max-width:768px){
-  .filters-grid {
-    gap: 10px 12px;
-  }
-  .filters-grid > .extra-select:not([data-field="dates"]),
-  .filters-grid > .extra-select[data-field="price"],
-  .filters-grid > .extra-select[data-field="format"],
-  .filters-grid > .extra-select[data-field="transport"] {
-    display:none !important;
-  }
-  .filters-grid > .filters-open{ order:20 !important; }
-  .filters-grid > .extra-select[data-field="sort"]{
-    display:inline-flex !important; order:30 !important; /* width:100%; */ max-width:none; 
-  }
-  .filters-grid > .filters-count{ display:block !important; order:40 !important; }
-}
+        /* До 992px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
+        @media (max-width: 992px) {
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select,
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select {
+                min-width: 140px;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
+                display: none;
+            }
+        }
 
-/* Сетка в модалке: показываем все поля; на мобиле — по одному в строке */
-body.filters-modal .filters .filters-grid > .extra-select{ display: inline-flex !important; }
-@media (max-width:768px){
-  body.filters-modal .filters .filters-grid{
-    align-items: stretch;
-  }
-  body.filters-modal .filters .filters-grid > *{
-    flex: 1 0 100%;
-  }
-}
+        /* Мобилки ≤768px: одинаковая двухстрочная раскладка для панели и для GHOST */
+        @media (max-width: 768px) {
+            body:not(.filters-modal) .filters > .filters-grid,
+            body.filters-modal .filters-ghost > .filters-grid {
+                flex-wrap: wrap;
+                gap: 10px 12px;
+            }
 
-/* скрывать лишние "мобильные строки" — их больше нет */
+            /* первая строка — только Даты + Кнопка; остальное скрыто */
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select:not([data-field="dates"]),
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="format"],
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="transport"],
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select:not([data-field="dates"]),
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="format"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="transport"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
+                display: none !important;
+            }
 
-/* В модалке кнопка "Все фильтры" скрыта — выше уже есть */
-</style>
+            /* кнопка на первой строке */
+            body:not(.filters-modal) .filters > .filters-grid > .filters-open,
+            body.filters-modal .filters-ghost > .filters-grid > .filters-open {
+                order: 20 !important;
+            }
+
+            /* невидимый разделитель — форс перенос перед сортировкой/счётчиком */
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m,
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m {
+                display: block !important;
+                flex: 0 0 100%;
+                height: 0;
+                overflow: hidden;
+            }
+
+            /* вторая строка — Сортировка слева (растягивается), Счётчик справа */
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="sort"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="sort"] {
+                display: inline-flex !important;
+                order: 60 !important;
+                max-width: none;
+                flex: 1 1 auto;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-count,
+            body.filters-modal .filters-ghost > .filters-grid > .filters-count {
+                order: 70 !important;
+            }
+        }
+
+        /* Сетка селектов внутри МОДАЛКИ — строгие правила только под body.filters-modal */
+        body.filters-modal .filters .filters-grid > .extra-select {
+            display: inline-flex !important;
+        }
+        @media (max-width: 768px) {
+            body.filters-modal .filters .filters-grid {
+                align-items: stretch;
+            }
+            body.filters-modal .filters .filters-grid > * {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-<div class="build-version">Build: 0.0.000</div>
-
-<form class="filters-form js-filters-form" action="" method="GET">
-  <div class="filters" id="filters" aria-label="Фильтры">
-    <div class="filters-header">
-      <div class="filters-title">Все фильтры</div>
-      <button type="button" class="filters-close js-filters-close" aria-label="Закрыть">×</button>
+    <div class="container">
+    <div class="build-version">
+        Build: 0.0.000
     </div>
 
-    <div class="filters-grid" data-filters-scope>
-      <!-- Даты (заглушка) -->
-      <div class="extra-select js-extra-select" data-type="stub" data-field="dates" data-placeholder="Даты" data-max-label-chars="28">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="exs-popover-dates">Даты</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-dates" role="dialog" hidden>
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Даты</div>
-          <div class="exs-body">
-            <div style="padding:8px 2px;color:#616161;font-size:14px">Заглушка: сюда позже будет вставлен выбор дат.</div>
-          </div>
-          <div class="exs-actions">
-            <button type="button" data-action="reset">Сбросить</button>
-            <button type="button" data-action="apply">Применить</button>
-          </div>
-        </div>
-        <div class="exs-hidden js-exs-hidden"></div>
-      </div>
-
-      <!-- Формат экскурсий -->
-      <div class="extra-select js-extra-select" data-type="checkbox" data-field="format" data-placeholder="Формат экскурсий" data-max-label-chars="28">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="exs-popover-format">Формат экскурсий</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-format" role="listbox" aria-multiselectable="true" hidden>
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Формат экскурсий</div>
-          <div class="exs-body js-exs-body">
-            <label><input type="checkbox" value="Групповые"> Групповые</label>
-            <label><input type="checkbox" value="Мини-группы"> Мини-группы</label>
-            <label><input type="checkbox" value="Индивидуальные"> Индивидуальные</label>
-          </div>
-          <div class="exs-actions">
-            <button type="button" data-action="reset">Сбросить</button>
-            <button type="button" data-action="apply">Применить</button>
-          </div>
-        </div>
-        <div class="exs-hidden js-exs-hidden">
-          <input type="hidden" name="format[]" value="Групповые">
-          <input type="hidden" name="format[]" value="Мини-группы">
-        </div>
-      </div>
-
-      <!-- Способ передвижения -->
-      <div class="extra-select js-extra-select" data-type="checkbox" data-field="transport" data-placeholder="Способ передвижения" data-max-label-chars="28">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="exs-popover-transport">Способ передвижения</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-transport" role="listbox" aria-multiselectable="true" hidden>
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Способ передвижения</div>
-          <div class="exs-body js-exs-body">
-            <label><input type="checkbox" value="Пешком"> Пешком</label>
-            <label><input type="checkbox" value="На автобусе"> На автобусе</label>
-            <label><input type="checkbox" value="На автомобиле"> На автомобиле</label>
-            <label><input type="checkbox" value="На мотоцикле"> На мотоцикле</label>
-            <label><input type="checkbox" value="На велосипеде"> На велосипеде</label>
-            <label><input type="checkbox" value="На теплоходе"> На теплоходе</label>
-            <label><input type="checkbox" value="На яхте"> На яхте</label>
-            <label><input type="checkbox" value="На катере"> На катере</label>
-            <label><input type="checkbox" value="Другое"> Другое</label>
-          </div>
-          <div class="exs-actions">
-            <button type="button" data-action="reset">Сбросить</button>
-            <button type="button" data-action="apply">Применить</button>
-          </div>
-        </div>
-        <div class="exs-hidden js-exs-hidden"></div>
-      </div>
-
-      <!-- Цены -->
-      <div class="extra-select js-extra-select" data-type="range" data-field="price" data-placeholder="Цена" data-min="0" data-max="100000" data-step="1000">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="exs-popover-price">Цены</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-price" role="dialog" hidden>
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Цены</div>
-          <div class="exs-body">
-            <div class="exs-price-row">
-              <label class="exs-price-field"><span>От</span><input type="number" class="exs-from js-exs-from" inputmode="numeric" placeholder="от"></label>
-              <label class="exs-price-field"><span>До</span><input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="до"></label>
+    <form class="filters-form js-filters-form" action="" method="GET">
+        <div class="filters" id="filters" aria-label="Фильтры">
+            <div class="filters-header">
+                <div class="filters-title">Все фильтры</div>
+                <button type="button" class="filters-close js-filters-close" aria-label="Закрыть">×</button>
             </div>
-            <div class="exs-range-plugin js-exs-range" id="price-plugin"></div>
-          </div>
-          <div class="exs-actions">
-            <button type="button" data-action="reset">Сбросить</button>
-            <button type="button" data-action="apply">Применить</button>
-          </div>
+
+            <div class="filters-grid" data-filters-scope>
+                <!-- Даты (заглушка) -->
+                <div class="extra-select js-extra-select"
+                     data-type="stub"
+                     data-field="dates"
+                     data-placeholder="Даты"
+                     data-max-label-chars="28">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-dates">Даты</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-dates" role="dialog" hidden>
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Даты</div>
+                        <div class="exs-body">
+                            <div style="padding:8px 2px;color:#616161;font-size:14px">
+                                Заглушка: сюда позже будет вставлен выбор дат.
+                            </div>
+                        </div>
+                        <div class="exs-actions">
+                            <button type="button" data-action="reset">Сбросить</button>
+                            <button type="button" data-action="apply">Применить</button>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden"></div>
+                </div>
+
+                <!-- Формат экскурсий -->
+                <div class="extra-select js-extra-select"
+                     data-type="checkbox"
+                     data-field="format"
+                     data-placeholder="Формат экскурсий"
+                     data-max-label-chars="28">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-format">Формат экскурсий</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-format" role="listbox" aria-multiselectable="true" hidden>
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Формат экскурсий</div>
+                        <div class="exs-body js-exs-body">
+                            <label><input type="checkbox" value="Групповые"> Групповые</label>
+                            <label><input type="checkbox" value="Мини-группы"> Мини-группы</label>
+                            <label><input type="checkbox" value="Индивидуальные"> Индивидуальные</label>
+                        </div>
+                        <div class="exs-actions">
+                            <button type="button" data-action="reset">Сбросить</button>
+                            <button type="button" data-action="apply">Применить</button>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden">
+                        <input type="hidden" name="format[]" value="Групповые">
+                        <input type="hidden" name="format[]" value="Мини-группы">
+                    </div>
+                </div>
+
+                <!-- Способ передвижения -->
+                <div class="extra-select js-extra-select"
+                     data-type="checkbox"
+                     data-field="transport"
+                     data-placeholder="Способ передвижения"
+                     data-max-label-chars="28">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-transport">Способ передвижения</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-transport" role="listbox" aria-multiselectable="true" hidden>
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Способ передвижения</div>
+                        <div class="exs-body js-exs-body">
+                            <label><input type="checkbox" value="Пешком"> Пешком</label>
+                            <label><input type="checkbox" value="На автобусе"> На автобусе</label>
+                            <label><input type="checkbox" value="На автомобиле"> На автомобиле</label>
+                            <label><input type="checkbox" value="На мотоцикле"> На мотоцикле</label>
+                            <label><input type="checkbox" value="На велосипеде"> На велосипеде</label>
+                            <label><input type="checkbox" value="На теплоходе"> На теплоходе</label>
+                            <label><input type="checkbox" value="На яхте"> На яхте</label>
+                            <label><input type="checkbox" value="На катере"> На катере</label>
+                            <label><input type="checkbox" value="Другое"> Другое</label>
+                        </div>
+                        <div class="exs-actions">
+                            <button type="button" data-action="reset">Сбросить</button>
+                            <button type="button" data-action="apply">Применить</button>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden"></div>
+                </div>
+
+                <!-- Цены -->
+                <div class="extra-select js-extra-select"
+                     data-type="range"
+                     data-field="price"
+                     data-placeholder="Цена"
+                     data-min="0"
+                     data-max="100000"
+                     data-step="1000">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-price">Цены</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-price" role="dialog" hidden>
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Цены</div>
+                        <div class="exs-body">
+                            <div class="exs-price-row">
+                                <label class="exs-price-field">
+                                    <span>От</span>
+                                    <input type="number" class="exs-from js-exs-from" inputmode="numeric" placeholder="от">
+                                </label>
+                                <label class="exs-price-field">
+                                    <span>До</span>
+                                    <input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="до">
+                                </label>
+                            </div>
+                            <div class="exs-range-plugin js-exs-range" id="price-plugin"></div>
+                        </div>
+                        <div class="exs-actions">
+                            <button type="button" data-action="reset">Сбросить</button>
+                            <button type="button" data-action="apply">Применить</button>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden"></div>
+                </div>
+
+                <!-- Длительность (только для модалки) -->
+                <div class="extra-select js-extra-select"
+                     data-type="checkbox"
+                     data-field="duration"
+                     data-placeholder="Длительность"
+                     data-max-label-chars="28">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-duration">Длительность</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-duration" role="listbox" hidden aria-multiselectable="true">
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Длительность</div>
+                        <div class="exs-body js-exs-body">
+                            <label><input type="checkbox" value="до 2 часов"> до 2 часов</label>
+                            <label><input type="checkbox" value="от 2 до 4"> от 2 до 4</label>
+                            <label><input type="checkbox" value="от 4 до 6"> от 4 до 6</label>
+                            <label><input type="checkbox" value="6+ часов"> 6+ часов</label>
+                        </div>
+                        <div class="exs-actions">
+                            <button type="button" data-action="reset">Сбросить</button>
+                            <button type="button" data-action="apply">Применить</button>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden"></div>
+                </div>
+
+                <!-- "Все фильтры" — предпоследняя в строке -->
+                <button type="button"
+                        class="filters-open js-filters-open"
+                        data-filters-open>
+                    <span class="filters-open-prefix">Все </span>фильтры
+                </button>
+
+                <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
+                <i class="filters-break-m" aria-hidden="true"></i>
+
+                <!-- Сортировка (единственный блок) -->
+                <div class="extra-select js-extra-select extra-select--sort" data-type="radio" data-field="sort">
+                    <button type="button"
+                            class="exs-trigger js-exs-trigger"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="exs-popover-sort">⇅</button>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
+                        <div class="exs-drag-handle"></div>
+                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                        <div class="exs-header">Сортировка</div>
+                        <div class="exs-body js-exs-body">
+                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" checked> рекомендуемые</label>
+                            <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
+                            <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом"> с высоким рейтингом</label>
+                            <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
+                            <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
+                        </div>
+                    </div>
+                    <div class="exs-hidden js-exs-hidden">
+                        <input type="hidden" name="sort" value="recommended">
+                    </div>
+                </div>
+
+                <!-- опционально счётчик (в той же сетке) -->
+                <div class="filters-count">720 экскурсий</div>
+            </div>
+
+            <div class="filters-footer">
+                <button type="button" class="filters-btn js-filters-reset-all" data-filters-reset-all>Сбросить всё</button>
+                <button type="button" class="filters-btn primary js-filters-apply-all" data-filters-apply-all>Показать</button>
+            </div>
         </div>
-        <div class="exs-hidden js-exs-hidden"></div>
-      </div>
-
-      <!-- Длительность -->
-      <div class="extra-select js-extra-select" data-type="checkbox" data-field="duration" data-placeholder="Длительность" data-max-label-chars="28">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="exs-popover-duration">Длительность</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-duration" role="listbox" hidden aria-multiselectable="true">
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Длительность</div>
-          <div class="exs-body js-exs-body">
-            <label><input type="checkbox" value="до 2 часов"> до 2 часов</label>
-            <label><input type="checkbox" value="от 2 до 4"> от 2 до 4</label>
-            <label><input type="checkbox" value="от 4 до 6"> от 4 до 6</label>
-            <label><input type="checkbox" value="6+ часов"> 6+ часов</label>
-          </div>
-          <div class="exs-actions">
-            <button type="button" data-action="reset">Сбросить</button>
-            <button type="button" data-action="apply">Применить</button>
-          </div>
-        </div>
-        <div class="exs-hidden js-exs-hidden"></div>
-      </div>
-
-      <!-- "Все фильтры" — предпоследняя. Надпись из HTML, компактная из data-атрибута -->
-      <button type="button" class="filters-open js-filters-open" data-filters-open data-compact-label="Фильтры">Все фильтры</button>
-
-      <!-- только для модалки: доп. чекбоксы -->
-      <div class="filters-extra-checks">
-        <div class="check-row">
-          <label><input type="checkbox" name="no_prepay" value="1"> Без предоплаты</label>
-          <label><input type="checkbox" name="with_discount" value="1"> Со скидкой</label>
-          <label><input type="checkbox" name="editors_choice" value="1"> Выбор редакции</label>
-        </div>
-      </div>
-
-      <!-- Сортировка (единственный блок) -->
-      <div class="extra-select js-extra-select extra-select--sort" data-type="radio" data-field="sort">
-        <button type="button" class="exs-trigger js-exs-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="exs-popover-sort">⇅</button>
-        <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
-          <div class="exs-drag-handle"></div>
-          <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-          <div class="exs-header">Сортировка</div>
-          <div class="exs-body js-exs-body">
-            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" checked> рекомендуемые</label>
-            <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
-            <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом"> с высоким рейтингом</label>
-            <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
-            <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
-          </div>
-        </div>
-        <div class="exs-hidden js-exs-hidden">
-          <input type="hidden" name="sort" value="recommended">
-        </div>
-      </div>
-
-      <!-- опционально счётчик (в той же сетке, без отдельной мобильной строки) -->
-      <div class="filters-count">720 экскурсий</div>
-    </div>
-
-    <div class="filters-footer">
-      <button type="button" class="filters-btn js-filters-reset-all" data-filters-reset-all>Сбросить всё</button>
-      <button type="button" class="filters-btn primary js-filters-apply-all" data-filters-apply-all>Показать</button>
-    </div>
-  </div>
-</form>
+    </form>
 </div>
 
 <script>
-(function(){
-  const isMobile = () => window.matchMedia('(max-width:768px)').matches;
+    (function () {
+        "use strict";
 
-  /* ===== ссылки на модалку/форма ===== */
-  const filters = document.getElementById('filters');
-  const form = document.querySelector('.js-filters-form');
+        const isMobile = () => window.matchMedia("(max-width:768px)").matches;
 
-  /* ===== Глобальный state ===== */
-  let currentOpen = null;       // { root, pop, trigger, close }
-  let overlayEl = null;         // подложка поповера (всегда в body)
-  let overlayMouseDown = false; // для корректной логики закрытия
-  let ghostEl = null;           // статичный визуальный двойник
+        /* ===== ссылки на модалку/форма ===== */
+        const filters = document.getElementById("filters");
+        const form = document.querySelector(".js-filters-form");
 
-  /* ===== AJAX submit (GET на текущий URL со всеми значениями формы) ===== */
-  function submitAjax(){
-    const fd = new FormData(form);
-    const params = new URLSearchParams();
-    for (const [k,v] of fd.entries()){ params.append(k, v); }
-    const url = location.pathname + (params.toString() ? ('?' + params.toString()) : '');
-    fetch(url, { method:'GET', credentials:'same-origin' }).catch(()=>{});
-  }
+        /* ===== Глобальный state ===== */
+        let currentOpen = null;       // { root, pop, trigger, close }
+        let overlayEl = null;         // подложка поповера (всегда в body)
+        let overlayMouseDown = false; // корректная логика закрытия
+        let ghostEl = null;           // статичный визуальный двойник
 
-  /* ===== Оверлей для поповеров — ВСЕГДА в body ===== */
-  const lockScrollBody = (on) => {
-    document.documentElement.style.overflow = on ? 'hidden' : '';
-  };
-  const ensureOverlay = () => {
-    if (!overlayEl){
-      overlayEl = document.createElement('div');
-      overlayEl.className = 'exs-overlay';
-      overlayEl.addEventListener('mousedown', ()=>{ overlayMouseDown = true; }, { capture:true });
-      overlayEl.addEventListener('mouseup', ()=>{
-        if (overlayMouseDown){ if (currentOpen) currentOpen.close(); }
-        overlayMouseDown = false;
-      }, { capture:true });
-      document.addEventListener('mouseup', (e)=>{
-        if (e.target !== overlayEl) overlayMouseDown = false;
-      }, { capture:true });
-      document.body.appendChild(overlayEl);
-    }
-  };
-  const moveOverlayOnTop = () => {
-    if (overlayEl){ overlayEl.remove(); document.body.appendChild(overlayEl); }
-  };
-  const removeOverlay = () => {
-    if (overlayEl){ overlayEl.remove(); overlayEl = null; }
-    overlayMouseDown = false;
-  };
+        /* ===== AJAX submit (GET на текущий URL со всеми значениями формы) ===== */
+        function submitAjax() {
+            const fd = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [k, v] of fd.entries()) {
+                params.append(k, v);
+            }
+            const url = location.pathname + (params.toString() ? ("?" + params.toString()) : "");
+            fetch(url, { method: "GET", credentials: "same-origin" }).catch(() => {});
+        }
 
-  /* ====== GHOST while modal (чисто визуальный) ====== */
-  function sanitizeGhost(root){
-    root.querySelectorAll('.exs-hidden').forEach(n => n.remove());
-    root.querySelectorAll('input, select, textarea, button').forEach(el=>{
-      el.removeAttribute('name');
-      el.setAttribute('disabled','disabled');
-      el.setAttribute('tabindex','-1');
-      el.removeAttribute('aria-controls');
-      el.removeAttribute('aria-owns');
-    });
-    root.querySelectorAll('[id]').forEach(el=> el.removeAttribute('id'));
-    root.querySelectorAll('.exs-popover').forEach(p=> p.setAttribute('hidden',''));
-    root.setAttribute('aria-hidden','true');
-  }
-  function createGhost(){
-    if (ghostEl) return;
-    const grid = filters.querySelector('.filters-grid');
-    if (!grid) return;
-    ghostEl = document.createElement('div');
-    ghostEl.className = 'filters-ghost';
-    const clone = grid.cloneNode(true);
-    sanitizeGhost(clone);
-    ghostEl.appendChild(clone);
-    filters.parentNode.insertBefore(ghostEl, filters);
-  }
-  function removeGhost(){
-    if (!ghostEl) return;
-    ghostEl.remove(); ghostEl = null;
-  }
+        /* ===== Оверлей для поповеров — ВСЕГДА в body ===== */
+        const lockScrollBody = (on) => {
+            document.documentElement.style.overflow = on ? "hidden" : "";
+        };
+        const ensureOverlay = () => {
+            if (!overlayEl) {
+                overlayEl = document.createElement("div");
+                overlayEl.className = "exs-overlay";
 
-  /* ===== Портал поповера в body ===== */
-  function portalOpen(pop, trigger){
-    const placeholder = document.createComment('exs-portal-placeholder');
-    pop.parentNode.insertBefore(placeholder, pop);
-    document.body.appendChild(pop);
+                // ВАЖНО: закрываем ТОЛЬКО если и mousedown, и mouseup были на overlay
+                overlayEl.addEventListener("mousedown", () => {
+                    overlayMouseDown = true;
+                }, { capture: true });
 
-    // Десктоп: позиционируем у кнопки
-    let cleanupPos = ()=>{};
-    if (!isMobile()){
-      const applyPos = ()=>{
-        const rect = trigger.getBoundingClientRect();
-        const style = pop.style;
-        style.position = 'fixed';
-        style.left = rect.left + 'px';
-        style.top  = (rect.bottom + 6) + 'px';
-        style.width = rect.width + 'px';
-        style.right = 'auto';
-        style.bottom = 'auto';
-        style.zIndex = 11000;
-        style.opacity = '1';
-        style.transform = 'translateY(0)';
-      };
-      applyPos();
-      const onScrollResize = () => applyPos();
-      window.addEventListener('scroll', onScrollResize, true);
-      window.addEventListener('resize', onScrollResize);
-      cleanupPos = ()=>{
-        window.removeEventListener('scroll', onScrollResize, true);
-        window.removeEventListener('resize', onScrollResize);
-        const style = pop.style;
-        style.position=''; style.left=''; style.top=''; style.width=''; style.right=''; style.bottom='';
-        style.opacity=''; style.transform=''; style.transition='';
-      };
-    }
-    const restore = ()=>{
-      cleanupPos();
-      if (placeholder.parentNode){
-        placeholder.parentNode.insertBefore(pop, placeholder);
-        placeholder.remove();
-      }
-    };
-    return { restore };
-  }
+                overlayEl.addEventListener("mouseup", () => {
+                    if (overlayMouseDown) {
+                        if (currentOpen) currentOpen.close();
+                    }
+                    overlayMouseDown = false;
+                }, { capture: true });
 
-  /* ===== helpers ===== */
-  function animateFromTo(pop, fromY, toY, duration=180, easing='ease', onEnd){
-    pop.style.animation = '';
-    pop.dataset.open = '';
-    pop.dataset.closing = '';
-    pop.style.transition = 'none';
-    pop.style.transform = `translateY(${fromY}px)`;
-    requestAnimationFrame(()=>{
-      pop.style.transition = `transform ${duration}ms ${easing}`;
-      requestAnimationFrame(()=>{
-        pop.style.transform = (typeof toY==='string') ? toY : `translateY(${toY}px)`;
-      });
-    });
-    const handler = (e)=>{
-      if (e.propertyName !== 'transform') return;
-      pop.removeEventListener('transitionend', handler);
-      pop.style.transition = '';
-      onEnd && onEnd();
-    };
-    pop.addEventListener('transitionend', handler);
-  }
-  function startKeyframe(pop, kind /* 'open' | 'close' */){
-    pop.style.animation = '';
-    pop.style.transform = '';
-    void pop.offsetWidth;
-    if (kind==='open'){
-      pop.dataset.closing = '';
-      pop.dataset.open = 'true';
-    } else {
-      pop.dataset.open = '';
-      pop.dataset.closing = 'true';
-    }
-  }
-  function desktopFadeOut(pop, done){
-    pop.style.transition = 'opacity 140ms ease, transform 140ms ease';
-    let finished = false;
-    const clear = ()=>{
-      if (finished) return;
-      finished = true;
-      pop.style.transition='';
-      pop.style.opacity='';
-      pop.style.transform='';
-      done && done();
-    };
-    requestAnimationFrame(()=>{
-      pop.style.opacity = '0';
-      pop.style.transform = 'translateY(-4px)';
-    });
-    const onEnd = (e)=>{
-      if (e.target!==pop) return;
-      pop.removeEventListener('transitionend', onEnd);
-      clear();
-    };
-    pop.addEventListener('transitionend', onEnd);
-    setTimeout(clear, 180);
-  }
+                // Если mouseup случился не на overlay — НЕ закрываем
+                document.addEventListener("mouseup", (e) => {
+                    if (e.target !== overlayEl) overlayMouseDown = false;
+                }, { capture: true });
 
-  /* ===== «резинка» для bottom-sheet ===== */
-  const RUBBER_K   = 160;
-  const VSLACK     = 40;
-  const BASE_PULL  = 125;
-  const MAX_UP_ACTUAL = BASE_PULL * Math.exp(-VSLACK / RUBBER_K);
-  function rubberUpShifted(pull){
-    const eV = Math.exp(-VSLACK / RUBBER_K);
-    const val = BASE_PULL * eV * (1 - Math.exp(-pull / RUBBER_K));
-    return Math.min(val, MAX_UP_ACTUAL);
-  }
+                document.body.appendChild(overlayEl);
+            }
+        };
+        const moveOverlayOnTop = () => {
+            if (overlayEl) {
+                overlayEl.remove();
+                document.body.appendChild(overlayEl);
+            }
+        };
+        const removeOverlay = () => {
+            if (overlayEl) {
+                overlayEl.remove();
+                overlayEl = null;
+            }
+            overlayMouseDown = false;
+        };
 
-  /* ===== свайп листа (мобила) ===== */
-  function attachSwipe(pop, api){
-    if (!isMobile()) return ()=>{};
-
-    const scrollable = pop.querySelector('.exs-body') || pop;
-
-    let started=false, dragging=false;
-    let y0=0, dy=0, rafId=null;
-
-    const THRESH = 6;
-    const clampSheet = (y)=>{
-      const maxDown = window.innerHeight * 0.85;
-      const minUp   = -MAX_UP_ACTUAL;
-      return Math.max(minUp, Math.min(y, maxDown));
-    };
-    const applyY = (y)=>{ pop.style.transform = `translateY(${clampSheet(y)}px)`; };
-    const onFrame = ()=>{ rafId=null; applyY(dy); };
-
-    const tryStart = (clientY)=>{
-      started = true; dragging = false; y0 = clientY; dy = 0;
-      pop.style.animation = 'none';
-      pop.dataset.open = '';
-      pop.dataset.closing = '';
-      pop.style.transition = 'none';
-    };
-
-    const onMoveCore = (clientY, e)=>{
-      if (!started) return;
-      const delta = clientY - y0;
-
-      if (!dragging){
-        if (delta < -THRESH && scrollable.scrollTop <= 0){ dragging = true; }
-        else if (delta > THRESH){ dragging = true; }
-        else { return; }
-      }
-
-      if (delta < 0 && scrollable.scrollTop <= 0){
-        const pull = Math.max(0, -delta);
-        dy = -rubberUpShifted(pull);
-        if (e && e.cancelable) e.preventDefault();
-        if (rafId==null) rafId = requestAnimationFrame(onFrame);
-        return;
-      }
-
-      if (delta >= 0){
-        dy = delta;
-        if (e && e.cancelable) e.preventDefault();
-        if (rafId==null) rafId = requestAnimationFrame(onFrame);
-        return;
-      }
-    };
-
-    const endCore = ()=>{
-      if (!started) return;
-      started=false;
-
-      if (dragging){
-        cancelAnimationFrame(rafId); rafId=null;
-
-        if (dy > 0){
-          const threshold = 40;
-          const currentY = clampSheet(dy);
-          if (currentY > threshold){
-            animateFromTo(pop, currentY, 'translateY(100%)', 180, 'ease', ()=>{
-              api.close({ animatedFromY:null, alreadyAnimated:true });
+        /* ====== GHOST while modal (чисто визуальный) ====== */
+        function sanitizeGhost(root) {
+            root.querySelectorAll(".exs-hidden").forEach(n => n.remove());
+            root.querySelectorAll("input, select, textarea, button").forEach(el => {
+                el.removeAttribute("name");
+                el.setAttribute("disabled", "disabled");
+                el.setAttribute("tabindex", "-1");
+                el.removeAttribute("aria-controls");
+                el.removeAttribute("aria-owns");
             });
-          } else {
-            animateFromTo(pop, currentY, 0, 180, 'ease', ()=>{
-              pop.style.transform = '';
-              pop.style.animation = '';
+            root.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+            root.querySelectorAll(".exs-popover").forEach(p => p.setAttribute("hidden", ""));
+            root.setAttribute("aria-hidden", "true");
+        }
+        function createGhost() {
+            if (ghostEl) return;
+            const grid = filters.querySelector(".filters-grid");
+            if (!grid) return;
+            ghostEl = document.createElement("div");
+            ghostEl.className = "filters-ghost";
+            const clone = grid.cloneNode(true);
+            sanitizeGhost(clone);
+            ghostEl.appendChild(clone);
+            filters.parentNode.insertBefore(ghostEl, filters);
+        }
+        function removeGhost() {
+            if (!ghostEl) return;
+            ghostEl.remove();
+            ghostEl = null;
+        }
+
+        /* ===== Портал поповера в body ===== */
+        function portalOpen(pop, trigger) {
+            const placeholder = document.createComment("exs-portal-placeholder");
+            pop.parentNode.insertBefore(placeholder, pop);
+            document.body.appendChild(pop);
+
+            // Десктоп: позиционируем у кнопки
+            let cleanupPos = () => {};
+            if (!isMobile()) {
+                const applyPos = () => {
+                    const rect = trigger.getBoundingClientRect();
+                    const style = pop.style;
+                    style.position = "fixed";
+                    style.left = rect.left + "px";
+                    style.top = (rect.bottom + 6) + "px";
+                    style.width = rect.width + "px";
+                    style.right = "auto";
+                    style.bottom = "auto";
+                    style.zIndex = 11000;
+                    style.opacity = "1";
+                    style.transform = "translateY(0)";
+                };
+                applyPos();
+                const onScrollResize = () => applyPos();
+                window.addEventListener("scroll", onScrollResize, true);
+                window.addEventListener("resize", onScrollResize);
+                cleanupPos = () => {
+                    window.removeEventListener("scroll", onScrollResize, true);
+                    window.removeEventListener("resize", onScrollResize);
+                    const style = pop.style;
+                    style.position = "";
+                    style.left = "";
+                    style.top = "";
+                    style.width = "";
+                    style.right = "";
+                    style.bottom = "";
+                    style.opacity = "";
+                    style.transform = "";
+                    style.transition = "";
+                };
+            }
+            const restore = () => {
+                cleanupPos();
+                if (placeholder.parentNode) {
+                    placeholder.parentNode.insertBefore(pop, placeholder);
+                    placeholder.remove();
+                }
+            };
+            return { restore };
+        }
+
+        /* ===== helpers ===== */
+        function animateFromTo(pop, fromY, toY, duration = 180, easing = "ease", onEnd) {
+            pop.style.animation = "";
+            pop.dataset.open = "";
+            pop.dataset.closing = "";
+            pop.style.transition = "none";
+            pop.style.transform = `translateY(${fromY}px)`;
+            requestAnimationFrame(() => {
+                pop.style.transition = `transform ${duration}ms ${easing}`;
+                requestAnimationFrame(() => {
+                    pop.style.transform = (typeof toY === "string") ? toY : `translateY(${toY}px)`;
+                });
             });
-          }
-        } else {
-          const currentY = clampSheet(dy);
-          animateFromTo(pop, currentY, 0, 160, 'cubic-bezier(.2,.8,.2,1)', ()=>{
-            pop.style.transform = '';
-            pop.style.animation = '';
-          });
+            const handler = (e) => {
+                if (e.propertyName !== "transform") return;
+                pop.removeEventListener("transitionend", handler);
+                pop.style.transition = "";
+                onEnd && onEnd();
+            };
+            pop.addEventListener("transitionend", handler);
         }
-      }
-
-      dragging=false; dy=0;
-    };
-
-    pop.addEventListener('pointerdown', (e)=>{ if (e.pointerType==='touch') tryStart(e.clientY); }, {passive:true});
-    pop.addEventListener('pointermove', (e)=> onMoveCore(e.clientY, e), {passive:false});
-    pop.addEventListener('pointerup',   endCore, {passive:true});
-    pop.addEventListener('pointercancel', endCore, {passive:true});
-
-    pop.addEventListener('touchstart', (e)=> tryStart(e.touches[0].clientY), {passive:true});
-    pop.addEventListener('touchmove',  (e)=> onMoveCore(e.touches[0].clientY, e), {passive:false});
-    pop.addEventListener('touchend',   endCore, {passive:true});
-    pop.addEventListener('touchcancel', endCore, {passive:true});
-
-    return ()=>{};
-  }
-
-  /* ===== клик-вне ===== */
-  (function outsideClickOnly(){
-    const handler = (e)=>{
-      if (!currentOpen) return;
-      const { pop, root, trigger } = currentOpen;
-      if (pop.contains(e.target) || root.contains(e.target) || trigger.contains(e.target)) return;
-      currentOpen.close();
-      e.stopPropagation();
-    };
-    document.addEventListener('click', handler, true);
-  })();
-
-  /* ========================= extra-select ========================= */
-  const roots = document.querySelectorAll('.js-extra-select');
-  if (!roots.length) return;
-
-  roots.forEach((root) => {
-    const type = (root.dataset.type || 'checkbox').trim();
-    const field = (root.dataset.field || '').trim();
-    const placeholder = (root.dataset.placeholder || 'Выбрать…').trim();
-    const maxChars = +root.dataset.maxLabelChars || 28;
-
-    const btn = root.querySelector('.js-exs-trigger');
-    const pop = document.getElementById('exs-popover-' + field);
-    const body = root.querySelector('.js-exs-body') || (pop ? pop.querySelector('.js-exs-body') : null);
-    const hiddenWrap = root.querySelector('.js-exs-hidden');
-    const closeX = pop ? pop.querySelector('.js-exs-close') : null;
-
-    let applied = [];
-    let detachSwipe = null;
-    let portalRestore = null;
-
-    const makeLabel = (arr, maxChars) => {
-      if (!arr.length) return '';
-      let out = '';
-      for (let i=0;i<arr.length;i++){
-        const next = (out ? out + ', ' : '') + arr[i];
-        if (next.length > maxChars) return out ? (out + ', …') : '…';
-        out = next;
-      }
-      return out;
-    };
-
-    const updateBtn = () => {
-      if (!btn) return;
-      if (type === 'checkbox'){
-        if (!applied.length){ btn.textContent = placeholder; btn.classList.remove('is-active'); return; }
-        btn.textContent = makeLabel(applied, maxChars); btn.classList.add('is-active');
-      } else if (type === 'range'){
-        if (!applied.length || (applied[0]==='' && applied[1]==='')){
-          btn.textContent = placeholder; btn.classList.remove('is-active'); return;
+        function startKeyframe(pop, kind /* 'open' | 'close' */) {
+            pop.style.animation = "";
+            pop.style.transform = "";
+            void pop.offsetWidth;
+            if (kind === "open") {
+                pop.dataset.closing = "";
+                pop.dataset.open = "true";
+            } else {
+                pop.dataset.open = "";
+                pop.dataset.closing = "true";
+            }
         }
-        const [a,b] = applied;
-        let text = '';
-        if (a!=='' && b!=='') text = `от ${a} — до ${b}`;
-        else if (a!=='') text = `от ${a}`;
-        else if (b!=='') text = `до ${b}`;
-        btn.textContent = text || placeholder;
-        text ? btn.classList.add('is-active') : btn.classList.remove('is-active');
-      } else if (type === 'radio'){
-        const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
-        let val = '';
-        const h = hiddenWrap ? hiddenWrap.querySelector('input[type="hidden"][name="sort"]') : null;
-        if (h && h.value) val = h.value;
-        else {
-          const ch = radios.find(r=>r.checked);
-          if (ch) val = ch.value;
+        function desktopFadeOut(pop, done) {
+            pop.style.transition = "opacity 140ms ease, transform 140ms ease";
+            let finished = false;
+            const clear = () => {
+                if (finished) return;
+                finished = true;
+                pop.style.transition = "";
+                pop.style.opacity = "";
+                pop.style.transform = "";
+                done && done();
+            };
+            requestAnimationFrame(() => {
+                pop.style.opacity = "0";
+                pop.style.transform = "translateY(-4px)";
+            });
+            const onEnd = (e) => {
+                if (e.target !== pop) return;
+                pop.removeEventListener("transitionend", onEnd);
+                clear();
+            };
+            pop.addEventListener("transitionend", onEnd);
+            setTimeout(clear, 180);
         }
-        const current = radios.find(r => r.value === val) || radios[0];
-        const labelText = (current?.dataset?.label || '').trim() || current?.closest('label')?.textContent?.trim() || current?.value || '';
-        btn.textContent = `⇅ ${labelText}`;
-        btn.classList.add('is-active');
-      } else if (type === 'stub'){
-        btn.textContent = placeholder;
-      }
-    };
 
-    const writeHidden = () => {
-      if (!hiddenWrap) return;
-      if (type === 'checkbox'){
-        hiddenWrap.innerHTML = '';
-        applied.forEach(v=>{
-          const h = document.createElement('input');
-          h.type='hidden'; h.name=field+'[]'; h.value=v; hiddenWrap.appendChild(h);
+        /* ===== «резинка» для bottom-sheet ===== */
+        const RUBBER_K = 160;
+        const VSLACK = 40;
+        const BASE_PULL = 125;
+        const MAX_UP_ACTUAL = BASE_PULL * Math.exp(-VSLACK / RUBBER_K);
+        function rubberUpShifted(pull) {
+            const eV = Math.exp(-VSLACK / RUBBER_K);
+            const val = BASE_PULL * eV * (1 - Math.exp(-pull / RUBBER_K));
+            return Math.min(val, MAX_UP_ACTUAL);
+        }
+
+        /* ===== свайп листа (мобила) ===== */
+        function attachSwipe(pop, api) {
+            if (!isMobile()) return () => {};
+
+            const scrollable = pop.querySelector(".exs-body") || pop;
+
+            let started = false, dragging = false;
+            let y0 = 0, dy = 0, rafId = null;
+
+            const THRESH = 6;
+            const clampSheet = (y) => {
+                const maxDown = window.innerHeight * 0.85;
+                const minUp = -MAX_UP_ACTUAL;
+                return Math.max(minUp, Math.min(y, maxDown));
+            };
+            const applyY = (y) => { pop.style.transform = `translateY(${clampSheet(y)}px)`; };
+            const onFrame = () => { rafId = null; applyY(dy); };
+
+            const tryStart = (clientY) => {
+                started = true;
+                dragging = false;
+                y0 = clientY;
+                dy = 0;
+                pop.style.animation = "none";
+                pop.dataset.open = "";
+                pop.dataset.closing = "";
+                pop.style.transition = "none";
+            };
+
+            const onMoveCore = (clientY, e) => {
+                if (!started) return;
+                const delta = clientY - y0;
+
+                if (!dragging) {
+                    if (delta < -THRESH && scrollable.scrollTop <= 0) { dragging = true; }
+                    else if (delta > THRESH) { dragging = true; }
+                    else { return; }
+                }
+
+                if (delta < 0 && scrollable.scrollTop <= 0) {
+                    const pull = Math.max(0, -delta);
+                    dy = -rubberUpShifted(pull);
+                    if (e && e.cancelable) e.preventDefault();
+                    if (rafId == null) rafId = requestAnimationFrame(onFrame);
+                    return;
+                }
+
+                if (delta >= 0) {
+                    dy = delta;
+                    if (e && e.cancelable) e.preventDefault();
+                    if (rafId == null) rafId = requestAnimationFrame(onFrame);
+                    return;
+                }
+            };
+
+            const endCore = () => {
+                if (!started) return;
+                started = false;
+
+                if (dragging) {
+                    cancelAnimationFrame(rafId); rafId = null;
+
+                    if (dy > 0) {
+                        const threshold = 40;
+                        const currentY = clampSheet(dy);
+                        if (currentY > threshold) {
+                            animateFromTo(pop, currentY, "translateY(100%)", 180, "ease", () => {
+                                api.close({ animatedFromY: null, alreadyAnimated: true });
+                            });
+                        } else {
+                            animateFromTo(pop, currentY, 0, 180, "ease", () => {
+                                pop.style.transform = "";
+                                pop.style.animation = "";
+                            });
+                        }
+                    } else {
+                        const currentY = clampSheet(dy);
+                        animateFromTo(pop, currentY, 0, 160, "cubic-bezier(.2,.8,.2,1)", () => {
+                            pop.style.transform = "";
+                            pop.style.animation = "";
+                        });
+                    }
+                }
+
+                dragging = false;
+                dy = 0;
+            };
+
+            pop.addEventListener("pointerdown", (e) => { if (e.pointerType === "touch") tryStart(e.clientY); }, { passive: true });
+            pop.addEventListener("pointermove", (e) => onMoveCore(e.clientY, e), { passive: false });
+            pop.addEventListener("pointerup", endCore, { passive: true });
+            pop.addEventListener("pointercancel", endCore, { passive: true });
+
+            pop.addEventListener("touchstart", (e) => tryStart(e.touches[0].clientY), { passive: true });
+            pop.addEventListener("touchmove", (e) => onMoveCore(e.touches[0].clientY, e), { passive: false });
+            pop.addEventListener("touchend", endCore, { passive: true });
+            pop.addEventListener("touchcancel", endCore, { passive: true });
+
+            return () => {};
+        }
+
+        /* ===== клик-вне ===== */
+        (function outsideClickOnly() {
+            const handler = (e) => {
+                if (!currentOpen) return;
+                const { pop, root, trigger } = currentOpen;
+                if (pop.contains(e.target) || root.contains(e.target) || trigger.contains(e.target)) return;
+                // overlay сам закрывается только по mousedown+mouseup на overlay
+                currentOpen.close();
+                e.stopPropagation();
+            };
+            document.addEventListener("click", handler, true);
+        })();
+
+        /* ========================= extra-select ========================= */
+        const roots = document.querySelectorAll(".js-extra-select");
+        if (!roots.length) return;
+
+        roots.forEach((root) => {
+            const type = (root.dataset.type || "checkbox").trim();
+            const field = (root.dataset.field || "").trim();
+            const placeholder = (root.dataset.placeholder || "Выбрать…").trim();
+            const maxChars = +root.dataset.maxLabelChars || 28;
+
+            const btn = root.querySelector(".js-exs-trigger");
+            const pop = document.getElementById("exs-popover-" + field);
+            const body = root.querySelector(".js-exs-body") || (pop ? pop.querySelector(".js-exs-body") : null);
+            const hiddenWrap = root.querySelector(".js-exs-hidden");
+            const closeX = pop ? pop.querySelector(".js-exs-close") : null;
+
+            let applied = [];
+            let detachSwipe = null;
+            let portalRestore = null;
+
+            // label renderer
+            const makeLabel = (arr, maxChars) => {
+                if (!arr.length) return "";
+                let out = "";
+                for (let i = 0; i < arr.length; i++) {
+                    const next = (out ? out + ", " : "") + arr[i];
+                    if (next.length > maxChars) return out ? (out + ", …") : "…";
+                    out = next;
+                }
+                return out;
+            };
+
+            const updateBtn = () => {
+                if (!btn) return;
+
+                if (type === "checkbox") {
+                    if (!applied.length) {
+                        btn.textContent = placeholder;
+                        btn.classList.remove("is-active");
+                        return;
+                    }
+                    btn.textContent = makeLabel(applied, maxChars);
+                    btn.classList.add("is-active");
+                    return;
+                }
+
+                if (type === "range") {
+                    // если диапазон равен дефолту [min,max] — показываем placeholder
+                    const min = Number(root.dataset.min ?? "0");
+                    const max = Number(root.dataset.max ?? "0");
+                    if (!applied.length || (applied[0] === "" && applied[1] === "")) {
+                        btn.textContent = placeholder;
+                        btn.classList.remove("is-active");
+                        return;
+                    }
+                    const [aRaw, bRaw] = applied;
+                    const a = aRaw === "" ? min : Number(aRaw);
+                    const b = bRaw === "" ? max : Number(bRaw);
+                    if (a === min && b === max) {
+                        btn.textContent = placeholder;         // <-- пункт 4: не показываем "от 0 до 100000"
+                        btn.classList.remove("is-active");
+                        return;
+                    }
+                    let text = "";
+                    if (a !== min && b !== max) text = `от ${a} — до ${b}`;
+                    else if (a !== min)         text = `от ${a}`;
+                    else if (b !== max)         text = `до ${b}`;
+                    btn.textContent = text || placeholder;
+                    text ? btn.classList.add("is-active") : btn.classList.remove("is-active");
+                    return;
+                }
+
+                if (type === "radio") {
+                    const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
+                    let val = "";
+                    const h = hiddenWrap ? hiddenWrap.querySelector('input[type="hidden"][name="sort"]') : null;
+                    if (h && h.value) val = h.value;
+                    else {
+                        const ch = radios.find(r => r.checked);
+                        if (ch) val = ch.value;
+                    }
+                    const current = radios.find(r => r.value === val) || radios[0];
+                    const labelText =
+                        (current?.dataset?.label || "").trim() ||
+                        current?.closest("label")?.textContent?.trim() ||
+                        current?.value || "";
+                    btn.textContent = `⇅ ${labelText}`;
+                    btn.classList.add("is-active");
+                    return;
+                }
+
+                if (type === "stub") {
+                    btn.textContent = placeholder;
+                }
+            };
+
+            const writeHidden = () => {
+                if (!hiddenWrap) return;
+
+                if (type === "checkbox") {
+                    hiddenWrap.innerHTML = "";
+                    applied.forEach(v => {
+                        const h = document.createElement("input");
+                        h.type = "hidden";
+                        h.name = field + "[]";
+                        h.value = v;
+                        hiddenWrap.appendChild(h);
+                    });
+                    return;
+                }
+
+                if (type === "range") {
+                    hiddenWrap.innerHTML = "";
+                    const h1 = document.createElement("input");
+                    h1.type = "hidden";
+                    h1.name = field + "[min]";
+                    h1.value = applied[0] ?? "";
+                    const h2 = document.createElement("input");
+                    h2.type = "hidden";
+                    h2.name = field + "[max]";
+                    h2.value = applied[1] ?? "";
+                    hiddenWrap.appendChild(h1);
+                    hiddenWrap.appendChild(h2);
+                    return;
+                }
+
+                if (type === "radio") {
+                    const h = hiddenWrap.querySelector('input[type="hidden"][name="sort"]');
+                    if (h) h.value = applied[0] ?? h.value ?? "";
+                    return;
+                }
+            };
+
+            const readHidden = () => {
+                if (!hiddenWrap) { applied = []; return; }
+
+                if (type === "checkbox") {
+                    applied = [...hiddenWrap.querySelectorAll(`input[type="hidden"][name="${field}[]"]`)].map(h => h.value);
+                    return;
+                }
+
+                if (type === "range") {
+                    const h1 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[min]"]`);
+                    const h2 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[max]"]`);
+                    applied = [(h1?.value ?? ""), (h2?.value ?? "")];
+                    return;
+                }
+
+                if (type === "radio") {
+                    const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
+                    const h = hiddenWrap.querySelector(`input[type="hidden"][name="sort"]`);
+                    let v = (h?.value || "");
+                    if (!v) {
+                        const ch = radios.find(r => r.checked);
+                        if (ch) v = ch.value;
+                    }
+                    applied = [v];
+                    return;
+                }
+
+                if (type === "stub") {
+                    applied = [];
+                }
+            };
+
+            /* ===== Типы ===== */
+
+            /* CHECKBOX */
+            if (type === "checkbox") {
+                const checks = body ? [...body.querySelectorAll('input[type="checkbox"]')] : [];
+
+                const stageFromApplied = () => {
+                    const set = new Set(applied);
+                    checks.forEach(c => { c.checked = set.has(c.value); });
+                };
+
+                const open = () => {
+                    if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                    stageFromApplied();
+                    if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+                    const { restore } = portalOpen(pop, btn);
+                    portalRestore = restore;
+                    ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
+                    if (isMobile()) {
+                        startKeyframe(pop, "open");
+                        detachSwipe = attachSwipe(pop, api);
+                    }
+                    currentOpen = { root, pop, trigger: btn, close: api.close };
+                    (checks.find(x => x.checked) || checks[0])?.focus();
+                };
+
+                const reallyHide = () => { if (pop) pop.hidden = true; };
+
+                const close = (opts = {}) => {
+                    const { animatedFromY = null, alreadyAnimated = false } = opts;
+
+                    const finalize = () => {
+                        removeOverlay(); lockScrollBody(false);
+                        reallyHide();
+                        if (portalRestore) { portalRestore(); portalRestore = null; }
+                        btn.setAttribute("aria-expanded", "false");
+                        if (currentOpen && currentOpen.root === root) currentOpen = null;
+                    };
+
+                    if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+
+                    if (isMobile()) {
+                        if (alreadyAnimated) {
+                            finalize();
+                        } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                            animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        } else {
+                            startKeyframe(pop, "close");
+                            setTimeout(finalize, 180);
+                        }
+                        setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    } else {
+                        desktopFadeOut(pop, finalize);
+                    }
+                };
+
+                const trapFocus = (e) => {
+                    if (e.key !== "Tab") return;
+                    const f = pop.querySelectorAll("input,button,[tabindex]:not([tabindex='-1'])");
+                    if (!f.length) return;
+                    const first = f[0], last = f[f.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                };
+                const onArrows = (e) => {
+                    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+                    const list = checks; const i = list.indexOf(document.activeElement);
+                    if (i === -1) return; e.preventDefault();
+                    const next = e.key === "ArrowDown" ? Math.min(i + 1, list.length - 1) : Math.max(i - 1, 0);
+                    list[next].focus();
+                };
+
+                ["pointerdown", "mousedown", "touchstart", "click"].forEach(ev => {
+                    pop.addEventListener(ev, (ev2) => ev2.stopPropagation(), { passive: ev === "touchstart" });
+                });
+
+                btn.addEventListener("click", (e) => { e.stopPropagation(); (pop.hidden ? open : api.close)(); });
+                btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (pop.hidden ? open : api.close)(); } });
+                pop.addEventListener("keydown", trapFocus);
+                pop.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); api.close(); } });
+                pop.addEventListener("keydown", onArrows);
+                closeX?.addEventListener("click", () => api.close());
+
+                pop.addEventListener("click", (e) => {
+                    const action = e.target?.dataset?.action;
+                    if (action === "reset") {
+                        checks.forEach(c => c.checked = false);
+                        applied = [];
+                        writeHidden(); updateBtn();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                    if (action === "apply") {
+                        applied = checks.filter(c => c.checked).map(c => c.value);
+                        writeHidden(); updateBtn();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                });
+
+                readHidden();
+                if (!applied.length) {
+                    const pre = checks.filter(c => c.checked).map(c => c.value);
+                    if (pre.length) { applied = pre; writeHidden(); }
+                    checks.forEach(c => c.checked = false);
+                }
+                updateBtn();
+
+                var api = { root, pop, trigger: btn, close };
+
+            /* RANGE */
+            } else if (type === "range") {
+                const min = +root.dataset.min || 0;
+                const max = +root.dataset.max || 100;
+                const step = +root.dataset.step || 1;
+
+                const fromNum = pop.querySelector(".js-exs-from");
+                const toNum = pop.querySelector(".js-exs-to");
+                const pluginEl = pop.querySelector(".js-exs-range");
+
+                const clamp = (v) => Math.min(max, Math.max(min, v));
+
+                noUiSlider.create(pluginEl, {
+                    start: [min, max],
+                    connect: true,
+                    step: step,
+                    range: { min: min, max: max },
+                    behaviour: "drag",
+                    keyboardSupport: true
+                });
+
+                let staged = [min, max];
+
+                const setStagedFromApplied = () => {
+                    let a = applied[0] === "" ? min : clamp(+applied[0]);
+                    let b = applied[1] === "" ? max : clamp(+applied[1]);
+                    if (a > b) [a, b] = [b, a];
+                    staged = [a, b];
+                    pluginEl.noUiSlider.set(staged);
+                    fromNum.value = a;
+                    toNum.value = b;
+                };
+
+                pluginEl.noUiSlider.on("update", (values) => {
+                    const a = Math.round(values[0]); const b = Math.round(values[1]);
+                    staged = [a, b];
+                    if (document.activeElement !== fromNum) fromNum.value = a;
+                    if (document.activeElement !== toNum) toNum.value = b;
+                });
+
+                const syncFrom = () => {
+                    let v = clamp(+fromNum.value);
+                    let other = staged[1];
+                    if (v > other) other = v;
+                    pluginEl.noUiSlider.set([v, other]); staged = [v, other];
+                };
+                const syncTo = () => {
+                    let v = clamp(+toNum.value);
+                    let other = staged[0];
+                    if (v < other) other = v;
+                    pluginEl.noUiSlider.set([other, v]); staged = [other, v];
+                };
+                fromNum.addEventListener("input", syncFrom);
+                toNum.addEventListener("input", syncTo);
+
+                const open = () => {
+                    if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                    setStagedFromApplied();
+                    pop.hidden = false; btn.setAttribute("aria-expanded", "true");
+
+                    const { restore } = portalOpen(pop, btn);
+                    portalRestore = restore;
+                    ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
+                    if (isMobile()) {
+                        startKeyframe(pop, "open");
+                        detachSwipe = attachSwipe(pop, api);
+                    }
+                    currentOpen = { root, pop, trigger: btn, close: api.close };
+                };
+
+                const reallyHide = () => { pop.hidden = true; };
+
+                const close = (opts = {}) => {
+                    const { animatedFromY = null, alreadyAnimated = false } = opts;
+
+                    const finalize = () => {
+                        removeOverlay(); lockScrollBody(false);
+                        reallyHide();
+                        if (portalRestore) { portalRestore(); portalRestore = null; }
+                        btn.setAttribute("aria-expanded", "false");
+                        if (currentOpen && currentOpen.root === root) currentOpen = null;
+                    };
+
+                    if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+
+                    if (isMobile()) {
+                        if (alreadyAnimated) {
+                            finalize();
+                        } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                            animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        } else {
+                            startKeyframe(pop, "close");
+                            setTimeout(finalize, 180);
+                        }
+                        setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    } else {
+                        desktopFadeOut(pop, finalize);
+                    }
+                };
+
+                const trapFocus = (e) => {
+                    if (e.key !== "Tab") return;
+                    const f = pop.querySelectorAll("input,button,.noUi-handle,[tabindex]:not([tabindex='-1'])");
+                    if (!f.length) return;
+                    const first = f[0], last = f[f.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                };
+
+                ["pointerdown", "mousedown", "touchstart", "click"].forEach(ev => {
+                    pop.addEventListener(ev, (ev2) => ev2.stopPropagation(), { passive: ev === "touchstart" });
+                });
+
+                btn.addEventListener("click", (e) => { e.stopPropagation(); (pop.hidden ? open : api.close)(); });
+                btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (pop.hidden ? open : api.close)(); } });
+                pop.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); api.close(); } });
+                pop.addEventListener("keydown", trapFocus);
+                const closeXRange = pop.querySelector(".js-exs-close");
+                closeXRange?.addEventListener("click", () => api.close());
+
+                pop.addEventListener("click", (e) => {
+                    const action = e.target?.dataset?.action;
+                    if (action === "reset") {
+                        pluginEl.noUiSlider.set([min, max]);
+                        staged = [min, max];
+                        applied = [String(min), String(max)];
+                        writeHidden(); updateBtn();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                    if (action === "apply") {
+                        const a = clamp(+fromNum.value);
+                        const b = clamp(+toNum.value);
+                        applied = [String(Math.min(a, b)), String(Math.max(a, b))];
+                        writeHidden(); updateBtn();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                });
+
+                readHidden();
+                if (!applied.length) {
+                    applied = [String(min), String(max)];
+                    writeHidden();
+                }
+                setStagedFromApplied();
+                updateBtn();
+
+                var api = { root, pop, trigger: btn, close };
+
+            /* RADIO */
+            } else if (type === "radio") {
+                const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
+
+                const stageFromHidden = () => {
+                    const h = (hiddenWrap && hiddenWrap.querySelector('input[type="hidden"][name="sort"]'));
+                    let val = (h?.value || "");
+                    if (!val) {
+                        const ch = radios.find(r => r.checked);
+                        if (ch) val = ch.value;
+                    }
+                    radios.forEach(r => r.checked = (r.value === val));
+                    applied = [val];
+                };
+
+                const open = () => {
+                    if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                    stageFromHidden();
+                    pop.hidden = false; btn.setAttribute("aria-expanded", "true");
+
+                    const { restore } = portalOpen(pop, btn);
+                    portalRestore = restore;
+                    ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
+                    if (isMobile()) {
+                        startKeyframe(pop, "open");
+                        detachSwipe = attachSwipe(pop, api);
+                    }
+
+                    currentOpen = { root, pop, trigger: btn, close: api.close };
+                    (radios.find(x => x.checked) || radios[0])?.focus();
+                };
+
+                const reallyHide = () => { pop.hidden = true; };
+
+                const close = (opts = {}) => {
+                    const { animatedFromY = null, alreadyAnimated = false } = opts;
+
+                    const finalize = () => {
+                        removeOverlay(); lockScrollBody(false);
+                        reallyHide();
+                        if (portalRestore) { portalRestore(); portalRestore = null; }
+                        btn.setAttribute("aria-expanded", "false");
+                        if (currentOpen && currentOpen.root === root) currentOpen = null;
+                    };
+
+                    if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+
+                    if (isMobile()) {
+                        if (alreadyAnimated) {
+                            finalize();
+                        } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                            animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        } else {
+                            startKeyframe(pop, "close");
+                            setTimeout(finalize, 180);
+                        }
+                        setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    } else {
+                        desktopFadeOut(pop, finalize);
+                    }
+                };
+
+                ["pointerdown", "mousedown", "touchstart", "click"].forEach(ev => {
+                    pop.addEventListener(ev, (ev2) => ev2.stopPropagation(), { passive: ev === "touchstart" });
+                });
+
+                btn.addEventListener("click", (e) => { e.stopPropagation(); (pop.hidden ? open : api.close)(); });
+                btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (pop.hidden ? open : api.close)(); } });
+                const closeXRadio = pop.querySelector(".js-exs-close");
+                closeXRadio?.addEventListener("click", () => api.close());
+
+                pop.addEventListener("change", (e) => {
+                    const r = e.target;
+                    if (r && r.type === "radio") {
+                        applied = [r.value];
+                        writeHidden(); updateBtn();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied, instant: true } }));
+                        api.close();
+                        submitAjax();
+                    }
+                });
+
+                readHidden();
+                if (!applied.length) {
+                    stageFromHidden();
+                }
+                updateBtn();
+
+                var api = { root, pop, trigger: btn, close };
+
+            /* STUB */
+            } else if (type === "stub") {
+                const open = () => {
+                    if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                    if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+                    const { restore } = portalOpen(pop, btn);
+                    portalRestore = restore;
+                    ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
+                    if (isMobile()) {
+                        startKeyframe(pop, "open");
+                        detachSwipe = attachSwipe(pop, api);
+                    }
+                    currentOpen = { root, pop, trigger: btn, close: api.close };
+                };
+                const reallyHide = () => { if (pop) pop.hidden = true; };
+                const close = (opts = {}) => {
+                    const { animatedFromY = null, alreadyAnimated = false } = opts;
+                    const finalize = () => {
+                        removeOverlay(); lockScrollBody(false);
+                        reallyHide();
+                        if (portalRestore) { portalRestore(); portalRestore = null; }
+                        btn.setAttribute("aria-expanded", "false");
+                        if (currentOpen && currentOpen.root === root) currentOpen = null;
+                    };
+                    if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+                    if (isMobile()) {
+                        if (alreadyAnimated) { finalize(); }
+                        else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                            animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        } else {
+                            startKeyframe(pop, "close");
+                            setTimeout(finalize, 180);
+                        }
+                        setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    } else {
+                        desktopFadeOut(pop, finalize);
+                    }
+                };
+
+                ["pointerdown", "mousedown", "touchstart", "click"].forEach(ev => {
+                    pop.addEventListener(ev, (ev2) => ev2.stopPropagation(), { passive: ev === "touchstart" });
+                });
+
+                btn.addEventListener("click", (e) => { e.stopPropagation(); (pop.hidden ? open : api.close)(); });
+                const closeXStub = pop.querySelector(".js-exs-close");
+                closeXStub?.addEventListener("click", () => api.close());
+                pop.addEventListener("click", (e) => {
+                    const action = e.target?.dataset?.action;
+                    if (action === "reset") { api.close(); submitAjax(); }
+                    if (action === "apply") { api.close(); submitAjax(); }
+                });
+
+                updateBtn();
+                var api = { root, pop, trigger: btn, close };
+            }
         });
-      } else if (type === 'range'){
-        hiddenWrap.innerHTML = '';
-        const h1 = document.createElement('input');
-        h1.type='hidden'; h1.name=field+'[min]'; h1.value = applied[0] ?? '';
-        const h2 = document.createElement('input');
-        h2.type='hidden'; h2.name=field+'[max]'; h2.value = applied[1] ?? '';
-        hiddenWrap.appendChild(h1); hiddenWrap.appendChild(h2);
-      } else if (type === 'radio'){
-        const h = hiddenWrap.querySelector('input[type="hidden"][name="sort"]');
-        if (h) h.value = applied[0] ?? h.value ?? '';
-      }
-    };
 
-    const readHidden = () => {
-      if (!hiddenWrap) { applied=[]; return; }
-      if (type === 'checkbox'){
-        applied = [...hiddenWrap.querySelectorAll(`input[type="hidden"][name="${field}[]"]`)].map(h=>h.value);
-      } else if (type === 'range'){
-        const h1 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[min]"]`);
-        const h2 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[max]"]`);
-        applied = [(h1?.value ?? ''), (h2?.value ?? '')];
-      } else if (type === 'radio'){
-        const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
-        const h = hiddenWrap.querySelector(`input[type="hidden"][name="sort"]`);
-        let v = (h?.value || '');
-        if (!v){
-          const ch = radios.find(r=>r.checked);
-          if (ch) v = ch.value;
-        }
-        applied = [ v ];
-      } else if (type === 'stub'){
-        applied = [];
-      }
-    };
+        /* ========================= МОДАЛКА (через body.filters-modal) ========================= */
+        const openBtn  = document.querySelector(".js-filters-open");
+        const closeBtn = filters.querySelector(".js-filters-close");
+        const resetAll = filters.querySelector(".js-filters-reset-all");
+        const applyAll = filters.querySelector(".js-filters-apply-all");
+        const scope    = filters.querySelector("[data-filters-scope]");
 
-    /* ===== Типы ===== */
+        let modalBackdrop = null;
+        const createBackdrop = () => {
+            if (modalBackdrop) return;
+            modalBackdrop = document.createElement("div");
+            modalBackdrop.className = "modal-backdrop";
+            let downOnBackdrop = false;
 
-    /* CHECKBOX */
-    if (type === 'checkbox'){
-      const checks = body ? [...body.querySelectorAll('input[type="checkbox"]')] : [];
+            // Закрываем модалку ТОЛЬКО если и mousedown, и mouseup были на самой подложке
+            modalBackdrop.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
+            modalBackdrop.addEventListener("mouseup", () => {
+                if (downOnBackdrop) {
+                    if (currentOpen) { currentOpen.close(); }
+                    else { closeModal(); }
+                }
+                downOnBackdrop = false;
+            }, { passive: true });
 
-      const stageFromApplied = () => {
-        const set = new Set(applied);
-        checks.forEach(c=>{ c.checked = set.has(c.value); });
-      };
-
-      const open = () => {
-        if (currentOpen && currentOpen.root!==root) currentOpen.close();
-        stageFromApplied();
-        if (pop){ pop.hidden = false; btn.setAttribute('aria-expanded','true'); }
-        const { restore } = portalOpen(pop, btn);
-        portalRestore = restore;
-        ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
-        if (isMobile()){
-          startKeyframe(pop, 'open');
-          detachSwipe = attachSwipe(pop, api);
-        }
-        currentOpen = { root, pop, trigger: btn, close: api.close };
-        (checks.find(x=>x.checked) || checks[0])?.focus();
-      };
-
-      const reallyHide = ()=>{ if (pop) pop.hidden = true; };
-
-      const close = (opts={}) => {
-        const { animatedFromY=null, alreadyAnimated=false } = opts;
-
-        const finalize = ()=>{
-          removeOverlay(); lockScrollBody(false);
-          reallyHide();
-          if (portalRestore){ portalRestore(); portalRestore=null; }
-          btn.setAttribute('aria-expanded','false');
-          if (currentOpen && currentOpen.root===root) currentOpen=null;
+            document.body.appendChild(modalBackdrop);
+        };
+        const removeBackdrop = () => {
+            if (!modalBackdrop) return;
+            modalBackdrop.remove();
+            modalBackdrop = null;
         };
 
-        if (detachSwipe){ detachSwipe(); detachSwipe=null; }
+        const lockPage = (on) => { document.body.style.overflow = on ? "hidden" : ""; };
 
-        if (isMobile()){
-          if (alreadyAnimated){
-            finalize();
-          } else if (Number.isFinite(animatedFromY) && animatedFromY>0){
-            animateFromTo(pop, animatedFromY, 'translateY(100%)', 180, 'ease', finalize);
-          } else {
-            startKeyframe(pop, 'close');
-            setTimeout(finalize, 180);
-          }
-          setTimeout(()=>{ pop.style.transform=''; pop.style.animation=''; }, 200);
-        } else {
-          desktopFadeOut(pop, finalize);
-        }
-      };
-
-      const trapFocus = (e)=>{
-        if (e.key!=='Tab') return;
-        const f = pop.querySelectorAll('input,button,[tabindex]:not([tabindex="-1"])');
-        if (!f.length) return;
-        const first=f[0], last=f[f.length-1];
-        if (e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
-      };
-      const onArrows = (e)=>{
-        if (e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
-        const list = checks; const i = list.indexOf(document.activeElement);
-        if (i===-1) return; e.preventDefault();
-        const next = e.key==='ArrowDown' ? Math.min(i+1, list.length-1) : Math.max(i-1, 0);
-        list[next].focus();
-      };
-
-      ['pointerdown','mousedown','touchstart','click'].forEach(ev=>{
-        pop.addEventListener(ev, (ev2)=>ev2.stopPropagation(), {passive: ev==='touchstart'});
-      });
-
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); (pop.hidden ? open : api.close)(); });
-      btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); (pop.hidden ? open : api.close)(); } });
-      pop.addEventListener('keydown', trapFocus);
-      pop.addEventListener('keydown', (e)=>{ if (e.key==='Escape'){ e.stopPropagation(); api.close(); } });
-      pop.addEventListener('keydown', onArrows);
-      closeX?.addEventListener('click', ()=>api.close());
-
-      pop.addEventListener('click', (e)=>{
-        const action = e.target?.dataset?.action;
-        if (action==='reset'){
-          checks.forEach(c=>c.checked=false);
-          applied = [];
-          writeHidden(); updateBtn();
-          root.dispatchEvent(new CustomEvent('exs-apply', { detail:{ field: field, values: applied }}));
-          api.close();
-          submitAjax();
-        }
-        if (action==='apply'){
-          applied = checks.filter(c=>c.checked).map(c=>c.value);
-          writeHidden(); updateBtn();
-          root.dispatchEvent(new CustomEvent('exs-apply', { detail:{ field: field, values: applied }}));
-          api.close();
-          submitAjax();
-        }
-      });
-
-      readHidden();
-      if (!applied.length){
-        const pre = checks.filter(c=>c.checked).map(c=>c.value);
-        if (pre.length){ applied = pre; writeHidden(); }
-        checks.forEach(c=>c.checked=false);
-      }
-      updateBtn();
-
-      var api = { root, pop, trigger: btn, close };
-
-    /* RANGE */
-    } else if (type === 'range'){
-      const min = +root.dataset.min || 0;
-      const max = +root.dataset.max || 100;
-      const step = +root.dataset.step || 1;
-
-      const fromNum = pop.querySelector('.js-exs-from');
-      const toNum = pop.querySelector('.js-exs-to');
-      const pluginEl = pop.querySelector('.js-exs-range');
-
-      const clamp = (v)=> Math.min(max, Math.max(min, v));
-
-      noUiSlider.create(pluginEl, {
-        start: [min, max],
-        connect: true,
-        step: step,
-        range: { min: min, max: max },
-        behaviour: 'drag',
-        keyboardSupport: true
-      });
-
-      let staged = [min, max];
-
-      const setStagedFromApplied = () => {
-        let a = applied[0]==='' ? min : clamp(+applied[0]);
-        let b = applied[1]==='' ? max : clamp(+applied[1]);
-        if (a>b) [a,b]=[b,a];
-        staged = [a,b];
-        pluginEl.noUiSlider.set(staged);
-        fromNum.value = a;
-        toNum.value = b;
-      };
-
-      pluginEl.noUiSlider.on('update', (values)=>{
-        const a = Math.round(values[0]); const b = Math.round(values[1]);
-        staged = [a,b];
-        if (document.activeElement !== fromNum) fromNum.value = a;
-        if (document.activeElement !== toNum) toNum.value = b;
-      });
-
-      const syncFrom = ()=>{
-        let v = clamp(+fromNum.value);
-        let other = staged[1];
-        if (v>other) other=v;
-        pluginEl.noUiSlider.set([v, other]); staged=[v, other];
-      };
-      const syncTo = ()=>{
-        let v = clamp(+toNum.value);
-        let other = staged[0];
-        if (v<other) other=v;
-        pluginEl.noUiSlider.set([other, v]); staged=[other, v];
-      };
-      fromNum.addEventListener('input', syncFrom);
-      toNum.addEventListener('input', syncTo);
-
-      const open = () => {
-        if (currentOpen && currentOpen.root!==root) currentOpen.close();
-        setStagedFromApplied();
-        pop.hidden=false; btn.setAttribute('aria-expanded','true');
-
-        const { restore } = portalOpen(pop, btn);
-        portalRestore = restore;
-        ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
-        if (isMobile()){
-          startKeyframe(pop, 'open');
-          detachSwipe = attachSwipe(pop, api);
-        }
-        currentOpen = { root, pop, trigger: btn, close: api.close };
-      };
-
-      const reallyHide = ()=>{ pop.hidden = true; };
-
-      const close = (opts={}) => {
-        const { animatedFromY=null, alreadyAnimated=false } = opts;
-
-        const finalize = ()=>{
-          removeOverlay(); lockScrollBody(false);
-          reallyHide();
-          if (portalRestore){ portalRestore(); portalRestore=null; }
-          btn.setAttribute('aria-expanded','false');
-          if (currentOpen && currentOpen.root===root) currentOpen=null;
+        const modalFocusTrap = (e) => {
+            if (!document.body.classList.contains("filters-modal")) return;
+            if (e.key !== "Tab") return;
+            const focusables = filters.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+            if (!focusables.length) return;
+            const first = focusables[0], last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
         };
 
-        if (detachSwipe){ detachSwipe(); detachSwipe=null; }
-
-        if (isMobile()){
-          if (alreadyAnimated){
-            finalize();
-          } else if (Number.isFinite(animatedFromY) && animatedFromY>0){
-            animateFromTo(pop, animatedFromY, 'translateY(100%)', 180, 'ease', finalize);
-          } else {
-            startKeyframe(pop, 'close');
-            setTimeout(finalize, 180);
-          }
-          setTimeout(()=>{ pop.style.transform=''; pop.style.animation=''; }, 200);
-        } else {
-          desktopFadeOut(pop, finalize);
-        }
-      };
-
-      const trapFocus = (e)=>{
-        if (e.key!=='Tab') return;
-        const f = pop.querySelectorAll('input,button,.noUi-handle,[tabindex]:not([tabindex="-1"])');
-        if (!f.length) return;
-        const first=f[0], last=f[f.length-1];
-        if (e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
-      };
-
-      ['pointerdown','mousedown','touchstart','click'].forEach(ev=>{
-        pop.addEventListener(ev, (ev2)=>ev2.stopPropagation(), {passive: ev==='touchstart'});
-      });
-
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); (pop.hidden ? open : api.close)(); });
-      btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); (pop.hidden ? open : api.close)(); } });
-      pop.addEventListener('keydown', (e)=>{ if (e.key==='Escape'){ e.stopPropagation(); api.close(); } });
-      pop.addEventListener('keydown', trapFocus);
-      const closeX = pop.querySelector('.js-exs-close');
-      closeX?.addEventListener('click', ()=>api.close());
-
-      pop.addEventListener('click', (e)=>{
-        const action = e.target?.dataset?.action;
-        if (action==='reset'){
-          pluginEl.noUiSlider.set([min, max]);
-          staged=[min,max];
-          applied=[String(min), String(max)];
-          writeHidden(); updateBtn();
-          root.dispatchEvent(new CustomEvent('exs-apply', { detail:{ field: field, values: applied }}));
-          api.close();
-          submitAjax();
-        }
-        if (action==='apply'){
-          const a = clamp(+fromNum.value);
-          const b = clamp(+toNum.value);
-          applied = [String(Math.min(a,b)), String(Math.max(a,b))];
-          writeHidden(); updateBtn();
-          root.dispatchEvent(new CustomEvent('exs-apply', { detail:{ field: field, values: applied }}));
-          api.close();
-          submitAjax();
-        }
-      });
-
-      readHidden();
-      if (!applied.length){
-        applied=[String(min), String(max)];
-        writeHidden();
-      }
-      setStagedFromApplied();
-      updateBtn();
-
-      var api = { root, pop, trigger: btn, close };
-
-    /* RADIO */
-    } else if (type === 'radio'){
-      const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
-
-      const stageFromHidden = ()=>{
-        const h = (hiddenWrap && hiddenWrap.querySelector('input[type="hidden"][name="sort"]'));
-        let val = (h?.value || '');
-        if (!val){
-          const ch = radios.find(r=>r.checked);
-          if (ch) val = ch.value;
-        }
-        radios.forEach(r=> r.checked = (r.value === val));
-        applied = [val];
-      };
-
-      const open = () => {
-        if (currentOpen && currentOpen.root!==root) currentOpen.close();
-        stageFromHidden();
-        pop.hidden=false; btn.setAttribute('aria-expanded','true');
-
-        const { restore } = portalOpen(pop, btn);
-        portalRestore = restore;
-        ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
-        if (isMobile()){
-          startKeyframe(pop, 'open');
-          detachSwipe = attachSwipe(pop, api);
-        }
-
-        currentOpen = { root, pop, trigger: btn, close: api.close };
-        (radios.find(x=>x.checked) || radios[0])?.focus();
-      };
-
-      const reallyHide = ()=>{ pop.hidden = true; };
-
-      const close = (opts={})=>{
-        const { animatedFromY=null, alreadyAnimated=false } = opts;
-
-        const finalize = ()=>{
-          removeOverlay(); lockScrollBody(false);
-          reallyHide();
-          if (portalRestore){ portalRestore(); portalRestore=null; }
-          btn.setAttribute('aria-expanded','false');
-          if (currentOpen && currentOpen.root===root) currentOpen=null;
+        const closeAllPopovers = () => {
+            document.querySelectorAll(".exs-popover:not([hidden])").forEach(p => {
+                const root = p.closest(".extra-select");
+                root?.querySelector(".js-exs-trigger")?.click();
+            });
         };
 
-        if (detachSwipe){ detachSwipe(); detachSwipe=null; }
-
-        if (isMobile()){
-          if (alreadyAnimated){
-            finalize();
-          } else if (Number.isFinite(animatedFromY) && animatedFromY>0){
-            animateFromTo(pop, animatedFromY, 'translateY(100%)', 180, 'ease', finalize);
-          } else {
-            startKeyframe(pop, 'close');
-            setTimeout(finalize, 180);
-          }
-          setTimeout(()=>{ pop.style.transform=''; pop.style.animation=''; }, 200);
-        } else {
-          desktopFadeOut(pop, finalize);
-        }
-      };
-
-      ['pointerdown','mousedown','touchstart','click'].forEach(ev=>{
-        pop.addEventListener(ev, (ev2)=>ev2.stopPropagation(), {passive: ev==='touchstart'});
-      });
-
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); (pop.hidden ? open : api.close)(); });
-      btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); (pop.hidden ? open : api.close)(); } });
-      const closeX = pop.querySelector('.js-exs-close');
-      closeX?.addEventListener('click', ()=>api.close());
-
-      pop.addEventListener('change', (e)=>{
-        const r = e.target;
-        if (r && r.type==='radio'){
-          applied = [r.value];
-          writeHidden(); updateBtn();
-          root.dispatchEvent(new CustomEvent('exs-apply', { detail:{ field: field, values: applied, instant:true }}));
-          api.close();
-          submitAjax();
-        }
-      });
-
-      readHidden();
-      if (!applied.length){
-        stageFromHidden();
-      }
-      updateBtn();
-
-      var api = { root, pop, trigger: btn, close };
-
-    /* STUB */
-    } else if (type === 'stub'){
-      const open = () => {
-        if (currentOpen && currentOpen.root!==root) currentOpen.close();
-        if (pop){ pop.hidden=false; btn.setAttribute('aria-expanded','true'); }
-        const { restore } = portalOpen(pop, btn);
-        portalRestore = restore;
-        ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
-        if (isMobile()){
-          startKeyframe(pop, 'open');
-          detachSwipe = attachSwipe(pop, api);
-        }
-        currentOpen = { root, pop, trigger: btn, close: api.close };
-      };
-      const reallyHide = ()=>{ if (pop) pop.hidden = true; };
-      const close = (opts={})=>{
-        const { animatedFromY=null, alreadyAnimated=false } = opts;
-        const finalize = ()=>{
-          removeOverlay(); lockScrollBody(false);
-          reallyHide();
-          if (portalRestore){ portalRestore(); portalRestore=null; }
-          btn.setAttribute('aria-expanded','false');
-          if (currentOpen && currentOpen.root===root) currentOpen=null;
+        const openModal = () => {
+            closeAllPopovers();
+            createGhost();
+            document.body.classList.add("filters-modal");
+            createBackdrop();
+            lockPage(true);
+            document.addEventListener("keydown", modalFocusTrap);
+            closeBtn?.focus();
         };
-        if (detachSwipe){ detachSwipe(); detachSwipe=null; }
-        if (isMobile()){
-          if (alreadyAnimated){ finalize(); }
-          else if (Number.isFinite(animatedFromY) && animatedFromY>0){
-            animateFromTo(pop, animatedFromY, 'translateY(100%)', 180, 'ease', finalize);
-          } else {
-            startKeyframe(pop, 'close');
-            setTimeout(finalize, 180);
-          }
-          setTimeout(()=>{ pop.style.transform=''; pop.style.animation=''; }, 200);
-        } else {
-          desktopFadeOut(pop, finalize);
-        }
-      };
 
-      ['pointerdown','mousedown','touchstart','click'].forEach(ev=>{
-        pop.addEventListener(ev, (ev2)=>ev2.stopPropagation(), {passive: ev==='touchstart'});
-      });
+        const closeModal = () => {
+            closeAllPopovers();
+            document.body.classList.remove("filters-modal");
+            removeBackdrop();
+            removeGhost();
+            lockPage(false);
+            document.removeEventListener("keydown", modalFocusTrap);
+            openBtn?.focus();
+        };
 
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); (pop.hidden ? open : api.close)(); });
-      const closeX = pop.querySelector('.js-exs-close');
-      closeX?.addEventListener('click', ()=>api.close());
-      pop.addEventListener('click', (e)=>{
-        const action = e.target?.dataset?.action;
-        if (action==='reset'){ api.close(); submitAjax(); }
-        if (action==='apply'){ api.close(); submitAjax(); }
-      });
+        openBtn?.addEventListener("click", openModal);
+        closeBtn?.addEventListener("click", closeModal);
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && document.body.classList.contains("filters-modal")) closeModal();
+        });
 
-      updateBtn();
-      var api = { root, pop, trigger: btn, close };
-    }
-  });
+        // Сброс всё — вызывает локальные reset
+        resetAll?.addEventListener("click", () => {
+            scope.querySelectorAll('.exs-actions [data-action="reset"]').forEach(btn => btn.click());
 
-  /* ========================= МОДАЛКА (теперь через body.filters-modal) ========================= */
-  const openBtn  = document.querySelector('.js-filters-open');
-  const closeBtn = filters.querySelector('.js-filters-close');
-  const resetAll = filters.querySelector('.js-filters-reset-all');
-  const applyAll = filters.querySelector('.js-filters-apply-all');
-  const scope    = filters.querySelector('[data-filters-scope]');
+            // Сортировку вернуть к значению по умолчанию из HTML
+            const sortRoot = document.querySelector('.extra-select[data-field="sort"]');
+            if (sortRoot) {
+                const hidden = sortRoot.querySelector('.js-exs-hidden input[name="sort"]');
+                const radios = sortRoot.querySelectorAll('input[type="radio"]');
+                let def = hidden?.defaultValue || "";
+                if (!def) {
+                    const ch = [...radios].find(r => r.defaultChecked);
+                    if (ch) def = ch.value;
+                }
+                if (hidden) hidden.value = def;
+                radios.forEach(r => r.checked = (r.value === def));
+                const btnSort = sortRoot.querySelector('.js-exs-trigger');
+                const current = [...radios].find(r => r.value === def) || radios[0];
+                const labelText =
+                    (current?.dataset?.label || "").trim() ||
+                    current?.closest("label")?.textContent?.trim() ||
+                    def;
+                if (btnSort) {
+                    btnSort.textContent = `⇅ ${labelText}`;
+                    btnSort.classList.add("is-active");
+                }
+            }
+            submitAjax();
+        });
 
-  let modalBackdrop = null;
-  const createBackdrop = ()=>{
-    if (modalBackdrop) return;
-    modalBackdrop = document.createElement('div');
-    modalBackdrop.className = 'modal-backdrop';
-    let downOnBackdrop=false;
-    modalBackdrop.addEventListener('mousedown', ()=>{ downOnBackdrop=true; }, {passive:true});
-    modalBackdrop.addEventListener('mouseup', ()=>{
-      if (downOnBackdrop){
-        if (currentOpen){ currentOpen.close(); }
-        else { closeModal(); }
-      }
-      downOnBackdrop=false;
-    }, {passive:true});
-    document.body.appendChild(modalBackdrop);
-  };
-  const removeBackdrop = ()=>{
-    if (!modalBackdrop) return;
-    modalBackdrop.remove(); modalBackdrop = null;
-  };
-
-  const lockPage = (on)=>{ document.body.style.overflow = on ? 'hidden' : ''; };
-
-  const modalFocusTrap = (e)=>{
-    if (!document.body.classList.contains('filters-modal')) return;
-    if (e.key !== 'Tab') return;
-    const focusables = filters.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
-    if (!focusables.length) return;
-    const first = focusables[0], last = focusables[focusables.length-1];
-    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
-  };
-
-  const closeAllPopovers = ()=>{
-    document.querySelectorAll('.exs-popover:not([hidden])').forEach(p=>{
-      const root = p.closest('.extra-select');
-      root?.querySelector('.js-exs-trigger')?.click();
-    });
-  };
-
-  const openModal = ()=>{
-    closeAllPopovers();
-    createGhost();
-    document.body.classList.add('filters-modal');
-    createBackdrop();
-    lockPage(true);
-    document.addEventListener('keydown', modalFocusTrap);
-    closeBtn?.focus();
-  };
-
-  const closeModal = ()=>{
-    closeAllPopovers();
-    document.body.classList.remove('filters-modal');
-    removeBackdrop();
-    removeGhost();
-    lockPage(false);
-    document.removeEventListener('keydown', modalFocusTrap);
-    openBtn?.focus();
-  };
-
-  openBtn?.addEventListener('click', openModal);
-  closeBtn?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && document.body.classList.contains('filters-modal')) closeModal(); });
-
-  // Сброс всё — вызывает локальные reset
-  resetAll?.addEventListener('click', ()=>{
-    scope.querySelectorAll('.exs-actions [data-action="reset"]').forEach(btn=>btn.click());
-
-    // Сортировку вернуть к значению по умолчанию из HTML
-    const sortRoot = document.querySelector('.extra-select[data-field="sort"]');
-    if (sortRoot){
-      const hidden = sortRoot.querySelector('.js-exs-hidden input[name="sort"]');
-      const radios = sortRoot.querySelectorAll('input[type="radio"]');
-      let def = hidden?.defaultValue || '';
-      if (!def){
-        const ch = [...radios].find(r=>r.defaultChecked);
-        if (ch) def = ch.value;
-      }
-      if (hidden) hidden.value = def;
-      radios.forEach(r=> r.checked = (r.value===def));
-      const btn = sortRoot.querySelector('.js-exs-trigger');
-      const current = [...radios].find(r=>r.value===def) || radios[0];
-      const labelText = (current?.dataset?.label || '').trim() || current?.closest('label')?.textContent?.trim() || def;
-      if (btn){ btn.textContent = `⇅ ${labelText}`; btn.classList.add('is-active'); }
-    }
-    submitAjax();
-  });
-
-  // Применить всё
-  applyAll?.addEventListener('click', ()=>{
-    scope.querySelectorAll('.exs-actions [data-action="apply"]').forEach(btn=>btn.click());
-    closeModal();
-  });
-})();
+        // Применить всё
+        applyAll?.addEventListener("click", () => {
+            scope.querySelectorAll('.exs-actions [data-action="apply"]').forEach(btn => btn.click());
+            closeModal();
+        });
+    })();
 </script>
 </body>
 </html>
