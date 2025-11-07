@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>extra-select demo</title>
+<title>Extra Filters demo</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css">
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js"></script>
@@ -15,6 +15,20 @@ body {
   padding: 0;
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.container {
+    padding: 1rem;
+}
+
+.build-version {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0;
+    color: #a7a7a7;
+    font-size: 16px;
+    line-height: 1.4;
 }
 
 /* ====== Контейнер фильтров ====== */
@@ -303,6 +317,9 @@ body.filters-modal .filters .filters-grid > .extra-select{ display: inline-flex 
 </head>
 <body>
 
+<div class="container">
+<div class="build-version">Build: 0.0.000</div>
+
 <form class="filters-form js-filters-form" action="" method="GET">
   <div class="filters" id="filters" aria-label="Фильтры">
     <div class="filters-header">
@@ -463,6 +480,7 @@ body.filters-modal .filters .filters-grid > .extra-select{ display: inline-flex 
     </div>
   </div>
 </form>
+</div>
 
 <script>
 (function(){
