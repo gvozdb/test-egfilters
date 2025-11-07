@@ -188,7 +188,7 @@
             border-radius: 8px;
             padding: 8px 10px;
         }
-        body.filters-modal .filters-extra-checks {
+        body.filters-modal .filters .filters-extra-checks {
             display: block;
         }
 
@@ -595,7 +595,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.003
+        Build: 0.0.004
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -772,6 +772,15 @@
                         data-filters-open>
                     <span class="filters-open-prefix">Все </span>фильтры
                 </button>
+
+                <!-- только для модалки: доп. чекбоксы -->
+                <div class="filters-extra-checks">
+                    <div class="check-row">
+                        <label><input type="checkbox" name="no_prepay" value="1"> Без предоплаты</label>
+                        <label><input type="checkbox" name="with_discount" value="1"> Со скидкой</label>
+                        <label><input type="checkbox" name="editors_choice" value="1"> Выбор редакции</label>
+                    </div>
+                </div>
 
                 <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
                 <i class="filters-break-m" aria-hidden="true"></i>
