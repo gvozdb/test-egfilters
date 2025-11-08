@@ -39,22 +39,71 @@
         /* ====== Контейнер фильтров ====== */
         .filters {
             position: relative;
+        }
+        .filters-body {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .filters-grid {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .filters-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        body:not(.filters-modal) .filters > .filters-body,
+        body.filters-modal .filters-ghost > .filters-body {
+            position: relative;
             max-width: 1100px;
             margin: 3rem auto;
             padding: 1rem;
             background: #fff;
             border-radius: .7rem;
         }
-        .filters-grid {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+
+        @media (max-width: 768px) {
+            body:not(.filters-modal) .filters > .filters-body,
+            body.filters-modal .filters-ghost > .filters-body {
+                flex-direction: column;
+                align-items: stretch;
+                margin: 0;
+                padding: 0;
+                background: transparent;
+            }
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid,
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid {
+                position: relative;
+                max-width: 1100px;
+                margin: 3rem auto;
+                padding: 1rem;
+                background: #fff;
+                border-radius: .7rem;
+            }
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta,
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta {
+                margin-left: 0;
+                justify-content: flex-start;
+            }
+        }
+
+        .filters-meta .filters-count {
+            margin-left: auto;
         }
 
         /* ОДНА строка в панели и в GHOST на ≥769px */
         @media (min-width: 769px) {
-            body:not(.filters-modal) .filters > .filters-grid,
-            body.filters-modal .filters-ghost > .filters-grid {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid,
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid {
                 flex-wrap: nowrap;
             }
         }
@@ -122,6 +171,19 @@
         }
         body.filters-modal .filters .filters-open {
             display: none;
+        }
+
+        body.filters-modal .filters .filters-body {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        body.filters-modal .filters .filters-meta {
+            margin-left: 0;
+            justify-content: flex-end;
+            padding: 0 16px 12px;
         }
 
         .modal-backdrop {
@@ -221,11 +283,6 @@
 
         /* ====== GHOST (визуальный двойник на время модалки) ====== */
         .filters-ghost {
-            max-width: 1100px;
-            margin: 3rem auto;
-            padding: 1rem;
-            background: #fff;
-            border-radius: .7rem;
             opacity: .65;
             pointer-events: none;
             user-select: none;
@@ -512,84 +569,83 @@
 
         /* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ (строка) ====== */
         /* Панель и GHOST: по умолчанию скрываем все элементы и далее показываем через data-show-panel-* */
-        body:not(.filters-modal) .filters > .filters-grid > *,
-        body.filters-modal .filters-ghost > .filters-grid > * {
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > *,
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > * {
+            display: none;
+        }
+        body:not(.filters-modal) .filters > .filters-body > .filters-meta > *,
+        body.filters-modal .filters-ghost > .filters-body > .filters-meta > * {
             display: none;
         }
 
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-10,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-10 { order: 10; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-20,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-20 { order: 20; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-30,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-30 { order: 30; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-40,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-40 { order: 40; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-50,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-50 { order: 50; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-55,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-55 { order: 55; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-60,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-60 { order: 60; }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-order-70,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-order-70 { order: 70; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="10"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="10"] { order: 10; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="20"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="20"] { order: 20; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="30"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="30"] { order: 30; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="40"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="40"] { order: 40; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="50"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="50"] { order: 50; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order="55"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order="55"] { order: 55; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-meta > [data-order="60"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-meta > [data-order="60"] { order: 60; }
+        body:not(.filters-modal) .filters > .filters-body > .filters-meta > [data-order="70"],
+        body.filters-modal .filters-ghost > .filters-body > .filters-meta > [data-order="70"] { order: 70; }
 
-        body:not(.filters-modal) .filters > .filters-grid > .filters-count,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-count {
-            margin-left: auto;
+        body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count,
+        body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count {
             white-space: nowrap;
             color: #616161;
             font-size: 14px;
         }
 
-        /* Класс для принудительного отображения поля в панели */
-        /*
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select.extra-select_force-panel,
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select.extra-select_force-panel {
-            display: inline-flex !important;
-        }
-        */
-
         @media (min-width: 992px) {
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-xl="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-xl="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-open[data-show-panel-xl="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-xl="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xl="true"] {
-                display: inline-flex;
-            }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-xl="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-xl="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xl="true"] {
                 display: block;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-xl="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-xl="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .extra-select[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .extra-select[data-show-panel-xl="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count[data-show-panel-xl="true"] {
                 display: block;
             }
         }
 
         @media (min-width: 769px) and (max-width: 991px) {
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-m="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-m="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-m="true"],
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-open[data-show-panel-m="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-m="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-m="true"] {
-                display: inline-flex;
-            }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-m="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-m="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-break-line[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-break-line[data-show-panel-m="true"] {
                 display: block;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-m="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-m="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .extra-select[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .extra-select[data-show-panel-m="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count[data-show-panel-m="true"] {
                 display: block;
             }
         }
 
         /* Скрыть счётчик в МОДАЛКЕ (панельная сущность); GHOST не трогаем */
-        body.filters-modal .filters .filters-grid > .filters-count {
+        body.filters-modal .filters .filters-meta > .filters-count {
             display: none !important;
         }
 
@@ -600,59 +656,58 @@
 
         /* До 991px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
         @media (max-width: 991px) {
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select,
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
                 min-width: 125px;
             }
         }
 
         /* Мобилки ≤768px: одинаковая двухстрочная раскладка для панели и для GHOST */
         @media (max-width: 768px) {
-            body:not(.filters-modal) .filters > .filters-grid,
-            body.filters-modal .filters-ghost > .filters-grid {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid,
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid {
                 flex-wrap: wrap;
                 gap: 10px 12px;
             }
 
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-xs="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-xs="true"],
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-open[data-show-panel-xs="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xs="true"] {
-                display: inline-flex;
-            }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-xs="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xs="true"] {
                 display: block;
                 flex: 0 0 100%;
                 height: 0;
                 overflow: hidden;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-xs="true"] {
-                display: block;
-            }
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select.extra-select_sort[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select.extra-select_sort[data-show-panel-xs="true"] {
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .extra-select[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .extra-select[data-show-panel-xs="true"] {
+                display: inline-flex;
                 max-width: none;
                 flex: 1 1 auto;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-order-xs-20,
-            body.filters-modal .filters-ghost > .filters-grid > .filters-order-xs-20 {
+            body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count[data-show-panel-xs="true"] {
+                display: block;
+            }
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > [data-order-xs="20"],
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > [data-order-xs="20"] {
                 order: 20;
             }
         }
 
         /* Сетка селектов внутри МОДАЛКИ — строгие правила только под body.filters-modal */
-        body.filters-modal .filters .filters-grid > .extra-select {
+        body.filters-modal .filters .filters-body .filters-grid > .extra-select {
             display: inline-flex !important;
         }
         @media (max-width: 768px) {
-            body.filters-modal .filters .filters-grid {
+            body.filters-modal .filters .filters-body .filters-grid {
                 align-items: stretch;
             }
-            body.filters-modal .filters .filters-grid > * {
+            body.filters-modal .filters .filters-body .filters-grid > * {
                 flex: 1 0 100%;
             }
         }
@@ -662,7 +717,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.007
+        Build: 0.0.008
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -671,10 +726,11 @@
                 <div class="filters-title">Все фильтры</div>
                 <button type="button" class="filters-close js-filters-close" aria-label="Закрыть">×</button>
             </div>
-
-            <div class="filters-grid" data-filters-scope>
+            <div class="filters-body">
+                <div class="filters-grid" data-filters-scope>
                 <!-- Даты (заглушка) -->
-                <div class="extra-select js-extra-select filters-order-10"
+                <div class="extra-select js-extra-select"
+                     data-order="10"
                      data-type="stub"
                      data-field="dates"
                      data-placeholder="Даты"
@@ -705,7 +761,8 @@
                 </div>
 
                 <!-- Формат экскурсий -->
-                <div class="extra-select js-extra-select filters-order-20"
+                <div class="extra-select js-extra-select"
+                     data-order="20"
                      data-type="checkbox"
                      data-field="format"
                      data-placeholder="Формат экскурсий"
@@ -739,7 +796,8 @@
                 </div>
 
                 <!-- Способ передвижения -->
-                <div class="extra-select js-extra-select filters-order-30"
+                <div class="extra-select js-extra-select"
+                     data-order="30"
                      data-type="checkbox"
                      data-field="transport"
                      data-placeholder="Способ передвижения"
@@ -776,7 +834,8 @@
                 </div>
 
                 <!-- Цены -->
-                <div class="extra-select js-extra-select filters-order-40"
+                <div class="extra-select js-extra-select"
+                     data-order="40"
                      data-type="range"
                      data-field="price"
                      data-placeholder="Цена"
@@ -850,7 +909,9 @@
 
                 <!-- "Все фильтры" — предпоследняя в строке -->
                 <button type="button"
-                        class="filters-open js-filters-open filters-order-50 filters-order-xs-20"
+                        class="filters-open js-filters-open"
+                        data-order="50"
+                        data-order-xs="20"
                         data-filters-open
                         data-show-panel-xl="true"
                         data-show-panel-m="true"
@@ -876,54 +937,60 @@
                 </div>
 
                 <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
-                <i class="filters-break-line filters-order-55"
+                <i class="filters-break-line"
                    aria-hidden="true"
+                   data-order="55"
                    data-show-panel-xl="false"
                    data-show-panel-m="false"
                    data-show-panel-xs="true"></i>
 
-                <!-- Сортировка (единственный блок) -->
-                <div class="extra-select js-extra-select extra-select_sort filters-order-60"
-                     data-type="radio"
-                     data-field="sort"
-                     data-placeholder="Сортировка"
-                     data-show-panel-xl="true"
-                     data-show-panel-m="true"
-                     data-show-panel-xs="true">
-                    <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-sort">
-                        <span class="exs-trigger-icon" aria-hidden="true">
-                            <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"></path>
-                            </svg>
-                        </span>
-                        <span class="exs-trigger-label" data-trigger-label><!-- default-sort-label --></span>
-                    </button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Сортировка</div>
-                        <div class="exs-body js-exs-body">
-                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true"> рекомендуемые</label>
-                            <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
-                            <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом" checked> с высоким рейтингом</label>
-                            <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
-                            <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
+                </div>
+                <div class="filters-meta">
+                    <!-- Сортировка (единственный блок) -->
+                    <div class="extra-select js-extra-select extra-select_sort"
+                         data-type="radio"
+                         data-field="sort"
+                         data-placeholder="Сортировка"
+                         data-show-panel-xl="true"
+                         data-show-panel-m="true"
+                         data-show-panel-xs="true"
+                         data-order="60">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-sort">
+                            <span class="exs-trigger-icon" aria-hidden="true">
+                                <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"></path>
+                                </svg>
+                            </span>
+                            <span class="exs-trigger-label" data-trigger-label><!-- default-sort-label --></span>
+                        </button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Сортировка</div>
+                            <div class="exs-body js-exs-body">
+                                <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true"> рекомендуемые</label>
+                                <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
+                                <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом" checked> с высоким рейтингом</label>
+                                <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
+                                <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden">
+                            <input type="hidden" name="sort" value="rating">
                         </div>
                     </div>
-                    <div class="exs-hidden js-exs-hidden">
-                        <input type="hidden" name="sort" value="rating">
-                    </div>
-                </div>
 
-                <!-- опционально счётчик (в той же сетке) -->
-                <div class="filters-count filters-order-70"
-                     data-show-panel-xl="false"
-                     data-show-panel-m="false"
-                     data-show-panel-xs="true">720 экскурсий</div>
+                    <!-- опционально счётчик (в отдельном блоке) -->
+                    <div class="filters-count"
+                         data-show-panel-xl="false"
+                         data-show-panel-m="false"
+                         data-show-panel-xs="true"
+                         data-order="70">720 экскурсий</div>
+                </div>
             </div>
 
             <div class="filters-footer">
@@ -1031,11 +1098,11 @@
         }
         function createGhost() {
             if (ghostEl) return;
-            const grid = filters.querySelector(".filters-grid");
-            if (!grid) return;
+            const bodyNode = filters.querySelector(".filters-body");
+            if (!bodyNode) return;
             ghostEl = document.createElement("div");
             ghostEl.className = "filters-ghost";
-            const clone = grid.cloneNode(true);
+            const clone = bodyNode.cloneNode(true);
             sanitizeGhost(clone);
             ghostEl.appendChild(clone);
             filters.parentNode.insertBefore(ghostEl, filters);
