@@ -556,7 +556,6 @@
             display: flex;
             flex-direction: row;
             gap: 12px;
-            margin-bottom: 12px;
             width: 100%;
         }
         .exs-price-field {
@@ -572,8 +571,12 @@
             border-radius: 8px;
             box-sizing: border-box;
         }
+        .exs-range {
+            padding: 18px 4px 25px;
+            margin-bottom: -10px;
+        }
         .exs-range-plugin {
-            margin: 10px 4px 6px;
+            margin: 0;
         }
         /* Очень узкие экраны — можно сложить в столбец */
         /*
@@ -882,7 +885,9 @@
                                     <input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="до">
                                 </label>
                             </div>
-                            <div class="exs-range-plugin js-exs-range exs-swipe-lock" id="price-plugin"></div>
+                            <div class="exs-range">
+                                <div class="exs-range-plugin js-exs-range js-exs-swipe-lock" id="price-plugin"></div>
+                            </div>
                         </div>
                         <div class="exs-actions">
                             <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
@@ -1289,7 +1294,7 @@
             if (!isMobile()) return () => {};
 
             const scrollable = pop.querySelector(".exs-body") || pop;
-            const isSwipeLocked = (target) => Boolean(target && target.closest(".exs-swipe-lock"));
+            const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
             const abortSwipeGesture = () => {
                 started = false;
                 dragging = false;
