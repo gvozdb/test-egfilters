@@ -11,7 +11,6 @@
     <style>
         /* ===================== FULL PROJECT CSS (4-space indents) ===================== */
 
-        /* базовый фон страницы */
         * {
             box-sizing: border-box;
         }
@@ -287,19 +286,7 @@
             margin-top: -2px;
         }
 
-        /* Сортировка выглядит как ссылка */
-        .extra-select_sort .exs-trigger {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding-right: 24px;
-            border-color: transparent;
-            color: #0066cc;
-            text-decoration: underline;
-        }
-        .extra-select_sort .exs-trigger::after {
-            display: none;
-        }
+
         .exs-trigger-icon {
             display: inline-flex;
             align-items: center;
@@ -317,6 +304,24 @@
             display: inline-block;
         }
 
+        /* Сортировка выглядит как ссылка */
+        .extra-select_sort .exs-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding-left: 0;
+            padding-right: 0;
+            border-color: transparent;
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        .extra-select_sort .exs-trigger::after {
+            display: none;
+        }
+        .extra-select_sort .exs-trigger-label:first-letter {
+            text-transform: uppercase;
+        }
+
         /* Поповер (десктоп) */
         .exs-popover {
             position: absolute;
@@ -326,10 +331,10 @@
             right: 0;
             margin-top: 6px;
             padding: 0;
-            border: 1px solid #ddd;
+            border: 0; /* 1px solid #ddd; */
             border-radius: 10px;
             background: #fff;
-            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            box-shadow: 0px 0px 24px rgba(0, 0, 0, .16);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -428,8 +433,7 @@
                 right: 0;
                 bottom: -160px;
                 top: auto;
-                max-height: 80vh;
-                max-height: 80dvh;
+                max-height: calc(80vh + 160px);
                 height: auto;
                 border-radius: 16px 16px 0 0;
                 margin: 0;
@@ -444,7 +448,7 @@
             .exs-popover[data-open="true"] { animation: exsSlideUpBounce .25s cubic-bezier(.22,1,.36,1) both; }
             .exs-popover[data-closing="true"] { animation: exsSlideDown .18s ease both; }
             .exs-header { display: block; }
-            .exs-body { max-height: calc(80dvh - 60px - 40px); overflow: auto; }
+            .exs-body { max-height: calc(calc(80vh + 160px) - 60px - 40px); overflow: auto; }
             .exs-actions { position: relative; padding: 10px 14px; }
             .exs-close { display: inline-flex; align-items: center; justify-content: center; }
             .exs-drag-handle { display: block; }
@@ -552,8 +556,8 @@
             body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xl="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-xl="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-xl="true"] {
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-xl="true"] {
                 display: block;
             }
             body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-xl="true"],
@@ -571,8 +575,8 @@
             body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-m="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-m="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-m="true"] {
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-m="true"] {
                 display: block;
             }
             body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-m="true"],
@@ -615,8 +619,8 @@
             body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xs="true"] {
                 display: inline-flex;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-xs="true"],
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-xs="true"] {
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-line[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-line[data-show-panel-xs="true"] {
                 display: block;
                 flex: 0 0 100%;
                 height: 0;
@@ -690,8 +694,8 @@
                             </div>
                         </div>
                         <div class="exs-actions">
-                            <button type="button" data-action="reset">Сбросить</button>
-                            <button type="button" data-action="apply">Применить</button>
+                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
+                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden"></div>
@@ -721,8 +725,8 @@
                             <label><input type="checkbox" value="Индивидуальные"> Индивидуальные</label>
                         </div>
                         <div class="exs-actions">
-                            <button type="button" data-action="reset">Сбросить</button>
-                            <button type="button" data-action="apply">Применить</button>
+                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
+                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden">
@@ -761,8 +765,8 @@
                             <label><input type="checkbox" value="Другое"> Другое</label>
                         </div>
                         <div class="exs-actions">
-                            <button type="button" data-action="reset">Сбросить</button>
-                            <button type="button" data-action="apply">Применить</button>
+                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
+                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden"></div>
@@ -802,8 +806,8 @@
                             <div class="exs-range-plugin js-exs-range" id="price-plugin"></div>
                         </div>
                         <div class="exs-actions">
-                            <button type="button" data-action="reset">Сбросить</button>
-                            <button type="button" data-action="apply">Применить</button>
+                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
+                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden"></div>
@@ -834,8 +838,8 @@
                             <label><input type="checkbox" value="6+ часов"> 6+ часов</label>
                         </div>
                         <div class="exs-actions">
-                            <button type="button" data-action="reset">Сбросить</button>
-                            <button type="button" data-action="apply">Применить</button>
+                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
+                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden"></div>
@@ -864,12 +868,12 @@
                     <div class="check-row">
                         <label><input type="checkbox" name="no_prepay" value="1"> Без предоплаты</label>
                         <label><input type="checkbox" name="with_discount" value="1"> Со скидкой</label>
-                        <label><input type="checkbox" name="editors_choice" value="1"> Выбор редакции</label>
+                        <label><input type="checkbox" name="editors_choice" value="1" checked> Выбор редакции</label>
                     </div>
                 </div>
 
                 <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
-                <i class="filters-break-m filters-order-55"
+                <i class="filters-break-line filters-order-55"
                    aria-hidden="true"
                    data-show-panel-xl="false"
                    data-show-panel-m="false"
@@ -893,22 +897,22 @@
                                 <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"></path>
                             </svg>
                         </span>
-                        <span class="exs-trigger-label" data-trigger-label>рекомендуемые</span>
+                        <span class="exs-trigger-label" data-trigger-label><!-- default-sort-label --></span>
                     </button>
                     <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Сортировка</div>
                         <div class="exs-body js-exs-body">
-                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true" checked> рекомендуемые</label>
+                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true"> рекомендуемые</label>
                             <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
-                            <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом"> с высоким рейтингом</label>
+                            <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом" checked> с высоким рейтингом</label>
                             <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
                             <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
                         </div>
                     </div>
                     <div class="exs-hidden js-exs-hidden">
-                        <input type="hidden" name="sort" value="recommended">
+                        <input type="hidden" name="sort" value="rating">
                     </div>
                 </div>
 
