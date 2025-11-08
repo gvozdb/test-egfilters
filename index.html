@@ -69,12 +69,28 @@
 
         /* Кнопка "Все фильтры" (текст через span-префикс) */
         .filters-open {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             background: #fff;
             cursor: pointer;
             white-space: nowrap;
+            flex: 0 0 auto;
+        }
+        .filters-open-icon {
+            flex: 0 0 auto;
+            width: 18px;
+            height: 18px;
+            color: #616161;
+        }
+        .filters-open-icon svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
         }
         .filters-open-prefix {
             display: inline;
@@ -272,14 +288,33 @@
         }
 
         /* Сортировка выглядит как ссылка */
-        .extra-select[data-field="sort"] .exs-trigger {
+        .extra-select_sort .exs-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             padding-right: 24px;
             border-color: transparent;
             color: #0066cc;
             text-decoration: underline;
         }
-        .extra-select[data-field="sort"] .exs-trigger::after {
+        .extra-select_sort .exs-trigger::after {
             display: none;
+        }
+        .exs-trigger-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+        }
+        .exs-trigger-icon svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+        .exs-trigger-label {
+            display: inline-block;
         }
 
         /* Поповер (десктоп) */
@@ -472,50 +507,78 @@
         }
 
         /* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ (строка) ====== */
-        /* Базовый порядок: Даты, Формат, Способ, Цена, "Все фильтры", Разделитель (моб), Сортировка, Счётчик */
-        /* Панель И GHOST — синхронные правила */
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="duration"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="duration"] {
-            display: none; /* в панели нет длительности */
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="dates"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="dates"] {
-            order: 10;
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="format"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="format"] {
-            order: 20;
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="transport"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="transport"] {
-            order: 30;
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
-            order: 40;
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-open,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-open {
-            order: 50;
-            flex: 0 0 auto;
-        }
-        body:not(.filters-modal) .filters > .filters-grid > .filters-break-m,
-        body.filters-modal .filters-ghost > .filters-grid > .filters-break-m {
-            order: 55;
+        /* Панель и GHOST: по умолчанию скрываем все элементы и далее показываем через data-show-panel-* */
+        body:not(.filters-modal) .filters > .filters-grid > *,
+        body.filters-modal .filters-ghost > .filters-grid > * {
             display: none;
         }
-        body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="sort"],
-        body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="sort"] {
-            order: 60;
-        }
+
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-10,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-10 { order: 10; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-20,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-20 { order: 20; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-30,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-30 { order: 30; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-40,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-40 { order: 40; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-50,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-50 { order: 50; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-55,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-55 { order: 55; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-60,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-60 { order: 60; }
+        body:not(.filters-modal) .filters > .filters-grid > .filters-order-70,
+        body.filters-modal .filters-ghost > .filters-grid > .filters-order-70 { order: 70; }
+
         body:not(.filters-modal) .filters > .filters-grid > .filters-count,
         body.filters-modal .filters-ghost > .filters-grid > .filters-count {
-            display: none;
-            order: 70;
             margin-left: auto;
             white-space: nowrap;
             color: #616161;
             font-size: 14px;
+        }
+
+        body:not(.filters-modal) .filters > .filters-grid > .extra-select.extra-select_force-panel,
+        body.filters-modal .filters-ghost > .filters-grid > .extra-select.extra-select_force-panel {
+            display: inline-flex !important;
+        }
+
+        @media (min-width: 992px) {
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-xl="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xl="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-xl="true"] {
+                display: block;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-xl="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-xl="true"] {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 991px) {
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-m="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-m="true"] {
+                display: inline-flex;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-m="true"] {
+                display: block;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-m="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-m="true"] {
+                display: block;
+            }
         }
 
         /* Скрыть счётчик в МОДАЛКЕ (панельная сущность); GHOST не трогаем */
@@ -534,10 +597,6 @@
             body.filters-modal .filters-ghost > .filters-grid > .extra-select {
                 min-width: 125px;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
-                display: none;
-            }
         }
 
         /* Мобилки ≤768px: одинаковая двухстрочная раскладка для панели и для GHOST */
@@ -548,45 +607,33 @@
                 gap: 10px 12px;
             }
 
-            /* первая строка — только Даты + Кнопка; остальное скрыто */
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select:not([data-field="dates"]),
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="format"],
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="transport"],
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select:not([data-field="dates"]),
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="format"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="transport"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
-                display: none !important;
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-show-panel-xs="true"] {
+                display: inline-flex;
             }
-
-            /* кнопка на первой строке */
-            body:not(.filters-modal) .filters > .filters-grid > .filters-open,
-            body.filters-modal .filters-ghost > .filters-grid > .filters-open {
-                order: 20 !important;
+            body:not(.filters-modal) .filters > .filters-grid > .filters-open[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-open[data-show-panel-xs="true"] {
+                display: inline-flex;
             }
-
-            /* невидимый разделитель — форс перенос перед сортировкой/счётчиком */
-            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m,
-            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m {
-                display: block !important;
+            body:not(.filters-modal) .filters > .filters-grid > .filters-break-m[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-break-m[data-show-panel-xs="true"] {
+                display: block;
                 flex: 0 0 100%;
                 height: 0;
                 overflow: hidden;
             }
-
-            /* вторая строка — Сортировка слева (растягивается), Счётчик справа */
-            body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="sort"],
-            body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="sort"] {
-                display: inline-flex !important;
-                order: 60 !important;
+            body:not(.filters-modal) .filters > .filters-grid > .filters-count[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .filters-count[data-show-panel-xs="true"] {
+                display: block;
+            }
+            body:not(.filters-modal) .filters > .filters-grid > .extra-select.extra-select_sort[data-show-panel-xs="true"],
+            body.filters-modal .filters-ghost > .filters-grid > .extra-select.extra-select_sort[data-show-panel-xs="true"] {
                 max-width: none;
                 flex: 1 1 auto;
             }
-            body:not(.filters-modal) .filters > .filters-grid > .filters-count,
-            body.filters-modal .filters-ghost > .filters-grid > .filters-count {
-                display: block !important;
-                order: 70 !important;
+            body:not(.filters-modal) .filters > .filters-grid > .filters-order-xs-20,
+            body.filters-modal .filters-ghost > .filters-grid > .filters-order-xs-20 {
+                order: 20;
             }
         }
 
@@ -608,7 +655,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.006
+        Build: 0.0.007
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -620,11 +667,14 @@
 
             <div class="filters-grid" data-filters-scope>
                 <!-- Даты (заглушка) -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select filters-order-10"
                      data-type="stub"
                      data-field="dates"
                      data-placeholder="Даты"
-                     data-max-label-chars="28">
+                     data-max-label-chars="28"
+                     data-show-panel-xl="true"
+                     data-show-panel-m="true"
+                     data-show-panel-xs="true">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="dialog"
@@ -648,11 +698,14 @@
                 </div>
 
                 <!-- Формат экскурсий -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select filters-order-20"
                      data-type="checkbox"
                      data-field="format"
                      data-placeholder="Формат экскурсий"
-                     data-max-label-chars="28">
+                     data-max-label-chars="28"
+                     data-show-panel-xl="true"
+                     data-show-panel-m="true"
+                     data-show-panel-xs="false">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="listbox"
@@ -679,11 +732,14 @@
                 </div>
 
                 <!-- Способ передвижения -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select filters-order-30"
                      data-type="checkbox"
                      data-field="transport"
                      data-placeholder="Способ передвижения"
-                     data-max-label-chars="28">
+                     data-max-label-chars="28"
+                     data-show-panel-xl="true"
+                     data-show-panel-m="true"
+                     data-show-panel-xs="false">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="listbox"
@@ -713,13 +769,16 @@
                 </div>
 
                 <!-- Цены -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select filters-order-40"
                      data-type="range"
                      data-field="price"
                      data-placeholder="Цена"
                      data-min="0"
                      data-max="100000"
-                     data-step="1000">
+                     data-step="1000"
+                     data-show-panel-xl="true"
+                     data-show-panel-m="false"
+                     data-show-panel-xs="false">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="dialog"
@@ -755,7 +814,10 @@
                      data-type="checkbox"
                      data-field="duration"
                      data-placeholder="Длительность"
-                     data-max-label-chars="28">
+                     data-max-label-chars="28"
+                     data-show-panel-xl="false"
+                     data-show-panel-m="false"
+                     data-show-panel-xs="false">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="listbox"
@@ -781,13 +843,24 @@
 
                 <!-- "Все фильтры" — предпоследняя в строке -->
                 <button type="button"
-                        class="filters-open js-filters-open"
-                        data-filters-open>
+                        class="filters-open js-filters-open filters-order-50 filters-order-xs-20"
+                        data-filters-open
+                        data-show-panel-xl="true"
+                        data-show-panel-m="true"
+                        data-show-panel-xs="true">
+                    <span class="filters-open-icon" aria-hidden="true">
+                        <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path>
+                        </svg>
+                    </span>
                     <span class="filters-open-prefix">Все </span>фильтры
                 </button>
 
                 <!-- только для модалки: доп. чекбоксы -->
-                <div class="filters-extra-checks">
+                <div class="filters-extra-checks"
+                     data-show-panel-xl="false"
+                     data-show-panel-m="false"
+                     data-show-panel-xs="false">
                     <div class="check-row">
                         <label><input type="checkbox" name="no_prepay" value="1"> Без предоплаты</label>
                         <label><input type="checkbox" name="with_discount" value="1"> Со скидкой</label>
@@ -796,15 +869,32 @@
                 </div>
 
                 <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
-                <i class="filters-break-m" aria-hidden="true"></i>
+                <i class="filters-break-m filters-order-55"
+                   aria-hidden="true"
+                   data-show-panel-xl="false"
+                   data-show-panel-m="false"
+                   data-show-panel-xs="true"></i>
 
                 <!-- Сортировка (единственный блок) -->
-                <div class="extra-select js-extra-select extra-select_sort" data-type="radio" data-field="sort">
+                <div class="extra-select js-extra-select extra-select_sort filters-order-60"
+                     data-type="radio"
+                     data-field="sort"
+                     data-placeholder="Сортировка"
+                     data-show-panel-xl="true"
+                     data-show-panel-m="true"
+                     data-show-panel-xs="true">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="listbox"
                             aria-expanded="false"
-                            aria-controls="exs-popover-sort">⇅</button>
+                            aria-controls="exs-popover-sort">
+                        <span class="exs-trigger-icon" aria-hidden="true">
+                            <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"></path>
+                            </svg>
+                        </span>
+                        <span class="exs-trigger-label" data-trigger-label>рекомендуемые</span>
+                    </button>
                     <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
@@ -823,7 +913,10 @@
                 </div>
 
                 <!-- опционально счётчик (в той же сетке) -->
-                <div class="filters-count">720 экскурсий</div>
+                <div class="filters-count filters-order-70"
+                     data-show-panel-xl="false"
+                     data-show-panel-m="false"
+                     data-show-panel-xs="true">720 экскурсий</div>
             </div>
 
             <div class="filters-footer">
@@ -1212,6 +1305,16 @@
             let detachSwipe = null;
             let portalRestore = null;
 
+            const setButtonText = (text) => {
+                if (!btn) return;
+                const labelHolder = btn.querySelector("[data-trigger-label]");
+                if (labelHolder) {
+                    labelHolder.textContent = text;
+                } else {
+                    btn.textContent = text;
+                }
+            };
+
             // label renderer
             const makeLabel = (arr, maxChars) => {
                 if (!arr.length) return "";
@@ -1229,11 +1332,11 @@
 
                 if (type === "checkbox") {
                     if (!applied.length) {
-                        btn.textContent = placeholder;
+                        setButtonText(placeholder);
                         btn.classList.remove("is-active");
                         return;
                     }
-                    btn.textContent = makeLabel(applied, maxChars);
+                    setButtonText(makeLabel(applied, maxChars));
                     btn.classList.add("is-active");
                     return;
                 }
@@ -1243,7 +1346,7 @@
                     const min = Number(root.dataset.min ?? "0");
                     const max = Number(root.dataset.max ?? "0");
                     if (!applied.length || (applied[0] === "" && applied[1] === "")) {
-                        btn.textContent = placeholder;
+                        setButtonText(placeholder);
                         btn.classList.remove("is-active");
                         return;
                     }
@@ -1251,7 +1354,7 @@
                     const a = aRaw === "" ? min : Number(aRaw);
                     const b = bRaw === "" ? max : Number(bRaw);
                     if (a === min && b === max) {
-                        btn.textContent = placeholder;         // <-- пункт 4: не показываем "от 0 до 100000"
+                        setButtonText(placeholder);         // <-- пункт 4: не показываем "от 0 до 100000"
                         btn.classList.remove("is-active");
                         return;
                     }
@@ -1259,7 +1362,7 @@
                     if (a !== min && b !== max) text = `от ${a} — до ${b}`;
                     else if (a !== min)         text = `от ${a}`;
                     else if (b !== max)         text = `до ${b}`;
-                    btn.textContent = text || placeholder;
+                    setButtonText(text || placeholder);
                     text ? btn.classList.add("is-active") : btn.classList.remove("is-active");
                     return;
                 }
@@ -1278,13 +1381,13 @@
                         (current?.dataset?.label || "").trim() ||
                         current?.closest("label")?.textContent?.trim() ||
                         current?.value || "";
-                    btn.textContent = `⇅ ${labelText}`;
+                    setButtonText(labelText || placeholder);
                     btn.classList.add("is-active");
                     return;
                 }
 
                 if (type === "stub") {
-                    btn.textContent = placeholder;
+                    setButtonText(placeholder);
                 }
             };
 
