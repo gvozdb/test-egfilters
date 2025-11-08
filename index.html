@@ -12,6 +12,10 @@
         /* ===================== FULL PROJECT CSS (4-space indents) ===================== */
 
         /* базовый фон страницы */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #eee;
             padding: 0;
@@ -603,7 +607,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.005
+        Build: 0.0.006
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -805,7 +809,7 @@
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Сортировка</div>
                         <div class="exs-body js-exs-body">
-                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" checked> рекомендуемые</label>
+                            <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true" checked> рекомендуемые</label>
                             <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
                             <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом"> с высоким рейтингом</label>
                             <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
@@ -1188,6 +1192,7 @@
 
         /* ========================= extra-select ========================= */
         const roots = document.querySelectorAll(".js-extra-select");
+        const extraSelectRegistry = new Map();
         if (!roots.length) return;
 
         roots.forEach((root) => {
@@ -1357,14 +1362,27 @@
             if (type === "checkbox") {
                 const checks = body ? [...body.querySelectorAll('input[type="checkbox"]')] : [];
 
-                const stageFromApplied = () => {
+                const syncChecksFromApplied = () => {
                     const set = new Set(applied);
                     checks.forEach(c => { c.checked = set.has(c.value); });
                 };
 
+                const commitFromChecks = () => {
+                    applied = checks.filter(c => c.checked).map(c => c.value);
+                    writeHidden();
+                    updateBtn();
+                };
+
+                const resetChecks = () => {
+                    checks.forEach(c => { c.checked = false; });
+                    applied = [];
+                    writeHidden();
+                    updateBtn();
+                };
+
                 const open = () => {
                     if (currentOpen && currentOpen.root !== root) currentOpen.close();
-                    stageFromApplied();
+                    syncChecksFromApplied();
                     if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                     const { restore } = portalOpen(pop, btn);
                     portalRestore = restore;
@@ -1437,16 +1455,13 @@
                 pop.addEventListener("click", (e) => {
                     const action = e.target?.dataset?.action;
                     if (action === "reset") {
-                        checks.forEach(c => c.checked = false);
-                        applied = [];
-                        writeHidden(); updateBtn();
+                        resetChecks();
                         root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
                         api.close();
                         submitAjax();
                     }
                     if (action === "apply") {
-                        applied = checks.filter(c => c.checked).map(c => c.value);
-                        writeHidden(); updateBtn();
+                        commitFromChecks();
                         root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
                         api.close();
                         submitAjax();
@@ -1456,12 +1471,21 @@
                 readHidden();
                 if (!applied.length) {
                     const pre = checks.filter(c => c.checked).map(c => c.value);
-                    if (pre.length) { applied = pre; writeHidden(); }
-                    checks.forEach(c => c.checked = false);
+                    if (pre.length) {
+                        applied = pre;
+                        writeHidden();
+                    }
                 }
+                syncChecksFromApplied();
                 updateBtn();
 
                 var api = { root, pop, trigger: btn, close };
+                extraSelectRegistry.set(root, {
+                    field,
+                    type,
+                    commitFromUi: commitFromChecks,
+                    resetForAll: resetChecks
+                });
 
             /* RANGE */
             } else if (type === "range") {
@@ -1494,6 +1518,30 @@
                     pluginEl.noUiSlider.set(staged);
                     fromNum.value = a;
                     toNum.value = b;
+                };
+
+                const commitRange = () => {
+                    const a = clamp(+fromNum.value);
+                    const b = clamp(+toNum.value);
+                    const lo = Math.min(a, b);
+                    const hi = Math.max(a, b);
+                    applied = [String(lo), String(hi)];
+                    pluginEl.noUiSlider.set([lo, hi]);
+                    staged = [lo, hi];
+                    fromNum.value = lo;
+                    toNum.value = hi;
+                    writeHidden();
+                    updateBtn();
+                };
+
+                const resetRange = () => {
+                    applied = [String(min), String(max)];
+                    pluginEl.noUiSlider.set([min, max]);
+                    staged = [min, max];
+                    fromNum.value = min;
+                    toNum.value = max;
+                    writeHidden();
+                    updateBtn();
                 };
 
                 pluginEl.noUiSlider.on("update", (values) => {
@@ -1586,19 +1634,13 @@
                 pop.addEventListener("click", (e) => {
                     const action = e.target?.dataset?.action;
                     if (action === "reset") {
-                        pluginEl.noUiSlider.set([min, max]);
-                        staged = [min, max];
-                        applied = [String(min), String(max)];
-                        writeHidden(); updateBtn();
+                        resetRange();
                         root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
                         api.close();
                         submitAjax();
                     }
                     if (action === "apply") {
-                        const a = clamp(+fromNum.value);
-                        const b = clamp(+toNum.value);
-                        applied = [String(Math.min(a, b)), String(Math.max(a, b))];
-                        writeHidden(); updateBtn();
+                        commitRange();
                         root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
                         api.close();
                         submitAjax();
@@ -1614,25 +1656,45 @@
                 updateBtn();
 
                 var api = { root, pop, trigger: btn, close };
+                extraSelectRegistry.set(root, {
+                    field,
+                    type,
+                    commitFromUi: commitRange,
+                    resetForAll: resetRange
+                });
 
             /* RADIO */
             } else if (type === "radio") {
                 const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
 
-                const stageFromHidden = () => {
-                    const h = (hiddenWrap && hiddenWrap.querySelector('input[type="hidden"][name="sort"]'));
-                    let val = (h?.value || "");
-                    if (!val) {
-                        const ch = radios.find(r => r.checked);
-                        if (ch) val = ch.value;
-                    }
-                    radios.forEach(r => r.checked = (r.value === val));
-                    applied = [val];
+                const defaultRadio = radios.find(r => r.dataset.isDefault === "true");
+                const defaultRadioValue = defaultRadio ? defaultRadio.value : (radios[0]?.value || "");
+
+                const syncRadiosFromApplied = () => {
+                    const val = applied[0] || "";
+                    radios.forEach(r => { r.checked = (r.value === val); });
+                };
+
+                const setRadioValue = (val) => {
+                    const next = val || "";
+                    applied = [next];
+                    syncRadiosFromApplied();
+                    writeHidden();
+                    updateBtn();
+                };
+
+                const commitFromRadios = () => {
+                    const selected = radios.find(r => r.checked) || radios.find(r => r.value === defaultRadioValue) || radios[0];
+                    setRadioValue(selected ? selected.value : defaultRadioValue);
+                };
+
+                const resetRadios = () => {
+                    setRadioValue(defaultRadioValue);
                 };
 
                 const open = () => {
                     if (currentOpen && currentOpen.root !== root) currentOpen.close();
-                    stageFromHidden();
+                    syncRadiosFromApplied();
                     pop.hidden = false; btn.setAttribute("aria-expanded", "true");
 
                     const { restore } = portalOpen(pop, btn);
@@ -1689,8 +1751,7 @@
                 pop.addEventListener("change", (e) => {
                     const r = e.target;
                     if (r && r.type === "radio") {
-                        applied = [r.value];
-                        writeHidden(); updateBtn();
+                        setRadioValue(r.value);
                         root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied, instant: true } }));
                         api.close();
                         submitAjax();
@@ -1698,12 +1759,16 @@
                 });
 
                 readHidden();
-                if (!applied.length) {
-                    stageFromHidden();
-                }
-                updateBtn();
+                setRadioValue(applied[0] || defaultRadioValue);
 
                 var api = { root, pop, trigger: btn, close };
+                extraSelectRegistry.set(root, {
+                    field,
+                    type,
+                    commitFromUi: commitFromRadios,
+                    resetForAll: resetRadios,
+                    defaultValue: defaultRadioValue
+                });
 
             /* STUB */
             } else if (type === "stub") {
@@ -1841,40 +1906,28 @@
 
         // Сброс всё — вызывает локальные reset
         resetAll?.addEventListener("click", () => {
-            scope.querySelectorAll('.exs-actions [data-action="reset"]').forEach(btn => btn.click());
-
-            // Сортировку вернуть к значению по умолчанию из HTML
-            const sortRoot = document.querySelector('.extra-select[data-field="sort"]');
-            if (sortRoot) {
-                const hidden = sortRoot.querySelector('.js-exs-hidden input[name="sort"]');
-                const radios = sortRoot.querySelectorAll('input[type="radio"]');
-                let def = hidden?.defaultValue || "";
-                if (!def) {
-                    const ch = [...radios].find(r => r.defaultChecked);
-                    if (ch) def = ch.value;
+            extraSelectRegistry.forEach((api) => {
+                if (typeof api.resetForAll === "function") {
+                    api.resetForAll();
                 }
-                if (hidden) hidden.value = def;
-                radios.forEach(r => r.checked = (r.value === def));
-                const btnSort = sortRoot.querySelector('.js-exs-trigger');
-                const current = [...radios].find(r => r.value === def) || radios[0];
-                const labelText =
-                    (current?.dataset?.label || "").trim() ||
-                    current?.closest("label")?.textContent?.trim() ||
-                    def;
-                if (btnSort) {
-                    btnSort.textContent = `⇅ ${labelText}`;
-                    btnSort.classList.add("is-active");
-                }
-            }
-            scope.querySelectorAll('.filters-extra-checks input[type="checkbox"]').forEach(cb => {
-                cb.checked = cb.defaultChecked;
             });
+
+            scope.querySelectorAll('.filters-extra-checks input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+
             submitAjax();
         });
 
         // Применить всё
         applyAll?.addEventListener("click", () => {
-            scope.querySelectorAll('.exs-actions [data-action="apply"]').forEach(btn => btn.click());
+            extraSelectRegistry.forEach((api) => {
+                if (typeof api.commitFromUi === "function") {
+                    api.commitFromUi();
+                }
+            });
+
+            submitAjax();
             closeModal();
         });
     })();
