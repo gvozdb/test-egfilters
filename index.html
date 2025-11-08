@@ -47,7 +47,7 @@
         }
         .filters-grid {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             flex: 1 1 auto;
             min-width: 0;
@@ -168,6 +168,7 @@
             max-height: max(700px, 80vh);
             margin: 0;
             padding: 0;
+            border-radius: .7rem;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -575,11 +576,13 @@
             margin: 10px 4px 6px;
         }
         /* Очень узкие экраны — можно сложить в столбец */
+        /*
         @media (max-width: 420px) {
             .exs-price-row {
                 flex-direction: column;
             }
         }
+        */
 
         /* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ (строка) ====== */
         /* Панель и GHOST: по умолчанию скрываем все элементы и далее показываем через data-show-panel-* */
