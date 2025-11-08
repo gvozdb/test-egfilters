@@ -734,7 +734,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.008
+        Build: 0.0.009
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -882,7 +882,7 @@
                                     <input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="до">
                                 </label>
                             </div>
-                            <div class="exs-range-plugin js-exs-range" id="price-plugin"></div>
+                            <div class="exs-range-plugin js-exs-range exs-swipe-lock" id="price-plugin"></div>
                         </div>
                         <div class="exs-actions">
                             <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
@@ -1024,28 +1024,49 @@
     (function () {
         "use strict";
 
+        const form = document.querySelector(".js-filters-form");
+        if (!form) {
+            return;
+        }
+
+        function submitAjax() {
+            const fd = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of fd.entries()) {
+                params.append(key, value);
+            }
+            const query = params.toString();
+            const url = location.pathname + (query ? ("?" + query) : "");
+            fetch(url, { method: "GET", credentials: "same-origin" }).catch(() => {});
+        }
+
+        form.querySelectorAll(".filters-extra-checks input[type=\"checkbox\"]").forEach((checkbox) => {
+            checkbox.addEventListener("change", () => {
+                submitAjax();
+            });
+        });
+
+        const debugBucket = window.FiltersDebugForm || {};
+        debugBucket.submitAjax = submitAjax;
+        window.FiltersDebugForm = debugBucket;
+    })();
+</script>
+
+<script>
+    (function () {
+        "use strict";
+
         const isMobile = () => window.matchMedia("(max-width:768px)").matches;
 
         /* ===== ссылки на модалку/форма ===== */
         const filters = document.getElementById("filters");
-        const form = document.querySelector(".js-filters-form");
+        const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
 
         /* ===== Глобальный state ===== */
         let currentOpen = null;       // { root, pop, trigger, close }
         let overlayEl = null;         // подложка поповера (всегда в body)
         let overlayMouseDown = false; // корректная логика закрытия
         let ghostEl = null;           // статичный визуальный двойник
-
-        /* ===== AJAX submit (GET на текущий URL со всеми значениями формы) ===== */
-        function submitAjax() {
-            const fd = new FormData(form);
-            const params = new URLSearchParams();
-            for (const [k, v] of fd.entries()) {
-                params.append(k, v);
-            }
-            const url = location.pathname + (params.toString() ? ("?" + params.toString()) : "");
-            fetch(url, { method: "GET", credentials: "same-origin" }).catch(() => {});
-        }
 
         /* ===== Оверлей для поповеров — ВСЕГДА в body ===== */
         const lockScrollBody = (on) => {
@@ -1268,6 +1289,16 @@
             if (!isMobile()) return () => {};
 
             const scrollable = pop.querySelector(".exs-body") || pop;
+            const isSwipeLocked = (target) => Boolean(target && target.closest(".exs-swipe-lock"));
+            const abortSwipeGesture = () => {
+                started = false;
+                dragging = false;
+                dy = 0;
+                if (rafId != null) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            };
 
             let started = false, dragging = false;
             let y0 = 0, dy = 0, rafId = null;
@@ -1351,12 +1382,31 @@
                 dy = 0;
             };
 
-            pop.addEventListener("pointerdown", (e) => { if (e.pointerType === "touch") tryStart(e.clientY); }, { passive: true });
+            pop.addEventListener("pointerdown", (e) => {
+                if (e.pointerType !== "touch") {
+                    return;
+                }
+                if (isSwipeLocked(e.target)) {
+                    abortSwipeGesture();
+                    return;
+                }
+                tryStart(e.clientY);
+            }, { passive: true });
             pop.addEventListener("pointermove", (e) => onMoveCore(e.clientY, e), { passive: false });
             pop.addEventListener("pointerup", endCore, { passive: true });
             pop.addEventListener("pointercancel", endCore, { passive: true });
 
-            pop.addEventListener("touchstart", (e) => tryStart(e.touches[0].clientY), { passive: true });
+            pop.addEventListener("touchstart", (e) => {
+                const touch = e.touches[0];
+                if (!touch) {
+                    return;
+                }
+                if (isSwipeLocked(e.target)) {
+                    abortSwipeGesture();
+                    return;
+                }
+                tryStart(touch.clientY);
+            }, { passive: true });
             pop.addEventListener("touchmove", (e) => onMoveCore(e.touches[0].clientY, e), { passive: false });
             pop.addEventListener("touchend", endCore, { passive: true });
             pop.addEventListener("touchcancel", endCore, { passive: true });
