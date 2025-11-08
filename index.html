@@ -79,8 +79,8 @@
         .filters-open-prefix {
             display: inline;
         }
-        /* прячем "Все " на ≤992px */
-        @media (max-width: 992px) {
+        /* прячем "Все " на ≤991px */
+        @media (max-width: 991px) {
             .filters-open-prefix {
                 display: none;
             }
@@ -198,7 +198,7 @@
         }
 
         @media (min-width: 769px) {
-            body.filters-modal .filters .filters-grid .extra-select:not(.extra-select--sort) {
+            body.filters-modal .filters .filters-grid .extra-select:not(.extra-select_sort) {
                 flex: 1 1 calc(50% - 12px);
                 max-width: calc(50% - 12px);
             }
@@ -224,10 +224,11 @@
             position: relative;
             display: inline-flex;
             flex: 1 1 auto;
-            min-width: 140px;
+            min-width: 125px;
         }
-        .extra-select--sort {
+        .extra-select_sort {
             flex: 0 0 auto;
+            min-width: inherit !important;
         }
 
         .exs-trigger {
@@ -523,15 +524,15 @@
         }
 
         /* Широкие: держим в одну линию, плавно сужаем */
-        @media (min-width: 993px) {
-            .extra-select { min-width: 140px; }
+        @media (min-width: 992px) {
+            .extra-select { min-width: 125px; }
         }
 
-        /* До 992px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
-        @media (max-width: 992px) {
+        /* До 991px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
+        @media (max-width: 991px) {
             body:not(.filters-modal) .filters > .filters-grid > .extra-select,
             body.filters-modal .filters-ghost > .filters-grid > .extra-select {
-                min-width: 140px;
+                min-width: 125px;
             }
             body:not(.filters-modal) .filters > .filters-grid > .extra-select[data-field="price"],
             body.filters-modal .filters-ghost > .filters-grid > .extra-select[data-field="price"] {
@@ -798,7 +799,7 @@
                 <i class="filters-break-m" aria-hidden="true"></i>
 
                 <!-- Сортировка (единственный блок) -->
-                <div class="extra-select js-extra-select extra-select--sort" data-type="radio" data-field="sort">
+                <div class="extra-select js-extra-select extra-select_sort" data-type="radio" data-field="sort">
                     <button type="button"
                             class="exs-trigger js-exs-trigger"
                             aria-haspopup="listbox"
