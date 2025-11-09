@@ -103,6 +103,150 @@
             margin-left: auto;
         }
 
+        /* ====== Даты ====== */
+        .filters-dates {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 8px 4px 16px;
+        }
+        .filters-dates-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d8dde4;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 15px;
+            line-height: 1.4;
+            color: #1f2933;
+            cursor: pointer;
+        }
+        .filters-dates-input:focus {
+            outline: none;
+            border-color: #2f80ed;
+            box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.12);
+        }
+        .filters-dates-calendar {
+            position: relative;
+        }
+        .drp {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+        .drp-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .drp-nav-title {
+            flex: 1 1 auto;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            color: #1f2933;
+        }
+        .drp-nav-btn {
+            flex: 0 0 auto;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #1f2933;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 120ms ease, color 120ms ease;
+        }
+        .drp-nav-btn:hover {
+            background: #e2e8f0;
+        }
+        .drp-calendars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .drp-month {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .drp-month-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2933;
+            text-transform: capitalize;
+        }
+        .drp-weekdays,
+        .drp-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .drp-weekday {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #7b8794;
+            text-transform: uppercase;
+        }
+        .drp-day {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 8px 0;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #1f2933;
+            cursor: pointer;
+            transition: background-color 120ms ease, color 120ms ease;
+        }
+        .drp-day:focus-visible {
+            outline: 2px solid #2f80ed;
+            outline-offset: 2px;
+        }
+        .drp-day:hover {
+            background: rgba(47, 128, 237, 0.1);
+        }
+        .drp-day.is-outside {
+            color: #9aa5b1;
+        }
+        .drp-day.is-today {
+            font-weight: 600;
+        }
+        .drp-day.is-range {
+            background: rgba(47, 128, 237, 0.18);
+            color: #1f2933;
+            border-radius: 0;
+        }
+        .drp-day.is-range-start,
+        .drp-day.is-range-end {
+            background: #2f80ed;
+            color: #ffffff;
+            border-radius: 10px;
+        }
+        .drp-day.is-range-start.is-range-end {
+            border-radius: 10px;
+        }
+        .drp-day.is-disabled {
+            color: #cbd2d9;
+            cursor: default;
+            pointer-events: none;
+        }
+
         /* ОДНА строка в панели и в GHOST на ≥769px */
         @media (min-width: 769px) {
             body:not(.filters-modal) .filters > .filters-body > .filters-grid,
@@ -788,7 +932,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.010
+        Build: 0.0.011
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -799,10 +943,10 @@
             </div>
             <div class="filters-body">
                 <div class="filters-grid" data-filters-scope>
-                <!-- Даты (заглушка) -->
+                <!-- Даты -->
                 <div class="extra-select js-extra-select"
                      data-order="10"
-                     data-type="stub"
+                     data-type="dates"
                      data-field="dates"
                      data-placeholder="Даты"
                      data-max-label-chars="28"
@@ -819,8 +963,18 @@
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Даты</div>
                         <div class="exs-body">
-                            <div style="padding:8px 2px;color:#616161;font-size:14px">
-                                Заглушка: сюда позже будет вставлен выбор дат.
+                            <div class="filters-dates js-filters-dates">
+                                <fieldset class="filter__fieldset filter__fieldset_dates js-dates-fieldset" data-drp-value="">
+                                    <input type="text"
+                                           class="filters-dates-input js-dates-input"
+                                           inputmode="none"
+                                           id="filters_dates_field"
+                                           value=""
+                                           data-drp-value=""
+                                           placeholder="Выберите даты"
+                                           readonly>
+                                </fieldset>
+                                <div class="filters-dates-calendar js-dates-calendar"></div>
                             </div>
                         </div>
                         <div class="exs-actions">
@@ -1077,6 +1231,7 @@
     </form>
 </div>
 
+<script src="https://extraguide.ru/assets/js/daterangepicker.js" defer></script>
 <script>
     (function () {
         "use strict";
@@ -1118,6 +1273,91 @@
         /* ===== ссылки на модалку/форма ===== */
         const filters = document.getElementById("filters");
         const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
+
+        const MONTHS_NOMINATIVE = [
+            "январь", "февраль", "март", "апрель", "май", "июнь",
+            "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
+        ];
+        const MONTHS_GENITIVE = [
+            "января", "февраля", "марта", "апреля", "мая", "июня",
+            "июля", "августа", "сентября", "октября", "ноября", "декабря"
+        ];
+        const WEEKDAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+        const clampToDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+        const addMonths = (date, diff) => {
+            const next = new Date(date.getFullYear(), date.getMonth(), 1);
+            next.setMonth(next.getMonth() + diff);
+            return next;
+        };
+        const addDays = (date, diff) => {
+            const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            next.setDate(next.getDate() + diff);
+            return next;
+        };
+        const parseISODate = (value) => {
+            if (!value || typeof value !== "string") return null;
+            const trimmed = value.trim();
+            const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!match) return null;
+            const year = Number(match[1]);
+            const month = Number(match[2]) - 1;
+            const day = Number(match[3]);
+            const date = new Date(year, month, day);
+            if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+                return null;
+            }
+            return date;
+        };
+        const toISODate = (date) => {
+            if (!(date instanceof Date)) return "";
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        };
+        const isSameDay = (a, b) => {
+            if (!(a instanceof Date) || !(b instanceof Date)) return false;
+            return a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate();
+        };
+        const isDayBetween = (target, start, end) => {
+            if (!(target instanceof Date) || !(start instanceof Date) || !(end instanceof Date)) return false;
+            const t = target.getTime();
+            const s = start.getTime();
+            const e = end.getTime();
+            if (s <= e) {
+                return t >= s && t <= e;
+            }
+            return t >= e && t <= s;
+        };
+        const formatMonthTitle = (date) => {
+            const month = MONTHS_NOMINATIVE[date.getMonth()] || "";
+            const capitalized = month ? (month.charAt(0).toUpperCase() + month.slice(1)) : "";
+            return `${capitalized} ${date.getFullYear()}`.trim();
+        };
+        const formatDateHuman = (date) => {
+            if (!(date instanceof Date)) return "";
+            return `${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]}`;
+        };
+        const formatRangeHuman = (start, end) => {
+            if (!(start instanceof Date) || !(end instanceof Date)) return "";
+            const sameDay = isSameDay(start, end);
+            if (sameDay) {
+                return `${formatDateHuman(start)} ${start.getFullYear()}`;
+            }
+            const sameYear = start.getFullYear() === end.getFullYear();
+            if (sameYear) {
+                if (start.getMonth() === end.getMonth()) {
+                    return `${start.getDate()} – ${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]} ${end.getFullYear()}`;
+                }
+                return `${formatDateHuman(start)} – ${formatDateHuman(end)} ${end.getFullYear()}`;
+            }
+            return `${formatDateHuman(start)} ${start.getFullYear()} – ${formatDateHuman(end)} ${end.getFullYear()}`;
+        };
+
 
         /* ===== Глобальный state ===== */
         let currentOpen = null;       // { root, pop, trigger, close }
@@ -1531,6 +1771,9 @@
             const body = root.querySelector(".js-exs-body") || (pop ? pop.querySelector(".js-exs-body") : null);
             const hiddenWrap = root.querySelector(".js-exs-hidden");
             const closeX = pop ? pop.querySelector(".js-exs-close") : null;
+            const datesFieldset = pop ? pop.querySelector(".js-dates-fieldset") : null;
+            const datesInput = pop ? pop.querySelector(".js-dates-input") : null;
+            const datesCalendarWrap = pop ? pop.querySelector(".js-dates-calendar") : null;
 
             let applied = [];
             let detachSwipe = null;
@@ -1604,6 +1847,47 @@
                         }
                     }
                     root.classList.remove("is-filled");
+                } else if (type === "dates") {
+                    if (!applied.length || !applied[0] || !applied[1]) {
+                        setButtonText(placeholder);
+                        btn.classList.remove("is-active");
+                        root.classList.remove("is-filled");
+                        if (datesFieldset && datesInput) {
+                            datesFieldset.dataset.drpValue = "";
+                            datesInput.dataset.drpValue = "";
+                            datesInput.value = "";
+                        }
+                    } else {
+                        const startDate = parseISODate(applied[0]);
+                        const endDate = parseISODate(applied[1]);
+                        if (startDate && endDate) {
+                            const label = formatRangeHuman(startDate, endDate) || placeholder;
+                            setButtonText(label);
+                            if (label && label !== placeholder) {
+                                btn.classList.add("is-active");
+                                root.classList.add("is-filled");
+                                nextActive = true;
+                            } else {
+                                btn.classList.remove("is-active");
+                                root.classList.remove("is-filled");
+                            }
+                            if (datesFieldset && datesInput) {
+                                const isoRange = `${toISODate(startDate)} – ${toISODate(endDate)}`;
+                                datesFieldset.dataset.drpValue = isoRange;
+                                datesInput.dataset.drpValue = isoRange;
+                                datesInput.value = label;
+                            }
+                        } else {
+                            setButtonText(placeholder);
+                            btn.classList.remove("is-active");
+                            root.classList.remove("is-filled");
+                            if (datesFieldset && datesInput) {
+                                datesFieldset.dataset.drpValue = "";
+                                datesInput.dataset.drpValue = "";
+                                datesInput.value = "";
+                            }
+                        }
+                    }
                 } else if (type === "radio") {
                     const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
                     let val = "";
@@ -1664,6 +1948,21 @@
                     return;
                 }
 
+                if (type === "dates") {
+                    hiddenWrap.innerHTML = "";
+                    const h1 = document.createElement("input");
+                    h1.type = "hidden";
+                    h1.name = field + "[start]";
+                    h1.value = applied[0] ?? "";
+                    const h2 = document.createElement("input");
+                    h2.type = "hidden";
+                    h2.name = field + "[end]";
+                    h2.value = applied[1] ?? "";
+                    hiddenWrap.appendChild(h1);
+                    hiddenWrap.appendChild(h2);
+                    return;
+                }
+
                 if (type === "radio") {
                     const h = hiddenWrap.querySelector('input[type="hidden"][name="sort"]');
                     if (h) h.value = applied[0] ?? h.value ?? "";
@@ -1682,6 +1981,13 @@
                 if (type === "range") {
                     const h1 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[min]"]`);
                     const h2 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[max]"]`);
+                    applied = [(h1?.value ?? ""), (h2?.value ?? "")];
+                    return;
+                }
+
+                if (type === "dates") {
+                    const h1 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[start]"]`);
+                    const h2 = hiddenWrap.querySelector(`input[type="hidden"][name="${field}[end]"]`);
                     applied = [(h1?.value ?? ""), (h2?.value ?? "")];
                     return;
                 }
@@ -1832,6 +2138,347 @@
                     type,
                     commitFromUi: commitFromChecks,
                     resetForAll: resetChecks,
+                    isActive: () => hasActive
+                });
+
+            /* DATES */
+            } else if (type === "dates") {
+                const today = clampToDate(new Date());
+                let stagedDates = [null, null];
+                let viewDate = startOfMonth(today);
+
+                const updateDisplayFromStaged = () => {
+                    if (!datesFieldset || !datesInput) return;
+                    const startSel = stagedDates[0];
+                    const endSel = stagedDates[1];
+                    if (startSel && endSel) {
+                        let a = clampToDate(startSel);
+                        let b = clampToDate(endSel);
+                        if (b.getTime() < a.getTime()) [a, b] = [b, a];
+                        const isoRange = `${toISODate(a)} – ${toISODate(b)}`;
+                        datesFieldset.dataset.drpValue = isoRange;
+                        datesInput.dataset.drpValue = isoRange;
+                        datesInput.value = formatRangeHuman(a, b);
+                    } else if (startSel) {
+                        const a = clampToDate(startSel);
+                        const isoRange = toISODate(a);
+                        datesFieldset.dataset.drpValue = isoRange;
+                        datesInput.dataset.drpValue = isoRange;
+                        datesInput.value = `${formatDateHuman(a)} ${a.getFullYear()}`;
+                    } else {
+                        datesFieldset.dataset.drpValue = "";
+                        datesInput.dataset.drpValue = "";
+                        datesInput.value = "";
+                    }
+                };
+
+                const setStagedFromApplied = () => {
+                    let start = parseISODate(applied[0] ?? "");
+                    let end = parseISODate(applied[1] ?? "");
+                    if ((!start || !end) && datesFieldset) {
+                        const raw = (datesFieldset.dataset.drpValue || "").split("–").map(part => part.trim());
+                        if (!start && raw[0]) start = parseISODate(raw[0]);
+                        if (!end && raw[1]) end = parseISODate(raw[1]);
+                    }
+                    start = start ? clampToDate(start) : null;
+                    end = end ? clampToDate(end) : null;
+                    if (start && end && end.getTime() < start.getTime()) {
+                        [start, end] = [end, start];
+                    }
+                    if (start && end) {
+                        stagedDates = [start, end];
+                    } else if (start) {
+                        stagedDates = [start, null];
+                    } else if (end) {
+                        stagedDates = [end, null];
+                    } else {
+                        stagedDates = [null, null];
+                    }
+                    viewDate = stagedDates[0] ? startOfMonth(stagedDates[0]) : startOfMonth(today);
+                    updateDisplayFromStaged();
+                };
+
+                const handleDaySelection = (isoValue) => {
+                    const nextDate = parseISODate(isoValue);
+                    if (!nextDate) return;
+                    const normalized = clampToDate(nextDate);
+                    const startSel = stagedDates[0];
+                    const endSel = stagedDates[1];
+                    if (!startSel || (startSel && endSel)) {
+                        stagedDates = [normalized, null];
+                    } else {
+                        if (normalized.getTime() < startSel.getTime()) {
+                            stagedDates = [normalized, startSel];
+                        } else if (isSameDay(normalized, startSel)) {
+                            stagedDates = [normalized, normalized];
+                        } else {
+                            stagedDates = [startSel, normalized];
+                        }
+                    }
+                    updateDisplayFromStaged();
+                    renderCalendar();
+                };
+
+                const renderMonth = (baseDate) => {
+                    const monthEl = document.createElement("div");
+                    monthEl.className = "drp-month";
+
+                    const title = document.createElement("div");
+                    title.className = "drp-month-name";
+                    title.textContent = formatMonthTitle(baseDate);
+                    monthEl.appendChild(title);
+
+                    const weekdaysRow = document.createElement("div");
+                    weekdaysRow.className = "drp-weekdays";
+                    WEEKDAYS_SHORT.forEach((name) => {
+                        const cell = document.createElement("div");
+                        cell.className = "drp-weekday";
+                        cell.textContent = name;
+                        weekdaysRow.appendChild(cell);
+                    });
+                    monthEl.appendChild(weekdaysRow);
+
+                    const grid = document.createElement("div");
+                    grid.className = "drp-grid";
+
+                    const firstDay = startOfMonth(baseDate);
+                    const offset = (firstDay.getDay() + 6) % 7;
+                    let cursor = addDays(firstDay, -offset);
+
+                    const startSel = stagedDates[0];
+                    const endSel = stagedDates[1];
+                    const effectiveEnd = endSel || startSel;
+
+                    for (let i = 0; i < 42; i++) {
+                        const cellDate = cursor;
+                        const isoValue = toISODate(cellDate);
+                        const btnDay = document.createElement("button");
+                        btnDay.type = "button";
+                        btnDay.className = "drp-day";
+                        btnDay.textContent = String(cellDate.getDate());
+                        if (cellDate.getMonth() !== baseDate.getMonth()) {
+                            btnDay.classList.add("is-outside");
+                        }
+                        if (isSameDay(cellDate, today)) {
+                            btnDay.classList.add("is-today");
+                        }
+                        if (startSel) {
+                            const rangeStart = clampToDate(startSel);
+                            const rangeEnd = effectiveEnd ? clampToDate(effectiveEnd) : rangeStart;
+                            if (isDayBetween(cellDate, rangeStart, rangeEnd)) {
+                                btnDay.classList.add("is-range");
+                            }
+                            if (isSameDay(cellDate, rangeStart)) {
+                                btnDay.classList.add("is-range-start");
+                            }
+                            if (effectiveEnd && isSameDay(cellDate, rangeEnd)) {
+                                btnDay.classList.add("is-range-end");
+                            }
+                        }
+                        btnDay.addEventListener("click", () => {
+                            handleDaySelection(isoValue);
+                        });
+                        grid.appendChild(btnDay);
+                        cursor = addDays(cursor, 1);
+                    }
+
+                    monthEl.appendChild(grid);
+                    return monthEl;
+                };
+
+                const renderCalendar = () => {
+                    if (!datesCalendarWrap) return;
+                    datesCalendarWrap.innerHTML = "";
+                    const drpRoot = document.createElement("div");
+                    drpRoot.className = "drp";
+
+                    const nav = document.createElement("div");
+                    nav.className = "drp-nav";
+
+                    const prevBtn = document.createElement("button");
+                    prevBtn.type = "button";
+                    prevBtn.className = "drp-nav-btn";
+                    prevBtn.setAttribute("aria-label", "Предыдущий месяц");
+                    prevBtn.textContent = "‹";
+                    prevBtn.addEventListener("click", () => {
+                        viewDate = addMonths(viewDate, -1);
+                        renderCalendar();
+                    });
+
+                    const nextBtn = document.createElement("button");
+                    nextBtn.type = "button";
+                    nextBtn.className = "drp-nav-btn";
+                    nextBtn.setAttribute("aria-label", "Следующий месяц");
+                    nextBtn.textContent = "›";
+                    nextBtn.addEventListener("click", () => {
+                        viewDate = addMonths(viewDate, 1);
+                        renderCalendar();
+                    });
+
+                    const title = document.createElement("div");
+                    title.className = "drp-nav-title";
+                    const nextMonth = addMonths(viewDate, 1);
+                    title.textContent = `${formatMonthTitle(viewDate)} – ${formatMonthTitle(nextMonth)}`;
+
+                    nav.appendChild(prevBtn);
+                    nav.appendChild(title);
+                    nav.appendChild(nextBtn);
+                    drpRoot.appendChild(nav);
+
+                    const calendarsWrap = document.createElement("div");
+                    calendarsWrap.className = "drp-calendars";
+                    calendarsWrap.appendChild(renderMonth(viewDate));
+                    calendarsWrap.appendChild(renderMonth(nextMonth));
+                    drpRoot.appendChild(calendarsWrap);
+
+                    datesCalendarWrap.appendChild(drpRoot);
+                };
+
+                const commitDates = () => {
+                    const startSel = stagedDates[0];
+                    const endCandidate = stagedDates[1] ?? stagedDates[0];
+                    if (startSel && endCandidate) {
+                        let a = clampToDate(startSel);
+                        let b = clampToDate(endCandidate);
+                        if (b.getTime() < a.getTime()) [a, b] = [b, a];
+                        applied = [toISODate(a), toISODate(b)];
+                    } else {
+                        applied = ["", ""];
+                    }
+                    writeHidden();
+                    updateBtn();
+                    setStagedFromApplied();
+                    renderCalendar();
+                };
+
+                const resetDates = () => {
+                    applied = ["", ""];
+                    stagedDates = [null, null];
+                    if (datesFieldset && datesInput) {
+                        datesFieldset.dataset.drpValue = "";
+                        datesInput.dataset.drpValue = "";
+                        datesInput.value = "";
+                    }
+                    writeHidden();
+                    updateBtn();
+                    renderCalendar();
+                };
+
+                const open = () => {
+                    if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                    setStagedFromApplied();
+                    renderCalendar();
+                    if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+                    const { restore } = portalOpen(pop, btn);
+                    portalRestore = restore;
+                    ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
+                    if (isMobile()) {
+                        startKeyframe(pop, "open");
+                        detachSwipe = attachSwipe(pop, api);
+                    }
+                    currentOpen = { root, pop, trigger: btn, close: api.close };
+                    datesInput?.focus();
+                };
+
+                const reallyHide = () => { if (pop) pop.hidden = true; };
+
+                const close = (opts = {}) => {
+                    const { animatedFromY = null, alreadyAnimated = false } = opts;
+
+                    const finalize = () => {
+                        removeOverlay(); lockScrollBody(false);
+                        reallyHide();
+                        if (portalRestore) { portalRestore(); portalRestore = null; }
+                        btn.setAttribute("aria-expanded", "false");
+                        if (currentOpen && currentOpen.root === root) currentOpen = null;
+                    };
+
+                    if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+
+                    if (isMobile()) {
+                        if (alreadyAnimated) {
+                            finalize();
+                        } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                            animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        } else {
+                            startKeyframe(pop, "close");
+                            setTimeout(finalize, 180);
+                        }
+                        setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    } else {
+                        desktopFadeOut(pop, finalize);
+                    }
+                };
+
+                const trapFocus = (e) => {
+                    if (e.key !== "Tab") return;
+                    const focusables = pop.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
+                    if (!focusables.length) return;
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                };
+
+                ["pointerdown", "mousedown", "touchstart", "click"].forEach(ev => {
+                    pop.addEventListener(ev, (ev2) => ev2.stopPropagation(), { passive: ev === "touchstart" });
+                });
+
+                btn.addEventListener("click", (e) => { e.stopPropagation(); (pop.hidden ? open : api.close)(); });
+                btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (pop.hidden ? open : api.close)(); } });
+                pop.addEventListener("keydown", trapFocus);
+                pop.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); api.close(); } });
+                closeX?.addEventListener("click", () => api.close());
+
+                pop.addEventListener("click", (e) => {
+                    const action = e.target?.dataset?.action;
+                    if (action === "reset") {
+                        resetDates();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                    if (action === "apply") {
+                        commitDates();
+                        root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                        api.close();
+                        submitAjax();
+                    }
+                });
+
+                if (datesInput) {
+                    datesInput.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            commitDates();
+                            root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                            api.close();
+                            submitAjax();
+                        }
+                    });
+                }
+
+                readHidden();
+                if ((!applied[0] || !applied[1]) && datesFieldset?.dataset?.drpValue) {
+                    const parts = datesFieldset.dataset.drpValue.split("–").map(part => part.trim());
+                    if (parts.length === 2) {
+                        const start = parseISODate(parts[0]);
+                        const end = parseISODate(parts[1]);
+                        if (start && end) {
+                            applied = [toISODate(start), toISODate(end)];
+                            writeHidden();
+                        }
+                    }
+                }
+                setStagedFromApplied();
+                updateBtn();
+
+                var api = { root, pop, trigger: btn, close };
+                extraSelectRegistry.set(root, {
+                    field,
+                    type,
+                    commitFromUi: commitDates,
+                    resetForAll: resetDates,
                     isActive: () => hasActive
                 });
 
