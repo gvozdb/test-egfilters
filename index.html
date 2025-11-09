@@ -316,14 +316,15 @@
         }
 
         .exs-trigger {
+            position: relative;
             width: 100%;
-            text-align: left;
             padding: 10px 36px 10px 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background: #fff;
             line-height: 1.2;
-            position: relative;
+            text-align: left;
+            cursor: pointer;
 
             /* один ряд, без переносов, аккуратное сжатие */
             white-space: nowrap;
@@ -399,7 +400,6 @@
             top: 100%;
             left: 0;
             right: 0;
-            margin-top: 6px;
             padding: 0;
             border: 0; /* 1px solid #ddd; */
             border-radius: 10px;
@@ -416,7 +416,7 @@
             display: none !important;
         }
         .exs-body {
-            max-height: 280px;
+            max-height: calc(70vh - 52px);
             overflow: auto;
             padding: 10px;
         }
