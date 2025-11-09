@@ -130,6 +130,27 @@
             cursor: pointer;
             white-space: nowrap;
             flex: 0 0 auto;
+            position: relative;
+        }
+        .filters-open-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #ff4d4f;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .filters-open-badge.is-visible {
+            display: inline-flex;
         }
         .filters-open-icon {
             flex: 0 0 auto;
@@ -313,6 +334,24 @@
             display: inline-flex;
             flex: 1 1 auto;
             min-width: 125px;
+        }
+        .extra-select.is-filled:not(.extra-select_sort)::before {
+            content: attr(data-placeholder);
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            font-size: 11px;
+            line-height: 1;
+            color: #8a8a8a;
+            pointer-events: none;
+            max-width: calc(100% - 48px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            z-index: 1;
+        }
+        .extra-select.is-filled:not(.extra-select_sort) .exs-trigger {
+            padding-top: 22px;
         }
         .extra-select_sort {
             flex: 0 0 auto;
@@ -748,7 +787,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.009
+        Build: 0.0.010
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -955,6 +994,7 @@
                         </svg>
                     </span>
                     <span class="filters-open-prefix">Все </span>фильтры
+                    <span class="filters-open-badge js-filters-open-badge" aria-hidden="true"></span>
                 </button>
 
                 <!-- только для модалки: доп. чекбоксы -->
@@ -1444,9 +1484,40 @@
         })();
 
         /* ========================= extra-select ========================= */
-        const roots = document.querySelectorAll(".js-extra-select");
         const extraSelectRegistry = new Map();
-        if (!roots.length) return;
+        const filtersOpenBadge = document.querySelector(".js-filters-open-badge");
+        const standaloneChecks = [...document.querySelectorAll(".filters-extra-checks input[type=\"checkbox\"]")];
+
+        const updateFiltersBadge = () => {
+            if (!filtersOpenBadge) {
+                return;
+            }
+            let count = 0;
+            extraSelectRegistry.forEach((api) => {
+                if (typeof api.isActive === "function" && api.isActive()) {
+                    count += 1;
+                }
+            });
+            standaloneChecks.forEach((checkbox) => {
+                if (checkbox.checked) {
+                    count += 1;
+                }
+            });
+            filtersOpenBadge.textContent = String(count);
+            filtersOpenBadge.classList.toggle("is-visible", count > 0);
+        };
+
+        standaloneChecks.forEach((checkbox) => {
+            checkbox.addEventListener("change", () => {
+                updateFiltersBadge();
+            });
+        });
+
+        const roots = document.querySelectorAll(".js-extra-select");
+        if (!roots.length) {
+            updateFiltersBadge();
+            return;
+        }
 
         roots.forEach((root) => {
             const type = (root.dataset.type || "checkbox").trim();
@@ -1463,6 +1534,8 @@
             let applied = [];
             let detachSwipe = null;
             let portalRestore = null;
+            let hasActive = false;
+            let defaultRadioValue = "";
 
             const setButtonText = (text) => {
                 if (!btn) return;
@@ -1489,49 +1562,54 @@
             const updateBtn = () => {
                 if (!btn) return;
 
+                let nextActive = false;
+
                 if (type === "checkbox") {
                     if (!applied.length) {
                         setButtonText(placeholder);
                         btn.classList.remove("is-active");
-                        return;
+                        root.classList.remove("is-filled");
+                    } else {
+                        setButtonText(makeLabel(applied, maxChars));
+                        btn.classList.add("is-active");
+                        root.classList.add("is-filled");
+                        nextActive = true;
                     }
-                    setButtonText(makeLabel(applied, maxChars));
-                    btn.classList.add("is-active");
-                    return;
-                }
-
-                if (type === "range") {
-                    // если диапазон равен дефолту [min,max] — показываем placeholder
+                } else if (type === "range") {
                     const min = Number(root.dataset.min ?? "0");
                     const max = Number(root.dataset.max ?? "0");
                     if (!applied.length || (applied[0] === "" && applied[1] === "")) {
                         setButtonText(placeholder);
                         btn.classList.remove("is-active");
-                        return;
+                    } else {
+                        const [aRaw, bRaw] = applied;
+                        const a = aRaw === "" ? min : Number(aRaw);
+                        const b = bRaw === "" ? max : Number(bRaw);
+                        if (a === min && b === max) {
+                            setButtonText(placeholder);
+                            btn.classList.remove("is-active");
+                        } else {
+                            let text = "";
+                            if (a !== min && b !== max) text = `от ${a} — до ${b}`;
+                            else if (a !== min)         text = `от ${a}`;
+                            else if (b !== max)         text = `до ${b}`;
+                            setButtonText(text || placeholder);
+                            if (text) {
+                                btn.classList.add("is-active");
+                                nextActive = true;
+                            } else {
+                                btn.classList.remove("is-active");
+                            }
+                        }
                     }
-                    const [aRaw, bRaw] = applied;
-                    const a = aRaw === "" ? min : Number(aRaw);
-                    const b = bRaw === "" ? max : Number(bRaw);
-                    if (a === min && b === max) {
-                        setButtonText(placeholder);         // <-- пункт 4: не показываем "от 0 до 100000"
-                        btn.classList.remove("is-active");
-                        return;
-                    }
-                    let text = "";
-                    if (a !== min && b !== max) text = `от ${a} — до ${b}`;
-                    else if (a !== min)         text = `от ${a}`;
-                    else if (b !== max)         text = `до ${b}`;
-                    setButtonText(text || placeholder);
-                    text ? btn.classList.add("is-active") : btn.classList.remove("is-active");
-                    return;
-                }
-
-                if (type === "radio") {
+                    root.classList.remove("is-filled");
+                } else if (type === "radio") {
                     const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
                     let val = "";
                     const h = hiddenWrap ? hiddenWrap.querySelector('input[type="hidden"][name="sort"]') : null;
-                    if (h && h.value) val = h.value;
-                    else {
+                    if (h && h.value) {
+                        val = h.value;
+                    } else {
                         const ch = radios.find(r => r.checked);
                         if (ch) val = ch.value;
                     }
@@ -1542,12 +1620,17 @@
                         current?.value || "";
                     setButtonText(labelText || placeholder);
                     btn.classList.add("is-active");
-                    return;
+                    nextActive = Boolean(current?.value) && current.value !== defaultRadioValue;
+                    root.classList.remove("is-filled");
+                } else if (type === "stub") {
+                    setButtonText(placeholder);
+                    root.classList.remove("is-filled");
+                } else {
+                    root.classList.remove("is-filled");
                 }
 
-                if (type === "stub") {
-                    setButtonText(placeholder);
-                }
+                hasActive = nextActive;
+                updateFiltersBadge();
             };
 
             const writeHidden = () => {
@@ -1747,7 +1830,8 @@
                     field,
                     type,
                     commitFromUi: commitFromChecks,
-                    resetForAll: resetChecks
+                    resetForAll: resetChecks,
+                    isActive: () => hasActive
                 });
 
             /* RANGE */
@@ -1923,7 +2007,8 @@
                     field,
                     type,
                     commitFromUi: commitRange,
-                    resetForAll: resetRange
+                    resetForAll: resetRange,
+                    isActive: () => hasActive
                 });
 
             /* RADIO */
@@ -1931,7 +2016,7 @@
                 const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
 
                 const defaultRadio = radios.find(r => r.dataset.isDefault === "true");
-                const defaultRadioValue = defaultRadio ? defaultRadio.value : (radios[0]?.value || "");
+                defaultRadioValue = defaultRadio ? defaultRadio.value : (radios[0]?.value || "");
 
                 const syncRadiosFromApplied = () => {
                     const val = applied[0] || "";
@@ -2030,7 +2115,8 @@
                     type,
                     commitFromUi: commitFromRadios,
                     resetForAll: resetRadios,
-                    defaultValue: defaultRadioValue
+                    defaultValue: defaultRadioValue,
+                    isActive: () => hasActive
                 });
 
             /* STUB */
@@ -2087,8 +2173,17 @@
 
                 updateBtn();
                 var api = { root, pop, trigger: btn, close };
+                extraSelectRegistry.set(root, {
+                    field,
+                    type,
+                    commitFromUi: null,
+                    resetForAll: null,
+                    isActive: () => hasActive
+                });
             }
         });
+
+        updateFiltersBadge();
 
         /* ========================= МОДАЛКА (через body.filters-modal) ========================= */
         const openBtn  = document.querySelector(".js-filters-open");
@@ -2179,6 +2274,7 @@
                 cb.checked = false;
             });
 
+            updateFiltersBadge();
             submitAjax();
         });
 
