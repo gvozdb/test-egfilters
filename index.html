@@ -16,7 +16,7 @@
         }
 
         body {
-            background-color: #eee;
+            background-color: #fff;
             padding: 0;
             margin: 0;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -67,7 +67,7 @@
             max-width: 1100px;
             margin: 3rem auto;
             padding: 1rem;
-            background: #fff;
+            background-color: #f2f5f8;
             border-radius: .7rem;
         }
 
@@ -89,7 +89,7 @@
                 max-width: 1100px;
                 /* margin: 3rem auto; */
                 padding: 1rem;
-                background: #fff;
+                background-color: #f2f5f8;
                 border-radius: .7rem;
             }
             body:not(.filters-modal) .filters > .filters-body > .filters-meta,
@@ -338,20 +338,21 @@
         .extra-select.is-filled:not(.extra-select_sort)::before {
             content: attr(data-placeholder);
             position: absolute;
-            top: 6px;
+            top: 5px;
             left: 12px;
-            font-size: 11px;
+            font-size: 10px;
             line-height: 1;
-            color: #8a8a8a;
+            color: #616161;
             pointer-events: none;
             max-width: calc(100% - 48px);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             z-index: 1;
+            padding-left: 1px;
         }
         .extra-select.is-filled:not(.extra-select_sort) .exs-trigger {
-            padding-top: 22px;
+            padding: 15px 36px 5px 12px;
         }
         .extra-select_sort {
             flex: 0 0 auto;
