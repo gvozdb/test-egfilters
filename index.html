@@ -42,7 +42,7 @@
         }
         .filters-body {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
         }
         .filters-grid {
@@ -178,17 +178,22 @@
         }
 
         body.filters-modal .filters .filters-body {
-            flex: 1 1 auto;
             display: flex;
+            align-items: flex-start;
             flex-direction: column;
+            flex: 1 1 auto;
             gap: 12px;
+            padding: 16px 16px;
+            max-height: calc(80vh - 90px);
+            overflow: auto;
         }
 
         body.filters-modal .filters .filters-meta {
             justify-content: flex-start;
             width: 100%;
-            padding: 0 16px 12px;
+            padding: 0;
             margin-left: 0;
+            border: 0;
         }
 
         .modal-backdrop {
@@ -228,8 +233,8 @@
         }
         body.filters-modal .filters .filters-grid {
             flex: 1 1 auto;
-            overflow: auto;
-            padding: 12px 16px 0;
+            overflow: initial;
+            padding: 0;
             flex-wrap: wrap; /* в модалке можно переносить */
         }
         body.filters-modal .filters .filters-footer {
@@ -266,10 +271,10 @@
             */
         }
         .filters-extra-checks .check-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            padding-top: 8px;
+            display: flex;
+            flex-flow: row wrap;
+            gap: 8px;
+            margin-top: 8px;
         }
         .filters-extra-checks label {
             display: flex;
@@ -280,7 +285,6 @@
             border: 1px solid #eee;
             border-radius: 8px;
             padding: 8px 10px;
-            width: 100%;
         }
         body.filters-modal .filters .filters-extra-checks {
             display: block;
@@ -288,8 +292,8 @@
 
         @media (min-width: 769px) {
             body.filters-modal .filters .filters-grid .extra-select:not(.extra-select_sort) {
-                flex: 1 1 calc(50% - 12px);
-                max-width: calc(50% - 12px);
+                flex: 1 1 calc(50% - 6px);
+                max-width: calc(50% - 6px);
             }
         }
 
@@ -497,6 +501,13 @@
         @keyframes exsSlideDown {
             from { transform: translateY(0); }
             to   { transform: translateY(100%); }
+        }
+
+        @media (min-width: 769px) {
+            .exs-popover[data-field-key="sort"] .exs-header {
+                display: block;
+                padding: 16px 14px 7px;
+            }
         }
         @media (max-width: 768px) {
             .exs-popover {
@@ -763,7 +774,7 @@
                             aria-haspopup="dialog"
                             aria-expanded="false"
                             aria-controls="exs-popover-dates">Даты</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-dates" role="dialog" hidden>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-dates" data-field-key="dates" role="dialog" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Даты</div>
@@ -795,7 +806,7 @@
                             aria-haspopup="listbox"
                             aria-expanded="false"
                             aria-controls="exs-popover-format">Формат экскурсий</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-format" role="listbox" aria-multiselectable="true" hidden>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-format" data-field-key="format" role="listbox" aria-multiselectable="true" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Формат экскурсий</div>
@@ -830,7 +841,7 @@
                             aria-haspopup="listbox"
                             aria-expanded="false"
                             aria-controls="exs-popover-transport">Способ передвижения</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-transport" role="listbox" aria-multiselectable="true" hidden>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-transport" data-field-key="transport" role="listbox" aria-multiselectable="true" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Способ передвижения</div>
@@ -870,7 +881,7 @@
                             aria-haspopup="dialog"
                             aria-expanded="false"
                             aria-controls="exs-popover-price">Цены</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-price" role="dialog" hidden>
+                    <div class="exs-popover js-exs-popover" id="exs-popover-price" data-field-key="price" role="dialog" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Цены</div>
@@ -911,7 +922,7 @@
                             aria-haspopup="listbox"
                             aria-expanded="false"
                             aria-controls="exs-popover-duration">Длительность</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-duration" role="listbox" hidden aria-multiselectable="true">
+                    <div class="exs-popover js-exs-popover" id="exs-popover-duration" data-field-key="duration" role="listbox" hidden aria-multiselectable="true">
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                         <div class="exs-header">Длительность</div>
@@ -991,10 +1002,10 @@
                             </span>
                             <span class="exs-trigger-label" data-trigger-label><!-- default-sort-label --></span>
                         </button>
-                        <div class="exs-popover js-exs-popover" id="exs-popover-sort" role="listbox" hidden>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-sort" data-field-key="sort" role="listbox" hidden>
                             <div class="exs-drag-handle"></div>
                             <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                            <div class="exs-header">Сортировка</div>
+                            <div class="exs-header">Показать сначала</div>
                             <div class="exs-body js-exs-body">
                                 <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true"> рекомендуемые</label>
                                 <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
