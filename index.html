@@ -137,11 +137,18 @@
             flex-direction: column;
             gap: 12px;
         }
+        .drp a,
+        .drp button {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
         .drp-nav {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            z-index: 2;
         }
         .drp-nav-title {
             flex: 1 1 auto;
@@ -168,6 +175,9 @@
             line-height: 1;
             transition: background-color 120ms ease, color 120ms ease;
         }
+        .drp-nav-btn[disabled] {
+            opacity: .25;
+        }
         .drp-nav-btn:hover {
             background: #e2e8f0;
         }
@@ -182,6 +192,7 @@
             gap: 8px;
         }
         .drp-month-name {
+            display: none;
             color: #1f2933;
             font-size: 14px;
             font-weight: 500;
@@ -195,9 +206,9 @@
             gap: 1px;
         }
         .drp-weekday {
-            color: #7b8794;
-            font-size: 12px;
-            /* font-weight: 600; */
+            color: #889eb4;
+            font-size: 14px;
+            font-weight: 500;
             /* text-transform: uppercase; */
             text-align: center;
         }
@@ -267,6 +278,13 @@
             color: #cbd2d9;
             cursor: default;
             pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .drp-month.drp-month_right {
+                border-top: 1px dotted #e7e7e7;
+                padding-top: 16px;
+            }
         }
 
         /* ОДНА строка в панели и в GHOST на ≥769px */
@@ -753,6 +771,11 @@
             }
             .exs-close { display: inline-flex; }
             .exs-drag-handle { display: block; }
+
+            .exs-popover[data-field-key="dates"] .exs-header,
+            .exs-popover[data-field-key="dates"] .exs-close {
+                display: none !important;
+            }
         }
 
         /* overlay поповера: ВСЕГДА в <body>, выше модалки, ниже поповера */
@@ -2258,9 +2281,9 @@
                     renderCalendar();
                 };
 
-                const renderMonth = (baseDate) => {
+                const renderMonth = (baseDate, addClass = '') => {
                     const monthEl = document.createElement("div");
-                    monthEl.className = "drp-month";
+                    monthEl.className = "drp-month " + addClass;
 
                     const title = document.createElement("div");
                     title.className = "drp-month-name";
@@ -2394,8 +2417,8 @@
 
                     const calendarsWrap = document.createElement("div");
                     calendarsWrap.className = "drp-calendars";
-                    calendarsWrap.appendChild(renderMonth(viewDate));
-                    calendarsWrap.appendChild(renderMonth(nextMonth));
+                    calendarsWrap.appendChild(renderMonth(viewDate, 'drp-month_left'));
+                    calendarsWrap.appendChild(renderMonth(nextMonth, 'drp-month_right'));
                     drpRoot.appendChild(calendarsWrap);
 
                     calendarsWrap.addEventListener("mouseleave", () => {
