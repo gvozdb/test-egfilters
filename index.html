@@ -427,7 +427,7 @@
         body.filters-modal .filters .filters-footer {
             display: flex;
             gap: 8px;
-            justify-content: space-between;
+            justify-content: flex-end;
             padding: 12px 16px;
             border-top: 1px solid #eee;
             background: #fff;
@@ -445,6 +445,11 @@
             background: #49be54;
             border-color: #49be54;
             color: #fff;
+        }
+        @media (max-width: 768px) {
+            body.filters-modal .filters .filters-footer {
+                justify-content: space-between;
+            }
         }
 
         /* ====== Блок дополнительных чекбоксов — только в модалке ====== */
@@ -639,7 +644,7 @@
         }
         .exs-actions {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             gap: 8px;
             padding: 10px;
             border-top: 1px solid #eee;
@@ -741,7 +746,11 @@
             .exs-popover[data-closing="true"] { animation: exsSlideDown .18s ease both; }
             .exs-header { display: block; }
             .exs-body { max-height: calc(calc(80vh + 160px) - 60px - 40px); overflow: auto; }
-            .exs-actions { position: relative; padding: 10px 14px; }
+            .exs-actions {
+                justify-content: space-between;
+                position: relative;
+                padding: 10px 14px;
+            }
             .exs-close { display: inline-flex; }
             .exs-drag-handle { display: block; }
         }
