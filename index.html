@@ -235,7 +235,12 @@
             background: rgba(73, 190, 84, 0.1);
         }
         .drp-day.is-outside {
-            color: #9aa5b1;
+            height: 0 !important;
+            padding: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+            /* color: #9aa5b1; */
         }
         .drp-day.is-today {
             /* font-weight: 600; */
@@ -284,6 +289,9 @@
             .drp-month.drp-month_right {
                 border-top: 1px dotted #e7e7e7;
                 padding-top: 16px;
+            }
+            .drp-month.drp-month_right .drp-weekdays {
+                display: none;
             }
         }
 
@@ -989,7 +997,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.012
+        Build: 0.0.014
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -1028,7 +1036,7 @@
                                        data-drp-value=""
                                        placeholder="Выберите даты"
                                        readonly>
-                                <div class="filters-dates-picker js-dates-picker"></div>
+                                <div class="filters-dates-picker js-dates-picker"></div> <!-- js-exs-swipe-lock -->
                             </div>
                         </div>
                         <div class="exs-actions">
@@ -1335,9 +1343,13 @@
             "январь", "февраль", "март", "апрель", "май", "июнь",
             "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
         ];
+        // const MONTHS_GENITIVE = [
+        //     "января", "февраля", "марта", "апреля", "мая", "июня",
+        //     "июля", "августа", "сентября", "октября", "ноября", "декабря"
+        // ];
         const MONTHS_GENITIVE = [
-            "января", "февраля", "марта", "апреля", "мая", "июня",
-            "июля", "августа", "сентября", "октября", "ноября", "декабря"
+            "янв", "фев", "мар", "апр", "мая", "июн",
+            "июл", "авг", "сен", "окт", "ноя", "дек"
         ];
         const WEEKDAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -2202,6 +2214,32 @@
                 let hoverDate = null;
                 let hasReadInitialDataset = false;
 
+                const skipClickByIso = new Map();
+                const SKIP_CLICK_WINDOW_MS = 1200;
+
+                const armSkipForIso = (isoValue) => {
+                    const existing = skipClickByIso.get(isoValue);
+                    if (existing != null) {
+                        clearTimeout(existing);
+                    }
+                    const timerId = setTimeout(() => {
+                        if (skipClickByIso.get(isoValue) === timerId) {
+                            skipClickByIso.delete(isoValue);
+                        }
+                    }, SKIP_CLICK_WINDOW_MS);
+                    skipClickByIso.set(isoValue, timerId);
+                };
+
+                const clearSkipForIso = (isoValue) => {
+                    const timerId = skipClickByIso.get(isoValue);
+                    if (timerId != null) {
+                        clearTimeout(timerId);
+                        skipClickByIso.delete(isoValue);
+                    }
+                };
+
+                const shouldSkipClickForIso = (isoValue) => skipClickByIso.has(isoValue);
+
                 const isDateInPast = (date) => {
                     if (!(date instanceof Date)) return false;
                     return date.getTime() < today.getTime();
@@ -2313,6 +2351,45 @@
                     const rangeStart = startSel ? clampToDate(startSel) : null;
                     const rangeEnd = rangeStart ? clampToDate(previewEnd || rangeStart) : null;
 
+                    const addDayHandlers = (btnDay, isoValue) => {
+                        const selectDate = () => {
+                            handleDaySelection(isoValue);
+                        };
+
+                        const handleTouchLike = () => {
+                            if (btnDay.disabled) {
+                                return;
+                            }
+                            armSkipForIso(isoValue);
+                            selectDate();
+                        };
+
+                        btnDay.addEventListener("click", () => {
+                            if (shouldSkipClickForIso(isoValue)) {
+                                clearSkipForIso(isoValue);
+                                return;
+                            }
+                            clearSkipForIso(isoValue);
+                            selectDate();
+                        });
+
+                        const canUsePointer = typeof window !== "undefined" && window.PointerEvent;
+
+                        if (canUsePointer) {
+                            btnDay.addEventListener("pointerdown", (e) => {
+                                if (e.pointerType === "mouse") {
+                                    return;
+                                }
+                                handleTouchLike();
+                                if (e.cancelable && typeof e.preventDefault === "function") {
+                                    e.preventDefault();
+                                }
+                            });
+                        } else {
+                            btnDay.addEventListener("touchstart", handleTouchLike, { passive: true });
+                        }
+                    };
+
                     for (let i = 0; i < 42; i++) {
                         const cellDate = cursor;
                         const isoValue = toISODate(cellDate);
@@ -2349,9 +2426,7 @@
                             }
                         }
                         if (!isPast) {
-                            btnDay.addEventListener("click", () => {
-                                handleDaySelection(isoValue);
-                            });
+                            addDayHandlers(btnDay, isoValue);
                             btnDay.addEventListener("mouseenter", () => {
                                 if (!stagedDates[0] || stagedDates[1]) return;
                                 const nextHover = clampToDate(cellDate);
