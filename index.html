@@ -943,7 +943,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.011
+        Build: 0.0.012
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -2151,8 +2151,16 @@
             /* DATES */
             } else if (type === "dates") {
                 const today = clampToDate(new Date());
+                const minViewDate = startOfMonth(today);
                 let stagedDates = [null, null];
-                let viewDate = startOfMonth(today);
+                let viewDate = minViewDate;
+                let hoverDate = null;
+                let hasReadInitialDataset = false;
+
+                const isDateInPast = (date) => {
+                    if (!(date instanceof Date)) return false;
+                    return date.getTime() < today.getTime();
+                };
 
                 const updateDisplayFromStaged = () => {
                     if (!datesInput) return;
@@ -2179,7 +2187,7 @@
                 const setStagedFromApplied = () => {
                     let start = parseISODate(applied[0] ?? "");
                     let end = parseISODate(applied[1] ?? "");
-                    if ((!start || !end) && datesInput) {
+                    if (!hasReadInitialDataset && (!start || !end) && datesInput) {
                         const raw = (datesInput.dataset.drpValue || "").split("–").map(part => part.trim());
                         if (!start && raw[0]) start = parseISODate(raw[0]);
                         if (!end && raw[1]) end = parseISODate(raw[1]);
@@ -2198,7 +2206,10 @@
                     } else {
                         stagedDates = [null, null];
                     }
-                    viewDate = stagedDates[0] ? startOfMonth(stagedDates[0]) : startOfMonth(today);
+                    hoverDate = null;
+                    const nextView = stagedDates[0] ? startOfMonth(stagedDates[0]) : minViewDate;
+                    viewDate = nextView.getTime() < minViewDate.getTime() ? minViewDate : nextView;
+                    hasReadInitialDataset = true;
                     updateDisplayFromStaged();
                 };
 
@@ -2206,6 +2217,7 @@
                     const nextDate = parseISODate(isoValue);
                     if (!nextDate) return;
                     const normalized = clampToDate(nextDate);
+                    if (isDateInPast(normalized)) return;
                     const startSel = stagedDates[0];
                     const endSel = stagedDates[1];
                     if (!startSel || (startSel && endSel)) {
@@ -2219,6 +2231,7 @@
                             stagedDates = [startSel, normalized];
                         }
                     }
+                    hoverDate = null;
                     updateDisplayFromStaged();
                     renderCalendar();
                 };
@@ -2251,7 +2264,9 @@
 
                     const startSel = stagedDates[0];
                     const endSel = stagedDates[1];
-                    const effectiveEnd = endSel || startSel;
+                    const previewEnd = (!endSel && startSel && hoverDate) ? clampToDate(hoverDate) : endSel;
+                    const rangeStart = startSel ? clampToDate(startSel) : null;
+                    const rangeEnd = rangeStart ? clampToDate(previewEnd || rangeStart) : null;
 
                     for (let i = 0; i < 42; i++) {
                         const cellDate = cursor;
@@ -2266,22 +2281,41 @@
                         if (isSameDay(cellDate, today)) {
                             btnDay.classList.add("is-today");
                         }
-                        if (startSel) {
-                            const rangeStart = clampToDate(startSel);
-                            const rangeEnd = effectiveEnd ? clampToDate(effectiveEnd) : rangeStart;
+                        const isPast = isDateInPast(cellDate);
+                        if (isPast) {
+                            btnDay.classList.add("is-disabled");
+                            btnDay.disabled = true;
+                        }
+                        if (rangeStart) {
                             if (isDayBetween(cellDate, rangeStart, rangeEnd)) {
                                 btnDay.classList.add("is-range");
+                                if (isDayBetween(addDays(cellDate, -1), rangeStart, rangeEnd)) {
+                                    btnDay.classList.add("is-to-left");
+                                }
+                                if (isDayBetween(addDays(cellDate, 1), rangeStart, rangeEnd)) {
+                                    btnDay.classList.add("is-to-right");
+                                }
                             }
                             if (isSameDay(cellDate, rangeStart)) {
                                 btnDay.classList.add("is-range-start");
                             }
-                            if (effectiveEnd && isSameDay(cellDate, rangeEnd)) {
+                            if (rangeEnd && isSameDay(cellDate, rangeEnd)) {
                                 btnDay.classList.add("is-range-end");
                             }
                         }
-                        btnDay.addEventListener("click", () => {
-                            handleDaySelection(isoValue);
-                        });
+                        if (!isPast) {
+                            btnDay.addEventListener("click", () => {
+                                handleDaySelection(isoValue);
+                            });
+                            btnDay.addEventListener("mouseenter", () => {
+                                if (!stagedDates[0] || stagedDates[1]) return;
+                                const nextHover = clampToDate(cellDate);
+                                if (isDateInPast(nextHover)) return;
+                                if (hoverDate && isSameDay(nextHover, hoverDate)) return;
+                                hoverDate = nextHover;
+                                renderCalendar();
+                            });
+                        }
                         grid.appendChild(btnDay);
                         cursor = addDays(cursor, 1);
                     }
@@ -2304,10 +2338,17 @@
                     prevBtn.className = "drp-nav-btn";
                     prevBtn.setAttribute("aria-label", "Предыдущий месяц");
                     prevBtn.textContent = "‹";
-                    prevBtn.addEventListener("click", () => {
-                        viewDate = addMonths(viewDate, -1);
-                        renderCalendar();
-                    });
+                    const prevTarget = addMonths(viewDate, -1);
+                    const canGoPrev = prevTarget.getTime() >= minViewDate.getTime();
+                    if (!canGoPrev) {
+                        prevBtn.disabled = true;
+                    } else {
+                        prevBtn.addEventListener("click", () => {
+                            const nextView = addMonths(viewDate, -1);
+                            viewDate = nextView.getTime() < minViewDate.getTime() ? minViewDate : nextView;
+                            renderCalendar();
+                        });
+                    }
 
                     const nextBtn = document.createElement("button");
                     nextBtn.type = "button";
@@ -2335,6 +2376,12 @@
                     calendarsWrap.appendChild(renderMonth(nextMonth));
                     drpRoot.appendChild(calendarsWrap);
 
+                    calendarsWrap.addEventListener("mouseleave", () => {
+                        if (!stagedDates[0] || stagedDates[1] || !hoverDate) return;
+                        hoverDate = null;
+                        renderCalendar();
+                    });
+
                     datesCalendarWrap.appendChild(drpRoot);
                 };
 
@@ -2358,12 +2405,15 @@
                 const resetDates = () => {
                     applied = ["", ""];
                     stagedDates = [null, null];
+                    hoverDate = null;
+                    viewDate = minViewDate;
                     if (datesInput) {
                         datesInput.dataset.drpValue = "";
                         datesInput.value = "";
                     }
                     writeHidden();
                     updateBtn();
+                    updateDisplayFromStaged();
                     renderCalendar();
                 };
 
