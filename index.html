@@ -207,6 +207,8 @@
         }
         .drp-calendars {
             display: grid;
+            align-items: center;
+            justify-content: center;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 8px;
             overflow: hidden;
@@ -266,7 +268,7 @@
             opacity: 0;
             overflow: hidden;
             pointer-events: none;
-            /* color: #9aa5b1; */
+            color: #9aa5b1;
         }
         .drp-day.is-today {
             /* font-weight: 600; */
@@ -312,8 +314,11 @@
         }
 
         @media (max-width: 768px) {
+            .drp-calendars {
+                grid-template-columns: repeat(auto-fit, min(100%, 422px));
+            }
             .drp-month.drp-month_right {
-                border-top: 1px dotted #e7e7e7;
+                /* border-top: 1px dotted #e7e7e7; */
                 padding-top: 8px;
             }
             .drp-month.drp-month_right .drp-weekdays {
@@ -869,7 +874,7 @@
         }
         /* Очень узкие экраны — можно сложить в столбец */
         /*
-        @media (max-width: 420px) {
+        @media (max-width: 421px) {
             .exs-price-row {
                 flex-direction: column;
             }
@@ -2547,6 +2552,7 @@
                         btnDay.textContent = String(cellDate.getDate());
                         if (cellDate.getMonth() !== baseDate.getMonth()) {
                             btnDay.classList.add("is-outside");
+                            // continue;
                         }
                         if (isSameDay(cellDate, today)) {
                             btnDay.classList.add("is-today");
