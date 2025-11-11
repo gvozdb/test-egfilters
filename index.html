@@ -136,6 +136,10 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            margin-top: .25rem;
+        }
+        .drp * {
+            user-select: none;
         }
         .drp a,
         .drp button {
@@ -158,6 +162,7 @@
             color: #1f2933;
         }
         .drp-nav-btn {
+            position: relative;
             flex: 0 0 auto;
             width: 32px;
             height: 32px;
@@ -175,6 +180,25 @@
             line-height: 1;
             transition: background-color 120ms ease, color 120ms ease;
         }
+        .drp-nav-btn:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            margin-top: -5px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transition: transform .15s ease;
+        }
+        .drp-nav-btn.drp-nav-btn_prev:after {
+            left: 13px;
+            transform: rotate(135deg);
+        }
+        .drp-nav-btn.drp-nav-btn_next:after {
+            right: 13px;
+            transform: rotate(-45deg);
+        }
         .drp-nav-btn[disabled] {
             opacity: .25;
         }
@@ -184,7 +208,8 @@
         .drp-calendars {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            gap: 8px;
+            overflow: hidden;
         }
         .drp-month {
             display: flex;
@@ -193,11 +218,12 @@
         }
         .drp-month-name {
             display: none;
+            padding-right: 1rem;
             color: #1f2933;
             font-size: 14px;
             font-weight: 500;
             text-transform: capitalize;
-            text-align: center;
+            text-align: right;
         }
         .drp-weekdays,
         .drp-grid {
@@ -288,10 +314,13 @@
         @media (max-width: 768px) {
             .drp-month.drp-month_right {
                 border-top: 1px dotted #e7e7e7;
-                padding-top: 16px;
+                padding-top: 8px;
             }
             .drp-month.drp-month_right .drp-weekdays {
                 display: none;
+            }
+            .drp-month-name {
+                /* display: block; */
             }
         }
 
@@ -1656,6 +1685,28 @@
 
             const scrollable = pop.querySelector(".exs-body") || pop;
             const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
+            const setSheetDragMeta = (active, distance = 0) => {
+                if (active) {
+                    pop.dataset.sheetDragging = "true";
+                    if (distance > 0) {
+                        pop.dataset.sheetDragDistance = String(distance);
+                    } else {
+                        delete pop.dataset.sheetDragDistance;
+                    }
+                } else {
+                    delete pop.dataset.sheetDragging;
+                    delete pop.dataset.sheetDragDistance;
+                }
+            };
+            const updateSheetDragDistance = (distance) => {
+                if (pop.dataset.sheetDragging === "true") {
+                    if (distance > 0) {
+                        pop.dataset.sheetDragDistance = String(distance);
+                    } else {
+                        delete pop.dataset.sheetDragDistance;
+                    }
+                }
+            };
             const abortSwipeGesture = () => {
                 started = false;
                 dragging = false;
@@ -1664,6 +1715,7 @@
                     cancelAnimationFrame(rafId);
                     rafId = null;
                 }
+                setSheetDragMeta(false);
             };
 
             let started = false, dragging = false;
@@ -1687,16 +1739,20 @@
                 pop.dataset.open = "";
                 pop.dataset.closing = "";
                 pop.style.transition = "none";
+                setSheetDragMeta(false);
             };
 
             const onMoveCore = (clientY, e) => {
                 if (!started) return;
                 const delta = clientY - y0;
+                const distance = delta < 0 ? Math.max(0, -delta) : delta;
 
                 if (!dragging) {
-                    if (delta < -THRESH && scrollable.scrollTop <= 0) { dragging = true; }
-                    else if (delta > THRESH) { dragging = true; }
+                    if (delta < -THRESH && scrollable.scrollTop <= 0) { dragging = true; setSheetDragMeta(true, distance); }
+                    else if (delta > THRESH) { dragging = true; setSheetDragMeta(true, distance); }
                     else { return; }
+                } else {
+                    updateSheetDragDistance(distance);
                 }
 
                 if (delta < 0 && scrollable.scrollTop <= 0) {
@@ -1746,6 +1802,7 @@
 
                 dragging = false;
                 dy = 0;
+                setSheetDragMeta(false);
             };
 
             pop.addEventListener("pointerdown", (e) => {
@@ -2213,7 +2270,6 @@
                 let viewDate = minViewDate;
                 let hoverDate = null;
                 let hasReadInitialDataset = false;
-
                 const skipClickByIso = new Map();
                 const SKIP_CLICK_WINDOW_MS = 1200;
 
@@ -2376,17 +2432,109 @@
                         const canUsePointer = typeof window !== "undefined" && window.PointerEvent;
 
                         if (canUsePointer) {
+                            let pendingTouchPointerId = null;
+                            let pendingTouchStart = null;
+                            let pointerMoveExceeded = false;
+                            let removePendingMoveListener = null;
+                            const TAP_DRAG_CANCEL_PX = 32;
+                            const SHEET_DRAG_CANCEL_PX = 24;
+                            const detachGlobalMove = () => {
+                                if (removePendingMoveListener) {
+                                    removePendingMoveListener();
+                                    removePendingMoveListener = null;
+                                }
+                            };
+
                             btnDay.addEventListener("pointerdown", (e) => {
                                 if (e.pointerType === "mouse") {
                                     return;
                                 }
+                                detachGlobalMove();
+                                pendingTouchPointerId = e.pointerId;
+                                pendingTouchStart = { x: e.clientX, y: e.clientY };
+                                pointerMoveExceeded = false;
+                                const onGlobalMove = (moveEvent) => {
+                                    if (moveEvent.pointerId !== pendingTouchPointerId) {
+                                        return;
+                                    }
+                                    if (moveEvent.pointerType === "mouse" || !pendingTouchStart) {
+                                        return;
+                                    }
+                                    const dx = Math.abs(moveEvent.clientX - pendingTouchStart.x);
+                                    const dy = Math.abs(moveEvent.clientY - pendingTouchStart.y);
+                                    if (dx > TAP_DRAG_CANCEL_PX || dy > TAP_DRAG_CANCEL_PX) {
+                                        pointerMoveExceeded = true;
+                                    }
+                                };
+                                window.addEventListener("pointermove", onGlobalMove, { passive: true });
+                                removePendingMoveListener = () => {
+                                    window.removeEventListener("pointermove", onGlobalMove);
+                                };
+                            });
+
+                            btnDay.addEventListener("pointerup", (e) => {
+                                if (e.pointerType === "mouse") {
+                                    return;
+                                }
+                                if (pendingTouchPointerId !== e.pointerId) {
+                                    return;
+                                }
+                                detachGlobalMove();
+                                const startPoint = pendingTouchStart;
+                                pendingTouchStart = null;
+                                const totalDx = startPoint ? Math.abs(e.clientX - startPoint.x) : 0;
+                                const totalDy = startPoint ? Math.abs(e.clientY - startPoint.y) : 0;
+                                if (totalDx > TAP_DRAG_CANCEL_PX || totalDy > TAP_DRAG_CANCEL_PX) {
+                                    pointerMoveExceeded = true;
+                                }
+                                pendingTouchPointerId = null;
+                                const popRoot = btnDay.closest(".exs-popover");
+                                let shouldSkipForSheetDrag = false;
+                                if (popRoot && popRoot.dataset.sheetDragging === "true") {
+                                    const distance = Number(popRoot.dataset.sheetDragDistance || "0");
+                                    if (Number.isFinite(distance) && distance > SHEET_DRAG_CANCEL_PX) {
+                                        shouldSkipForSheetDrag = true;
+                                    }
+                                }
+                                const fingerMovedFar = pointerMoveExceeded;
+                                pointerMoveExceeded = false;
+                                if (shouldSkipForSheetDrag || fingerMovedFar) {
+                                    armSkipForIso(isoValue);
+                                    setTimeout(() => { clearSkipForIso(isoValue); }, 300);
+                                    return;
+                                }
                                 handleTouchLike();
-                                if (e.cancelable && typeof e.preventDefault === "function") {
-                                    e.preventDefault();
+                            });
+
+                            btnDay.addEventListener("pointercancel", (e) => {
+                                if (e.pointerType === "mouse") {
+                                    return;
+                                }
+                                if (pendingTouchPointerId === e.pointerId) {
+                                    pendingTouchPointerId = null;
+                                    pendingTouchStart = null;
+                                    pointerMoveExceeded = false;
+                                    detachGlobalMove();
                                 }
                             });
                         } else {
-                            btnDay.addEventListener("touchstart", handleTouchLike, { passive: true });
+                            let touchStarted = false;
+
+                            btnDay.addEventListener("touchstart", () => {
+                                touchStarted = true;
+                            }, { passive: true });
+
+                            btnDay.addEventListener("touchend", () => {
+                                if (!touchStarted) {
+                                    return;
+                                }
+                                touchStarted = false;
+                                handleTouchLike();
+                            });
+
+                            btnDay.addEventListener("touchcancel", () => {
+                                touchStarted = false;
+                            }, { passive: true });
                         }
                     };
 
@@ -2455,29 +2603,78 @@
 
                     const prevBtn = document.createElement("button");
                     prevBtn.type = "button";
-                    prevBtn.className = "drp-nav-btn";
+                    prevBtn.className = "drp-nav-btn drp-nav-btn_prev";
                     prevBtn.setAttribute("aria-label", "Предыдущий месяц");
-                    prevBtn.textContent = "‹";
+                    prevBtn.textContent = "";
                     const prevTarget = addMonths(viewDate, -1);
                     const canGoPrev = prevTarget.getTime() >= minViewDate.getTime();
                     if (!canGoPrev) {
                         prevBtn.disabled = true;
                     } else {
                         prevBtn.addEventListener("click", () => {
+                            const host = pop.querySelector(".drp-calendars");
+                            const fromH = host ? host.offsetHeight : 0;
+
                             const nextView = addMonths(viewDate, -1);
                             viewDate = nextView.getTime() < minViewDate.getTime() ? minViewDate : nextView;
-                            renderCalendar();
+
+                            renderCalendar(); // перерисовали
+
+                            const newHost = pop.querySelector(".drp-calendars");
+                            if (newHost) {
+                                const toH = newHost.offsetHeight;
+
+                                newHost.style.height = fromH + "px";
+                                newHost.style.overflow = "hidden";
+                                // принудительный reflow
+                                void newHost.getBoundingClientRect();
+
+                                newHost.style.transition = "height 180ms ease";
+                                requestAnimationFrame(() => {
+                                    newHost.style.height = toH + "px";
+                                });
+
+                                newHost.addEventListener("transitionend", () => {
+                                    newHost.style.height = "";
+                                    newHost.style.transition = "";
+                                    newHost.style.overflow = "";
+                                }, { once: true });
+                            }
                         });
                     }
 
                     const nextBtn = document.createElement("button");
                     nextBtn.type = "button";
-                    nextBtn.className = "drp-nav-btn";
+                    nextBtn.className = "drp-nav-btn drp-nav-btn_next";
                     nextBtn.setAttribute("aria-label", "Следующий месяц");
-                    nextBtn.textContent = "›";
+                    nextBtn.textContent = "";
                     nextBtn.addEventListener("click", () => {
+                        const host = pop.querySelector(".drp-calendars");
+                        const fromH = host ? host.offsetHeight : 0;
+
                         viewDate = addMonths(viewDate, 1);
-                        renderCalendar();
+
+                        renderCalendar(); // перерисовали
+
+                        const newHost = pop.querySelector(".drp-calendars");
+                        if (newHost) {
+                            const toH = newHost.offsetHeight;
+
+                            newHost.style.height = fromH + "px";
+                            newHost.style.overflow = "hidden";
+                            void newHost.getBoundingClientRect();
+
+                            newHost.style.transition = "height 180ms ease";
+                            requestAnimationFrame(() => {
+                                newHost.style.height = toH + "px";
+                            });
+
+                            newHost.addEventListener("transitionend", () => {
+                                newHost.style.height = "";
+                                newHost.style.transition = "";
+                                newHost.style.overflow = "";
+                            }, { once: true });
+                        }
                     });
 
                     const title = document.createElement("div");
