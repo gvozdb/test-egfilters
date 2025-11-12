@@ -1955,6 +1955,7 @@
                     if (!applied.length || (applied[0] === "" && applied[1] === "")) {
                         setButtonText(placeholder);
                         btn.classList.remove("is-active");
+                        root.classList.remove("is-filled");
                     } else {
                         const [aRaw, bRaw] = applied;
                         const a = aRaw === "" ? min : Number(aRaw);
@@ -1962,6 +1963,7 @@
                         if (a === min && b === max) {
                             setButtonText(placeholder);
                             btn.classList.remove("is-active");
+                            root.classList.remove("is-filled");
                         } else {
                             let text = "";
                             if (a !== min && b !== max) text = `от ${a} — до ${b}`;
@@ -1970,13 +1972,14 @@
                             setButtonText(text || placeholder);
                             if (text) {
                                 btn.classList.add("is-active");
+                                root.classList.add("is-filled");
                                 nextActive = true;
                             } else {
                                 btn.classList.remove("is-active");
+                                root.classList.remove("is-filled");
                             }
                         }
                     }
-                    root.classList.remove("is-filled");
                 } else if (type === "dates") {
                     if (!applied.length || !applied[0] || !applied[1]) {
                         setButtonText(placeholder);
