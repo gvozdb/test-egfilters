@@ -564,7 +564,7 @@
             position: relative;
             display: inline-flex;
             flex: 1 1 auto;
-            min-width: 125px;
+            min-width: 97px;
         }
         .extra-select.is-filled:not(.extra-select_sort)::before {
             content: attr(data-placeholder);
@@ -605,13 +605,14 @@
             line-height: 1.2;
             text-align: left;
             cursor: pointer;
-
+        }
+        .extra-select:not(.extra-select_has-icon) .exs-trigger {
             /* один ряд, без переносов, аккуратное сжатие */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .extra-select_has-icon .exs-trigger {
+        .extra-select.extra-select_has-icon:not(.extra-select_sort) .exs-trigger {
             padding-left: 32px;
         }
         .exs-trigger[aria-expanded="true"] {
@@ -665,15 +666,21 @@
             fill: currentColor;
         }
         .extra-select_has-icon.is-filled:not(.extra-select_sort) .exs-trigger {
-            padding: 15px 36px 5px 32px;
+            /* padding: 15px 36px 5px 32px; */
         }
         .extra-select_has-icon.extra-select_sort .exs-trigger {
         }
-        .exs-trigger-label {
+        .extra-select.extra-select_has-icon .exs-trigger-label {
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        .extra-select[data-field="dates"].extra-select_has-icon.is-filled .exs-trigger-label {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: initial;
+            word-break: break-word;
         }
 
         /* Сортировка выглядит как ссылка */
@@ -802,6 +809,9 @@
         }
 
         @media (min-width: 769px) {
+            .extra-select[data-field="dates"] {
+                flex: none;
+            }
             .exs-popover[data-field-key="dates"] {
                 min-width: 520px;
             }
@@ -992,14 +1002,14 @@
 
         /* Широкие: держим в одну линию, плавно сужаем */
         @media (min-width: 992px) {
-            .extra-select { min-width: 125px; }
+            .extra-select { min-width: 97px; }
         }
 
         /* До 991px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
         @media (max-width: 991px) {
             body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
             body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
-                min-width: 125px;
+                min-width: 97px;
             }
         }
 
