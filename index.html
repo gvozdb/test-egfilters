@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js"></script>
 
     <style>
-        /* ===================== FULL PROJECT CSS (4-space indents) ===================== */
 
         * {
             box-sizing: border-box;
@@ -36,7 +35,6 @@
             line-height: 1.4;
         }
 
-        /* ====== Контейнер фильтров ====== */
         .filters {
             position: relative;
         }
@@ -87,7 +85,6 @@
             body.filters-modal .filters-ghost > .filters-body > .filters-grid {
                 position: relative;
                 max-width: 1100px;
-                /* margin: 3rem auto; */
                 padding: 1rem;
                 background-color: #f2f5f8;
                 border-radius: .7rem;
@@ -103,14 +100,7 @@
             margin-left: auto;
         }
 
-        /* ====== Даты ====== */
         .filters-dates {
-            /*
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding: 8px 4px 16px;
-            */
         }
         .filters-dates-input {
             display: none;
@@ -237,7 +227,6 @@
             color: #889eb4;
             font-size: 14px;
             font-weight: 500;
-            /* text-transform: uppercase; */
             text-align: center;
         }
         .datespicker-day {
@@ -271,7 +260,6 @@
             color: #9aa5b1;
         }
         .datespicker-day.is-today {
-            /* font-weight: 600; */
         }
         .datespicker-day.is-range {
             border-radius: 0;
@@ -318,18 +306,15 @@
                 grid-template-columns: repeat(auto-fit, min(100%, 422px));
             }
             .datespicker-month.datespicker-month_right {
-                /* border-top: 1px dotted #e7e7e7; */
                 padding-top: 8px;
             }
             .datespicker-month.datespicker-month_right .datespicker-weekdays {
                 display: none;
             }
             .datespicker-month-name {
-                /* display: block; */
             }
         }
 
-        /* ОДНА строка в панели и в GHOST на ≥769px */
         @media (min-width: 769px) {
             body:not(.filters-modal) .filters > .filters-body > .filters-grid,
             body.filters-modal .filters-ghost > .filters-body > .filters-grid {
@@ -337,14 +322,12 @@
             }
         }
 
-        /* заголовок/футер модалки скрыты в обычном режиме */
         .filters-header,
         .filters-footer,
         .filters-close {
             display: none;
         }
 
-        /* Кнопка "Все фильтры" (текст через span-префикс) */
         .filters-open {
             display: inline-flex;
             align-items: center;
@@ -393,7 +376,6 @@
         .filters-open-prefix {
             display: inline;
         }
-        /* прячем "Все " на ≤991px */
         @media (max-width: 991px) {
             .filters-open-prefix {
                 display: none;
@@ -403,7 +385,6 @@
             }
         }
 
-        /* ====== Модалка (через класс на body) ====== */
         body.filters-modal .filters {
             position: fixed;
             z-index: 10000;
@@ -482,7 +463,7 @@
             flex: 1 1 auto;
             overflow: initial;
             padding: 0;
-            flex-wrap: wrap; /* в модалке можно переносить */
+            flex-wrap: wrap;
         }
         body.filters-modal .filters .filters-footer {
             display: flex;
@@ -512,15 +493,9 @@
             }
         }
 
-        /* ====== Блок дополнительных чекбоксов — только в модалке ====== */
         .filters-extra-checks {
             display: none;
             width: 100%;
-            /*
-            padding: 8px 0 0;
-            border-top: 1px dashed #eee;
-            margin-top: 8px;
-            */
         }
         .filters-extra-checks .check-row {
             display: flex;
@@ -549,7 +524,6 @@
             }
         }
 
-        /* ====== GHOST (визуальный двойник на время модалки) ====== */
         .filters-ghost {
             opacity: .65;
             pointer-events: none;
@@ -559,12 +533,14 @@
             display: none !important;
         }
 
-        /* ====== extra-select ====== */
         .extra-select {
             position: relative;
             display: inline-flex;
             flex: 1 1 auto;
             min-width: 97px;
+        }
+        .extra-select.extra-select_full-value {
+            min-width: 124px;
         }
         .extra-select.is-filled:not(.extra-select_sort)::before {
             content: attr(data-placeholder);
@@ -607,7 +583,6 @@
             cursor: pointer;
         }
         .extra-select:not(.extra-select_has-icon) .exs-trigger {
-            /* один ряд, без переносов, аккуратное сжатие */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -640,7 +615,6 @@
             margin-top: -2px;
         }
 
-
         .extra-select_has-icon .exs-trigger .exs-trigger-icon {
             display: inline-flex;
             align-items: center;
@@ -666,7 +640,6 @@
             fill: currentColor;
         }
         .extra-select_has-icon.is-filled:not(.extra-select_sort) .exs-trigger {
-            /* padding: 15px 36px 5px 32px; */
         }
         .extra-select_has-icon.extra-select_sort .exs-trigger {
         }
@@ -676,14 +649,13 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .extra-select[data-field="dates"].extra-select_has-icon.is-filled .exs-trigger-label {
+        .extra-select.extra-select_full-value.extra-select_has-icon.is-filled .exs-trigger-label {
             white-space: normal;
             overflow: visible;
             text-overflow: initial;
             word-break: break-word;
         }
 
-        /* Сортировка выглядит как ссылка */
         .extra-select_sort .exs-trigger {
             display: inline-flex;
             align-items: center;
@@ -702,7 +674,6 @@
             text-transform: uppercase;
         }
 
-        /* Поповер (десктоп) */
         .exs-popover {
             position: absolute;
             z-index: 11000;
@@ -710,7 +681,7 @@
             left: 0;
             right: 0;
             padding: 0;
-            border: 0; /* 1px solid #ddd; */
+            border: 0;
             border-radius: 10px;
             background: #fff;
             box-shadow: 0px 0px 24px rgba(0, 0, 0, .16);
@@ -745,7 +716,6 @@
             background: #fff;
         }
 
-        /* Моб. элементы */
         .exs-close {
             display: none;
             position: absolute;
@@ -797,7 +767,6 @@
             text-align: center;
         }
 
-        /* Моб. bottom-sheet */
         @keyframes exsSlideUpBounce {
             0% { transform: translateY(100%); }
             75% { transform: translateY(-6%); }
@@ -809,7 +778,7 @@
         }
 
         @media (min-width: 769px) {
-            .extra-select[data-field="dates"] {
+            .extra-select.extra-select_full-value {
                 flex: none;
             }
             .exs-popover[data-field-key="dates"] {
@@ -857,7 +826,6 @@
             }
         }
 
-        /* overlay поповера: ВСЕГДА в <body>, выше модалки, ниже поповера */
         .exs-overlay {
             position: fixed;
             inset: 0;
@@ -865,7 +833,6 @@
             z-index: 10990;
         }
 
-        /* noUiSlider косметика */
         .noUi-target { border: 0; box-shadow: none; }
         .noUi-horizontal { height: 6px; }
         .noUi-connect { background: #49be54; }
@@ -882,7 +849,6 @@
         }
         .noUi-handle:before, .noUi-handle:after { display: none; }
 
-        /* Цена — поля в одной строке, суммарно 100% ширины */
         .exs-price-row {
             display: flex;
             flex-direction: row;
@@ -893,7 +859,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            flex: 1 1 0; /* оба поля делят строку поровну, суммарно 100% */
+            flex: 1 1 0;
         }
         .exs-price-field input[type="number"] {
             width: 100%;
@@ -909,17 +875,7 @@
         .exs-range-plugin {
             margin: 0;
         }
-        /* Очень узкие экраны — можно сложить в столбец */
-        /*
-        @media (max-width: 421px) {
-            .exs-price-row {
-                flex-direction: column;
-            }
-        }
-        */
 
-        /* ====== РАЗМЕТКА/АДАПТИВ ПАНЕЛИ (строка) ====== */
-        /* Панель и GHOST: по умолчанию скрываем все элементы и далее показываем через data-show-panel-* */
         body:not(.filters-modal) .filters > .filters-body > .filters-grid > *,
         body.filters-modal .filters-ghost > .filters-body > .filters-grid > * {
             display: none;
@@ -995,29 +951,29 @@
             }
         }
 
-        /* Скрыть счётчик в МОДАЛКЕ (панельная сущность); GHOST не трогаем */
         body.filters-modal .filters .filters-meta > .filters-count {
             display: none !important;
         }
 
-        /* Широкие: держим в одну линию, плавно сужаем */
         @media (min-width: 992px) {
             .extra-select { min-width: 97px; }
+            .extra-select.extra-select_full-value { min-width: 124px; }
         }
 
-        /* До 991px: одинаковое ужатие и скрытие цены — и для панели, и для GHOST */
         @media (max-width: 991px) {
             body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
             body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
                 min-width: 97px;
             }
+            body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select.extra-select_full-value,
+            body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select.extra-select_full-value {
+                min-width: 124px;
+            }
         }
 
-        /* Мобилки ≤768px: одинаковая двухстрочная раскладка для панели и для GHOST */
         @media (max-width: 768px) {
             body:not(.filters-modal) .filters > .filters-body > .filters-grid,
             body.filters-modal .filters-ghost > .filters-body > .filters-grid {
-                /* flex-wrap: wrap; */
                 gap: 10px 12px;
             }
 
@@ -1050,7 +1006,6 @@
             }
         }
 
-        /* Сетка селектов внутри МОДАЛКИ — строгие правила только под body.filters-modal */
         body.filters-modal .filters .filters-body .filters-grid > .extra-select {
             display: inline-flex !important;
         }
@@ -1068,7 +1023,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.016
+        Build: 0.0.017
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -1079,8 +1034,7 @@
             </div>
             <div class="filters-body">
                 <div class="filters-grid" data-filters-scope>
-                <!-- Даты -->
-                <div class="extra-select js-extra-select extra-select_has-icon"
+                <div class="extra-select js-extra-select extra-select_full-value extra-select_has-icon"
                      data-order="10"
                      data-type="dates"
                      data-field="dates"
@@ -1121,7 +1075,7 @@
                                        data-datespicker-value=""
                                        placeholder="Выберите даты"
                                        readonly>
-                                <div class="filters-dates-picker js-dates-picker"></div> <!-- js-exs-swipe-lock -->
+                                <div class="filters-dates-picker js-dates-picker"></div>
                             </div>
                         </div>
                         <div class="exs-actions">
@@ -1132,7 +1086,6 @@
                     <div class="exs-hidden js-exs-hidden"></div>
                 </div>
 
-                <!-- Формат экскурсий -->
                 <div class="extra-select js-extra-select"
                      data-order="20"
                      data-type="checkbox"
@@ -1167,7 +1120,6 @@
                     </div>
                 </div>
 
-                <!-- Способ передвижения -->
                 <div class="extra-select js-extra-select"
                      data-order="30"
                      data-type="checkbox"
@@ -1205,12 +1157,11 @@
                     <div class="exs-hidden js-exs-hidden"></div>
                 </div>
 
-                <!-- Цены -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select extra-select_full-value"
                      data-order="40"
                      data-type="range"
                      data-field="price"
-                     data-placeholder="Цена"
+                     data-placeholder="Цены"
                      data-min="0"
                      data-max="100000"
                      data-step="1000"
@@ -1249,7 +1200,6 @@
                     <div class="exs-hidden js-exs-hidden"></div>
                 </div>
 
-                <!-- Длительность (только для модалки) -->
                 <div class="extra-select js-extra-select"
                      data-type="checkbox"
                      data-field="duration"
@@ -1281,7 +1231,6 @@
                     <div class="exs-hidden js-exs-hidden"></div>
                 </div>
 
-                <!-- "Все фильтры" — предпоследняя в строке -->
                 <button type="button"
                         class="filters-open js-filters-open"
                         data-order="50"
@@ -1299,7 +1248,6 @@
                     <span class="filters-open-badge js-filters-open-badge" aria-hidden="true"></span>
                 </button>
 
-                <!-- только для модалки: доп. чекбоксы -->
                 <div class="filters-extra-checks"
                      data-show-panel-xl="false"
                      data-show-panel-m="false"
@@ -1311,19 +1259,8 @@
                     </div>
                 </div>
 
-                <!-- Невидимый разделитель для мобил — фиксирует перенос перед сортировкой/счётчиком -->
-                <!--
-                <i class="filters-break-line"
-                   aria-hidden="true"
-                   data-order="55"
-                   data-show-panel-xl="false"
-                   data-show-panel-m="false"
-                   data-show-panel-xs="true"></i>
-               -->
-
                 </div>
                 <div class="filters-meta">
-                    <!-- Сортировка (единственный блок) -->
                     <div class="extra-select js-extra-select extra-select_sort extra-select_has-icon"
                          data-type="radio"
                          data-field="sort"
@@ -1342,7 +1279,7 @@
                                     <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"></path>
                                 </svg>
                             </span>
-                            <span class="exs-trigger-label" data-trigger-label><!-- default-sort-label --></span>
+                            <span class="exs-trigger-label" data-trigger-label></span>
                         </button>
                         <div class="exs-popover js-exs-popover" id="exs-popover-sort" data-field-key="sort" role="listbox" hidden>
                             <div class="exs-drag-handle"></div>
@@ -1361,7 +1298,6 @@
                         </div>
                     </div>
 
-                    <!-- опционально счётчик (в отдельном блоке) -->
                     <div class="filters-count"
                          data-show-panel-xl="false"
                          data-show-panel-m="false"
@@ -1378,10 +1314,6 @@
     </form>
 </div>
 
-<!--
-<script src="https://extraguide.ru/assets/js/jquery-1.12.3.min.js"></script>
-<script src="https://extraguide.ru/assets/js/daterangepicker.js" defer></script>
--->
 <script>
     (function () {
         "use strict";
@@ -1420,7 +1352,6 @@
 
         const isMobile = () => window.matchMedia("(max-width:768px)").matches;
 
-        /* ===== ссылки на модалку/форма ===== */
         const filters = document.getElementById("filters");
         const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
 
@@ -1428,10 +1359,6 @@
             "январь", "февраль", "март", "апрель", "май", "июнь",
             "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
         ];
-        // const MONTHS_GENITIVE = [
-        //     "января", "февраля", "марта", "апреля", "мая", "июня",
-        //     "июля", "августа", "сентября", "октября", "ноября", "декабря"
-        // ];
         const MONTHS_GENITIVE = [
             "янв", "фев", "мар", "апр", "мая", "июн",
             "июл", "авг", "сен", "окт", "ноя", "дек"
@@ -1512,14 +1439,11 @@
             return `${formatDateHuman(start)} ${start.getFullYear()} – ${formatDateHuman(end)} ${end.getFullYear()}`;
         };
 
+        let currentOpen = null;
+        let overlayEl = null;
+        let overlayMouseDown = false;
+        let ghostEl = null;
 
-        /* ===== Глобальный state ===== */
-        let currentOpen = null;       // { root, pop, trigger, close }
-        let overlayEl = null;         // подложка поповера (всегда в body)
-        let overlayMouseDown = false; // корректная логика закрытия
-        let ghostEl = null;           // статичный визуальный двойник
-
-        /* ===== Оверлей для поповеров — ВСЕГДА в body ===== */
         const lockScrollBody = (on) => {
             document.documentElement.style.overflow = on ? "hidden" : "";
         };
@@ -1528,7 +1452,6 @@
                 overlayEl = document.createElement("div");
                 overlayEl.className = "exs-overlay";
 
-                // ВАЖНО: закрываем ТОЛЬКО если и mousedown, и mouseup были на overlay
                 overlayEl.addEventListener("mousedown", () => {
                     overlayMouseDown = true;
                 }, { capture: true });
@@ -1540,7 +1463,6 @@
                     overlayMouseDown = false;
                 }, { capture: true });
 
-                // Если mouseup случился не на overlay — НЕ закрываем
                 document.addEventListener("mouseup", (e) => {
                     if (e.target !== overlayEl) overlayMouseDown = false;
                 }, { capture: true });
@@ -1562,7 +1484,6 @@
             overlayMouseDown = false;
         };
 
-        /* ====== GHOST while modal (чисто визуальный) ====== */
         function sanitizeGhost(root) {
             root.querySelectorAll(".exs-hidden").forEach(n => n.remove());
             const removeJsClasses = (el) => {
@@ -1604,13 +1525,11 @@
             ghostEl = null;
         }
 
-        /* ===== Портал поповера в body ===== */
         function portalOpen(pop, trigger) {
             const placeholder = document.createComment("exs-portal-placeholder");
             pop.parentNode.insertBefore(placeholder, pop);
             document.body.appendChild(pop);
 
-            // Десктоп: позиционируем у кнопки
             let cleanupPos = () => {};
             if (!isMobile()) {
                 const applyPos = () => {
@@ -1667,7 +1586,6 @@
             return { restore };
         }
 
-        /* ===== helpers ===== */
         function animateFromTo(pop, fromY, toY, duration = 180, easing = "ease", onEnd) {
             pop.style.animation = "";
             pop.dataset.open = "";
@@ -1688,7 +1606,7 @@
             };
             pop.addEventListener("transitionend", handler);
         }
-        function startKeyframe(pop, kind /* 'open' | 'close' */) {
+        function startKeyframe(pop, kind ) {
             pop.style.animation = "";
             pop.style.transform = "";
             void pop.offsetWidth;
@@ -1724,7 +1642,6 @@
             setTimeout(clear, 180);
         }
 
-        /* ===== «резинка» для bottom-sheet ===== */
         const RUBBER_K = 160;
         const VSLACK = 40;
         const BASE_PULL = 125;
@@ -1735,7 +1652,6 @@
             return Math.min(val, MAX_UP_ACTUAL);
         }
 
-        /* ===== свайп листа (мобила) ===== */
         function attachSwipe(pop, api) {
             if (!isMobile()) return () => {};
 
@@ -1893,20 +1809,17 @@
             return () => {};
         }
 
-        /* ===== клик-вне ===== */
         (function outsideClickOnly() {
             const handler = (e) => {
                 if (!currentOpen) return;
                 const { pop, root, trigger } = currentOpen;
                 if (pop.contains(e.target) || root.contains(e.target) || trigger.contains(e.target)) return;
-                // overlay сам закрывается только по mousedown+mouseup на overlay
                 currentOpen.close();
                 e.stopPropagation();
             };
             document.addEventListener("click", handler, true);
         })();
 
-        /* ========================= extra-select ========================= */
         const extraSelectRegistry = new Map();
         const filtersOpenBadge = document.querySelector(".js-filters-open-badge");
         const standaloneChecks = [...document.querySelectorAll(".filters-extra-checks input[type=\"checkbox\"]")];
@@ -1972,7 +1885,6 @@
                 }
             };
 
-            // label renderer
             const makeLabel = (arr, maxChars) => {
                 if (!arr.length) return "";
                 let out = "";
@@ -2017,7 +1929,7 @@
                             root.classList.remove("is-filled");
                         } else {
                             let text = "";
-                            if (a !== min && b !== max) text = `от ${a} — до ${b}`;
+                            if (a !== min && b !== max) text = `${a} – ${b}`;
                             else if (a !== min)         text = `от ${a}`;
                             else if (b !== max)         text = `до ${b}`;
                             setButtonText(text || placeholder);
@@ -2094,7 +2006,6 @@
                 } else {
                     root.classList.remove("is-filled");
                 }
-
                 hasActive = nextActive;
                 updateFiltersBadge();
             };
@@ -2189,9 +2100,6 @@
                 }
             };
 
-            /* ===== Типы ===== */
-
-            /* CHECKBOX */
             if (type === "checkbox") {
                 const checks = body ? [...body.querySelectorAll('input[type="checkbox"]')] : [];
 
@@ -2321,7 +2229,6 @@
                     isActive: () => hasActive
                 });
 
-            /* DATES */
             } else if (type === "dates") {
                 const today = clampToDate(new Date());
                 const minViewDate = startOfMonth(today);
@@ -2606,7 +2513,6 @@
                         btnDay.textContent = String(cellDate.getDate());
                         if (cellDate.getMonth() !== baseDate.getMonth()) {
                             btnDay.classList.add("is-outside");
-                            // continue;
                         }
                         if (isSameDay(cellDate, today)) {
                             btnDay.classList.add("is-today");
@@ -2678,7 +2584,7 @@
                             const nextView = addMonths(viewDate, -1);
                             viewDate = nextView.getTime() < minViewDate.getTime() ? minViewDate : nextView;
 
-                            renderCalendar(); // перерисовали
+                            renderCalendar();
 
                             const newHost = pop.querySelector(".datespicker-calendars");
                             if (newHost) {
@@ -2686,7 +2592,6 @@
 
                                 newHost.style.height = fromH + "px";
                                 newHost.style.overflow = "hidden";
-                                // принудительный reflow
                                 void newHost.getBoundingClientRect();
 
                                 newHost.style.transition = "height 180ms ease";
@@ -2714,7 +2619,7 @@
 
                         viewDate = addMonths(viewDate, 1);
 
-                        renderCalendar(); // перерисовали
+                        renderCalendar();
 
                         const newHost = pop.querySelector(".datespicker-calendars");
                         if (newHost) {
@@ -2807,7 +2712,6 @@
                         detachSwipe = attachSwipe(pop, api);
                     }
                     currentOpen = { root, pop, trigger: btn, close: api.close };
-                    // datesInput?.focus();
                 };
 
                 const reallyHide = () => { if (pop) pop.hidden = true; };
@@ -2876,18 +2780,6 @@
                     }
                 });
 
-                // if (datesInput) {
-                //     datesInput.addEventListener("keydown", (e) => {
-                //         if (e.key === "Enter") {
-                //             e.preventDefault();
-                //             commitDates();
-                //             root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
-                //             api.close();
-                //             submitAjax();
-                //         }
-                //     });
-                // }
-
                 readHidden();
                 if ((!applied[0] || !applied[1]) && datesInput?.dataset?.datespickerValue) {
                     const parts = datesInput.dataset.datespickerValue.split("–").map(part => part.trim());
@@ -2912,7 +2804,6 @@
                     isActive: () => hasActive
                 });
 
-            /* RANGE */
             } else if (type === "range") {
                 const min = +root.dataset.min || 0;
                 const max = +root.dataset.max || 100;
@@ -3089,7 +2980,6 @@
                     isActive: () => hasActive
                 });
 
-            /* RADIO */
             } else if (type === "radio") {
                 const radios = pop ? [...pop.querySelectorAll('input[type="radio"]')] : [];
 
@@ -3197,7 +3087,6 @@
                     isActive: () => hasActive
                 });
 
-            /* STUB */
             } else if (type === "stub") {
                 const open = () => {
                     if (currentOpen && currentOpen.root !== root) currentOpen.close();
@@ -3263,7 +3152,6 @@
 
         updateFiltersBadge();
 
-        /* ========================= МОДАЛКА (через body.filters-modal) ========================= */
         const openBtn  = document.querySelector(".js-filters-open");
         const closeBtn = filters.querySelector(".js-filters-close");
         const resetAll = filters.querySelector(".js-filters-reset-all");
@@ -3277,7 +3165,6 @@
             modalBackdrop.className = "modal-backdrop";
             let downOnBackdrop = false;
 
-            // Закрываем модалку ТОЛЬКО если и mousedown, и mouseup были на самой подложке
             modalBackdrop.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
             modalBackdrop.addEventListener("mouseup", () => {
                 if (downOnBackdrop) {
@@ -3340,7 +3227,6 @@
             if (e.key === "Escape" && document.body.classList.contains("filters-modal")) closeModal();
         });
 
-        // Сброс всё — вызывает локальные reset
         resetAll?.addEventListener("click", () => {
             extraSelectRegistry.forEach((api) => {
                 if (typeof api.resetForAll === "function") {
@@ -3356,7 +3242,6 @@
             submitAjax();
         });
 
-        // Применить всё
         applyAll?.addEventListener("click", () => {
             extraSelectRegistry.forEach((api) => {
                 if (typeof api.commitFromUi === "function") {
