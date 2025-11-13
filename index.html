@@ -132,21 +132,21 @@
         .filters-dates-picker {
             position: relative;
         }
-        .drp {
+        .datespicker {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-top: .25rem;
         }
-        .drp * {
+        .datespicker * {
             user-select: none;
         }
-        .drp a,
-        .drp button {
+        .datespicker a,
+        .datespicker button {
             -webkit-tap-highlight-color: transparent;
             -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
-        .drp-nav {
+        .datespicker-nav {
             position: relative;
             display: flex;
             align-items: center;
@@ -154,14 +154,14 @@
             gap: 12px;
             z-index: 2;
         }
-        .drp-nav-title {
+        .datespicker-nav-title {
             flex: 1 1 auto;
             text-align: center;
             font-weight: 600;
             font-size: 15px;
             color: #1f2933;
         }
-        .drp-nav-btn {
+        .datespicker-nav-btn {
             position: relative;
             flex: 0 0 auto;
             width: 32px;
@@ -180,7 +180,7 @@
             line-height: 1;
             transition: background-color 120ms ease, color 120ms ease;
         }
-        .drp-nav-btn:after {
+        .datespicker-nav-btn:after {
             content: "";
             position: absolute;
             top: 50%;
@@ -191,21 +191,21 @@
             border-bottom: 2px solid currentColor;
             transition: transform .15s ease;
         }
-        .drp-nav-btn.drp-nav-btn_prev:after {
+        .datespicker-nav-btn.datespicker-nav-btn_prev:after {
             left: 13px;
             transform: rotate(135deg);
         }
-        .drp-nav-btn.drp-nav-btn_next:after {
+        .datespicker-nav-btn.datespicker-nav-btn_next:after {
             right: 13px;
             transform: rotate(-45deg);
         }
-        .drp-nav-btn[disabled] {
+        .datespicker-nav-btn[disabled] {
             opacity: .25;
         }
-        .drp-nav-btn:hover {
+        .datespicker-nav-btn:hover {
             background: #e2e8f0;
         }
-        .drp-calendars {
+        .datespicker-calendars {
             display: grid;
             align-items: center;
             justify-content: center;
@@ -213,12 +213,12 @@
             gap: 8px;
             overflow: hidden;
         }
-        .drp-month {
+        .datespicker-month {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        .drp-month-name {
+        .datespicker-month-name {
             display: none;
             padding-right: 1rem;
             color: #1f2933;
@@ -227,20 +227,20 @@
             text-transform: capitalize;
             text-align: right;
         }
-        .drp-weekdays,
-        .drp-grid {
+        .datespicker-weekdays,
+        .datespicker-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
         }
-        .drp-weekday {
+        .datespicker-weekday {
             color: #889eb4;
             font-size: 14px;
             font-weight: 500;
             /* text-transform: uppercase; */
             text-align: center;
         }
-        .drp-day {
+        .datespicker-day {
             position: relative;
             display: inline-flex;
             align-items: center;
@@ -255,14 +255,14 @@
             cursor: pointer;
             transition: background-color 120ms ease, color 120ms ease;
         }
-        .drp-day:focus-visible {
+        .datespicker-day:focus-visible {
             outline: 2px solid #49be54;
             outline-offset: 2px;
         }
-        .drp-day:hover {
+        .datespicker-day:hover {
             background: rgba(73, 190, 84, 0.1);
         }
-        .drp-day.is-outside {
+        .datespicker-day.is-outside {
             height: 0 !important;
             padding: 0;
             opacity: 0;
@@ -270,61 +270,61 @@
             pointer-events: none;
             color: #9aa5b1;
         }
-        .drp-day.is-today {
+        .datespicker-day.is-today {
             /* font-weight: 600; */
         }
-        .drp-day.is-range {
+        .datespicker-day.is-range {
             border-radius: 0;
             background: rgba(73, 190, 84, 0.18);
             color: #1f2933;
         }
-        .drp-day.is-range.is-outside {
+        .datespicker-day.is-range.is-outside {
             background: rgba(73, 190, 84, 0.07);
             color: #9aa5b1;
         }
-        .drp-day.is-range-start,
-        .drp-day.is-range-end {
+        .datespicker-day.is-range-start,
+        .datespicker-day.is-range-end {
             background: #49be54;
             color: #ffffff;
         }
-        .drp-day.is-range-start.is-outside,
-        .drp-day.is-range-end.is-outside {
+        .datespicker-day.is-range-start.is-outside,
+        .datespicker-day.is-range-end.is-outside {
             background: rgba(73, 190, 84, .41);
             color: #ffffff;
         }
-        .drp-day.is-range-start.is-range-end {
+        .datespicker-day.is-range-start.is-range-end {
             border-radius: .75rem;
         }
-        .drp-day.is-range.is-to-left.is-range-start {
+        .datespicker-day.is-range.is-to-left.is-range-start {
             border-radius: 0 .75rem .75rem 0;
         }
-        .drp-day.is-range.is-to-left.is-range-end {
+        .datespicker-day.is-range.is-to-left.is-range-end {
             border-radius: 0 .75rem .75rem 0;
         }
-        .drp-day.is-to-right.is-range-start {
+        .datespicker-day.is-to-right.is-range-start {
             border-radius: .75rem 0 0 .75rem;
         }
-        .drp-day.is-to-right.is-range-end {
+        .datespicker-day.is-to-right.is-range-end {
             border-radius: .75rem 0 0 .75rem;
         }
-        .drp-day.is-disabled {
+        .datespicker-day.is-disabled {
             color: #cbd2d9;
             cursor: default;
             pointer-events: none;
         }
 
         @media (max-width: 768px) {
-            .drp-calendars {
+            .datespicker-calendars {
                 grid-template-columns: repeat(auto-fit, min(100%, 422px));
             }
-            .drp-month.drp-month_right {
+            .datespicker-month.datespicker-month_right {
                 /* border-top: 1px dotted #e7e7e7; */
                 padding-top: 8px;
             }
-            .drp-month.drp-month_right .drp-weekdays {
+            .datespicker-month.datespicker-month_right .datespicker-weekdays {
                 display: none;
             }
-            .drp-month-name {
+            .datespicker-month-name {
                 /* display: block; */
             }
         }
@@ -585,6 +585,10 @@
         .extra-select.is-filled:not(.extra-select_sort) .exs-trigger {
             padding: 15px 36px 5px 12px;
         }
+        .extra-select_has-icon.is-filled:not(.extra-select_sort)::before {
+            left: 44px;
+            max-width: calc(100% - 80px);
+        }
         .extra-select_sort {
             flex: 0 0 auto;
             min-width: inherit !important;
@@ -597,6 +601,7 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             background: #fff;
+            color: #1f2933;
             line-height: 1.2;
             text-align: left;
             cursor: pointer;
@@ -605,6 +610,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .exs-trigger_with-icon {
+            padding-left: 44px;
         }
         .exs-trigger[aria-expanded="true"] {
             border-color: #49be54;
@@ -632,12 +640,18 @@
         }
 
 
-        .exs-trigger-icon {
+        .exs-trigger_with-icon .exs-trigger-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
+            color: inherit;
+            pointer-events: none;
         }
         .exs-trigger-icon svg {
             display: block;
@@ -645,8 +659,14 @@
             height: 100%;
             fill: currentColor;
         }
+        .extra-select_has-icon.is-filled:not(.extra-select_sort) .exs-trigger_with-icon {
+            padding: 15px 36px 5px 44px;
+        }
         .exs-trigger-label {
-            display: inline-block;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Сортировка выглядит как ссылка */
@@ -1031,7 +1051,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.014
+        Build: 0.0.015
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -1043,7 +1063,7 @@
             <div class="filters-body">
                 <div class="filters-grid" data-filters-scope>
                 <!-- Даты -->
-                <div class="extra-select js-extra-select"
+                <div class="extra-select js-extra-select extra-select_has-icon"
                      data-order="10"
                      data-type="dates"
                      data-field="dates"
@@ -1053,10 +1073,24 @@
                      data-show-panel-m="true"
                      data-show-panel-xs="true">
                     <button type="button"
-                            class="exs-trigger js-exs-trigger"
+                            class="exs-trigger js-exs-trigger exs-trigger_with-icon"
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-controls="exs-popover-dates">Даты</button>
+                            aria-controls="exs-popover-dates">
+                        <span class="exs-trigger-icon" aria-hidden="true">
+                            <svg preserveAspectRatio="none"
+                                 width="100%"
+                                 height="100%"
+                                 viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <g></g>
+                                <g>
+                                    <path d="M19,4h-1V2h-2v2H8V2H6v2H5C3.89,4,3.01,4.9,3.01,6L3,20c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V6C21,4.9,20.1,4,19,4z M19,20 H5V10h14V20z M9,14H7v-2h2V14z M13,14h-2v-2h2V14z M17,14h-2v-2h2V14z M9,18H7v-2h2V18z M13,18h-2v-2h2V18z M17,18h-2v-2h2V18z"></path>
+                                </g>
+                            </svg>
+                        </span>
+                        <span class="exs-trigger-label">Даты</span>
+                    </button>
                     <div class="exs-popover js-exs-popover" id="exs-popover-dates" data-field-key="dates" role="dialog" hidden>
                         <div class="exs-drag-handle"></div>
                         <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
@@ -1067,7 +1101,7 @@
                                        class="filters-dates-input js-dates-input"
                                        inputmode="none"
                                        value=""
-                                       data-drp-value=""
+                                       data-datespicker-value=""
                                        placeholder="Выберите даты"
                                        readonly>
                                 <div class="filters-dates-picker js-dates-picker"></div> <!-- js-exs-swipe-lock -->
@@ -1986,7 +2020,7 @@
                         btn.classList.remove("is-active");
                         root.classList.remove("is-filled");
                         if (datesInput) {
-                            datesInput.dataset.drpValue = "";
+                            datesInput.dataset.datespickerValue = "";
                             datesInput.value = "";
                         }
                     } else {
@@ -2005,7 +2039,7 @@
                             }
                             if (datesInput) {
                                 const isoRange = `${toISODate(startDate)} – ${toISODate(endDate)}`;
-                                datesInput.dataset.drpValue = isoRange;
+                                datesInput.dataset.datespickerValue = isoRange;
                                 datesInput.value = label;
                             }
                         } else {
@@ -2013,7 +2047,7 @@
                             btn.classList.remove("is-active");
                             root.classList.remove("is-filled");
                             if (datesInput) {
-                                datesInput.dataset.drpValue = "";
+                                datesInput.dataset.datespickerValue = "";
                                 datesInput.value = "";
                             }
                         }
@@ -2318,15 +2352,15 @@
                         let b = clampToDate(endSel);
                         if (b.getTime() < a.getTime()) [a, b] = [b, a];
                         const isoRange = `${toISODate(a)} – ${toISODate(b)}`;
-                        datesInput.dataset.drpValue = isoRange;
+                        datesInput.dataset.datespickerValue = isoRange;
                         datesInput.value = formatRangeHuman(a, b);
                     } else if (startSel) {
                         const a = clampToDate(startSel);
                         const isoRange = toISODate(a);
-                        datesInput.dataset.drpValue = isoRange;
+                        datesInput.dataset.datespickerValue = isoRange;
                         datesInput.value = `${formatDateHuman(a)} ${a.getFullYear()}`;
                     } else {
-                        datesInput.dataset.drpValue = "";
+                        datesInput.dataset.datespickerValue = "";
                         datesInput.value = "";
                     }
                 };
@@ -2335,7 +2369,7 @@
                     let start = parseISODate(applied[0] ?? "");
                     let end = parseISODate(applied[1] ?? "");
                     if (!hasReadInitialDataset && (!start || !end) && datesInput) {
-                        const raw = (datesInput.dataset.drpValue || "").split("–").map(part => part.trim());
+                        const raw = (datesInput.dataset.datespickerValue || "").split("–").map(part => part.trim());
                         if (!start && raw[0]) start = parseISODate(raw[0]);
                         if (!end && raw[1]) end = parseISODate(raw[1]);
                     }
@@ -2385,25 +2419,25 @@
 
                 const renderMonth = (baseDate, addClass = '') => {
                     const monthEl = document.createElement("div");
-                    monthEl.className = "drp-month " + addClass;
+                    monthEl.className = "datespicker-month " + addClass;
 
                     const title = document.createElement("div");
-                    title.className = "drp-month-name";
+                    title.className = "datespicker-month-name";
                     title.textContent = formatMonthTitle(baseDate);
                     monthEl.appendChild(title);
 
                     const weekdaysRow = document.createElement("div");
-                    weekdaysRow.className = "drp-weekdays";
+                    weekdaysRow.className = "datespicker-weekdays";
                     WEEKDAYS_SHORT.forEach((name) => {
                         const cell = document.createElement("div");
-                        cell.className = "drp-weekday";
+                        cell.className = "datespicker-weekday";
                         cell.textContent = name;
                         weekdaysRow.appendChild(cell);
                     });
                     monthEl.appendChild(weekdaysRow);
 
                     const grid = document.createElement("div");
-                    grid.className = "drp-grid";
+                    grid.className = "datespicker-grid";
 
                     const firstDay = startOfMonth(baseDate);
                     const offset = (firstDay.getDay() + 6) % 7;
@@ -2551,7 +2585,7 @@
                         const isoValue = toISODate(cellDate);
                         const btnDay = document.createElement("button");
                         btnDay.type = "button";
-                        btnDay.className = "drp-day";
+                        btnDay.className = "datespicker-day";
                         btnDay.textContent = String(cellDate.getDate());
                         if (cellDate.getMonth() !== baseDate.getMonth()) {
                             btnDay.classList.add("is-outside");
@@ -2604,15 +2638,15 @@
                 const renderCalendar = () => {
                     if (!datesCalendarWrap) return;
                     datesCalendarWrap.innerHTML = "";
-                    const drpRoot = document.createElement("div");
-                    drpRoot.className = "drp";
+                    const datespickerRoot = document.createElement("div");
+                    datespickerRoot.className = "datespicker";
 
                     const nav = document.createElement("div");
-                    nav.className = "drp-nav";
+                    nav.className = "datespicker-nav";
 
                     const prevBtn = document.createElement("button");
                     prevBtn.type = "button";
-                    prevBtn.className = "drp-nav-btn drp-nav-btn_prev";
+                    prevBtn.className = "datespicker-nav-btn datespicker-nav-btn_prev";
                     prevBtn.setAttribute("aria-label", "Предыдущий месяц");
                     prevBtn.textContent = "";
                     const prevTarget = addMonths(viewDate, -1);
@@ -2621,7 +2655,7 @@
                         prevBtn.disabled = true;
                     } else {
                         prevBtn.addEventListener("click", () => {
-                            const host = pop.querySelector(".drp-calendars");
+                            const host = pop.querySelector(".datespicker-calendars");
                             const fromH = host ? host.offsetHeight : 0;
 
                             const nextView = addMonths(viewDate, -1);
@@ -2629,7 +2663,7 @@
 
                             renderCalendar(); // перерисовали
 
-                            const newHost = pop.querySelector(".drp-calendars");
+                            const newHost = pop.querySelector(".datespicker-calendars");
                             if (newHost) {
                                 const toH = newHost.offsetHeight;
 
@@ -2654,18 +2688,18 @@
 
                     const nextBtn = document.createElement("button");
                     nextBtn.type = "button";
-                    nextBtn.className = "drp-nav-btn drp-nav-btn_next";
+                    nextBtn.className = "datespicker-nav-btn datespicker-nav-btn_next";
                     nextBtn.setAttribute("aria-label", "Следующий месяц");
                     nextBtn.textContent = "";
                     nextBtn.addEventListener("click", () => {
-                        const host = pop.querySelector(".drp-calendars");
+                        const host = pop.querySelector(".datespicker-calendars");
                         const fromH = host ? host.offsetHeight : 0;
 
                         viewDate = addMonths(viewDate, 1);
 
                         renderCalendar(); // перерисовали
 
-                        const newHost = pop.querySelector(".drp-calendars");
+                        const newHost = pop.querySelector(".datespicker-calendars");
                         if (newHost) {
                             const toH = newHost.offsetHeight;
 
@@ -2687,20 +2721,20 @@
                     });
 
                     const title = document.createElement("div");
-                    title.className = "drp-nav-title";
+                    title.className = "datespicker-nav-title";
                     const nextMonth = addMonths(viewDate, 1);
                     title.textContent = `${formatMonthTitle(viewDate)} – ${formatMonthTitle(nextMonth)}`;
 
                     nav.appendChild(prevBtn);
                     nav.appendChild(title);
                     nav.appendChild(nextBtn);
-                    drpRoot.appendChild(nav);
+                    datespickerRoot.appendChild(nav);
 
                     const calendarsWrap = document.createElement("div");
-                    calendarsWrap.className = "drp-calendars";
-                    calendarsWrap.appendChild(renderMonth(viewDate, 'drp-month_left'));
-                    calendarsWrap.appendChild(renderMonth(nextMonth, 'drp-month_right'));
-                    drpRoot.appendChild(calendarsWrap);
+                    calendarsWrap.className = "datespicker-calendars";
+                    calendarsWrap.appendChild(renderMonth(viewDate, 'datespicker-month_left'));
+                    calendarsWrap.appendChild(renderMonth(nextMonth, 'datespicker-month_right'));
+                    datespickerRoot.appendChild(calendarsWrap);
 
                     calendarsWrap.addEventListener("mouseleave", () => {
                         if (!stagedDates[0] || stagedDates[1] || !hoverDate) return;
@@ -2708,7 +2742,7 @@
                         renderCalendar();
                     });
 
-                    datesCalendarWrap.appendChild(drpRoot);
+                    datesCalendarWrap.appendChild(datespickerRoot);
                 };
 
                 const commitDates = () => {
@@ -2734,7 +2768,7 @@
                     hoverDate = null;
                     viewDate = minViewDate;
                     if (datesInput) {
-                        datesInput.dataset.drpValue = "";
+                        datesInput.dataset.datespickerValue = "";
                         datesInput.value = "";
                     }
                     writeHidden();
@@ -2838,8 +2872,8 @@
                 // }
 
                 readHidden();
-                if ((!applied[0] || !applied[1]) && datesInput?.dataset?.drpValue) {
-                    const parts = datesInput.dataset.drpValue.split("–").map(part => part.trim());
+                if ((!applied[0] || !applied[1]) && datesInput?.dataset?.datespickerValue) {
+                    const parts = datesInput.dataset.datespickerValue.split("–").map(part => part.trim());
                     if (parts.length === 2) {
                         const start = parseISODate(parts[0]);
                         const end = parseISODate(parts[1]);
