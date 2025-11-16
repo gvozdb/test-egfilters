@@ -289,6 +289,7 @@
 
     const filters = document.getElementById("filters");
     const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
+    const isModalActive = () => document.body.classList.contains("filters-modal");
 
     const MONTHS_NOMINATIVE = [
         "январь", "февраль", "март", "апрель", "май", "июнь",
@@ -1089,6 +1090,13 @@
                 updateBtn();
             };
 
+            const commitFromModal = () => {
+                if (!isModalActive()) {
+                    return;
+                }
+                commitFromChecks();
+            };
+
             const resetChecks = () => {
                 checks.forEach(c => { c.checked = false; });
                 applied = [];
@@ -1167,6 +1175,10 @@
             pop.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); api.close(); } });
             pop.addEventListener("keydown", onArrows);
             closeX?.addEventListener("click", () => api.close());
+
+            checks.forEach((checkbox) => {
+                checkbox.addEventListener("change", commitFromModal);
+            });
 
             pop.addEventListener("click", (e) => {
                 const action = e.target?.dataset?.action;
@@ -1314,6 +1326,9 @@
                 hoverDate = null;
                 updateDisplayFromStaged();
                 renderCalendar();
+                if (isModalActive() && stagedDates[0] && stagedDates[1]) {
+                    commitDates();
+                }
             };
 
             const renderMonth = (baseDate, addClass = '') => {
@@ -1768,6 +1783,9 @@
                 }
             }
             setStagedFromApplied();
+            if (datesCalendarWrap) {
+                renderCalendar();
+            }
             updateBtn();
 
             var api = { root, pop, trigger: btn, close };
@@ -1842,6 +1860,17 @@
                 if (document.activeElement !== toNum) toNum.value = b;
             });
 
+            let suppressModalRangeCommit = false;
+
+            const commitRangeFromModal = () => {
+                if (!isModalActive() || suppressModalRangeCommit) {
+                    return;
+                }
+                suppressModalRangeCommit = true;
+                commitRange();
+                suppressModalRangeCommit = false;
+            };
+
             const syncFrom = () => {
                 let v = clamp(+fromNum.value);
                 let other = staged[1];
@@ -1856,6 +1885,9 @@
             };
             fromNum.addEventListener("input", syncFrom);
             toNum.addEventListener("input", syncTo);
+            fromNum.addEventListener("change", commitRangeFromModal);
+            toNum.addEventListener("change", commitRangeFromModal);
+            pluginEl.noUiSlider.on("change", commitRangeFromModal);
 
             const open = () => {
                 if (currentOpen && currentOpen.root !== root) currentOpen.close();
