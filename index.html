@@ -52,237 +52,254 @@
             </div>
             <div class="filters-body">
                 <div class="filters-grid" data-filters-scope>
-                <div class="extra-select js-extra-select extra-select_full-value extra-select_has-icon"
-                     data-order="10"
-                     data-type="dates"
-                     data-field="dates"
-                     data-placeholder="Даты"
-                     data-max-label-chars="28"
-                     data-show-panel-xl="true"
-                     data-show-panel-m="true"
-                     data-show-panel-xs="true">
+
+                    <!-- extra-select_full-value -->
+                    <div class="extra-select js-extra-select extra-select_has-icon"
+                         data-order="10"
+                         data-type="dates"
+                         data-field="dates"
+                         data-label="Выберите даты"
+                         data-placeholder="Выберите даты"
+                         data-max-label-chars="28"
+                         data-show-panel-xl="true"
+                         data-show-panel-m="true"
+                         data-show-panel-xs="true">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-dates">
+                            <span class="exs-trigger-icon" aria-hidden="true">
+                                <svg preserveAspectRatio="none"
+                                     width="100%"
+                                     height="100%"
+                                     viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <g></g>
+                                    <g>
+                                        <path d="M19,4h-1V2h-2v2H8V2H6v2H5C3.89,4,3.01,4.9,3.01,6L3,20c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V6C21,4.9,20.1,4,19,4z M19,20 H5V10h14V20z M9,14H7v-2h2V14z M13,14h-2v-2h2V14z M17,14h-2v-2h2V14z M9,18H7v-2h2V18z M13,18h-2v-2h2V18z M17,18h-2v-2h2V18z"></path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <span class="exs-trigger-label" data-trigger-label>&nbsp;</span>
+                        </button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-dates" data-field-key="dates" role="dialog" hidden>
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Даты</div>
+                            <div class="exs-body">
+                                <div class="filters-dates js-filters-dates">
+                                    <input type="text"
+                                           class="filters-dates-input js-dates-input"
+                                           inputmode="none"
+                                           value=""
+                                           data-datespicker-value=""
+                                           placeholder="Выберите даты"
+                                           readonly>
+                                    <div class="filters-dates-picker js-dates-picker"></div>
+                                </div>
+                            </div>
+                            <div class="exs-actions">
+                                <button type="button" class="filters-btn filters-btn_reset" data-action="reset">Сбросить</button>
+                                <button type="button" class="filters-btn filters-btn_apply" data-action="apply">Применить</button>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden">
+                            <input type="hidden" name="dates[start]" value="2025-11-25">
+                            <input type="hidden" name="dates[end]" value="2025-11-25">
+                        </div>
+                    </div>
+
+                    <div class="extra-select js-extra-select"
+                         data-order="20"
+                         data-type="checkbox"
+                         data-field="format"
+                         data-placeholder="Формат экскурсий"
+                         data-max-label-chars="28"
+                         data-show-panel-xl="true"
+                         data-show-panel-m="true"
+                         data-show-panel-xs="false">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-format">&nbsp;</button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-format" data-field-key="format" role="listbox" aria-multiselectable="true" hidden>
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Формат экскурсий</div>
+                            <div class="exs-body js-exs-body">
+                                <label class="exs-custombox"><input type="checkbox" value="Групповые"><span>Групповые</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="Мини-группы"><span>Мини-группы</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="Индивидуальные"><span>Индивидуальные</span></label>
+                            </div>
+                            <div class="exs-actions">
+                                <button type="button" class="filters-btn filters-btn_reset" data-action="reset">Сбросить</button>
+                                <button type="button" class="filters-btn filters-btn_apply" data-action="apply">Применить</button>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden">
+                            <input type="hidden" name="format[]" value="Групповые">
+                            <input type="hidden" name="format[]" value="Мини-группы">
+                        </div>
+                    </div>
+
+                    <div class="extra-select js-extra-select"
+                         data-order="30"
+                         data-type="checkbox"
+                         data-field="transport"
+                         data-placeholder="Способ передвижения"
+                         data-max-label-chars="28"
+                         data-show-panel-xl="true"
+                         data-show-panel-m="true"
+                         data-show-panel-xs="false">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-transport">&nbsp;</button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-transport" data-field-key="transport" role="listbox" aria-multiselectable="true" hidden>
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Способ передвижения</div>
+                            <div class="exs-body js-exs-body">
+                                <label class="exs-custombox"><input type="checkbox" value="Пешком"><span>Пешком</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На автобусе"><span>На автобусе</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На автомобиле"><span>На автомобиле</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На мотоцикле"><span>На мотоцикле</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На велосипеде"><span>На велосипеде</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На теплоходе"><span>На теплоходе</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На яхте"><span>На яхте</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="На катере"><span>На катере</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="Другое"><span>Другое</span></label>
+                            </div>
+                            <div class="exs-actions">
+                                <button type="button" class="filters-btn filters-btn_reset" data-action="reset">Сбросить</button>
+                                <button type="button" class="filters-btn filters-btn_apply" data-action="apply">Применить</button>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden"></div>
+                    </div>
+
+                    <div class="extra-select js-extra-select extra-select_full-value"
+                         data-order="40"
+                         data-type="range"
+                         data-field="price"
+                         data-placeholder="Цены"
+                         data-min="0"
+                         data-max="100000"
+                         data-step="1000"
+                         data-show-panel-xl="true"
+                         data-show-panel-m="false"
+                         data-show-panel-xs="false">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-price">&nbsp;</button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-price" data-field-key="price" role="dialog" hidden>
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Цены</div>
+                            <div class="exs-body">
+                                <div class="exs-price-row">
+                                    <label class="exs-price-field">
+                                        <span>от</span>
+                                        <input type="number" class="exs-from js-exs-from" inputmode="numeric" placeholder="">
+                                    </label>
+                                    <label class="exs-price-field">
+                                        <span>до</span>
+                                        <input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="">
+                                    </label>
+                                </div>
+                                <div class="exs-range">
+                                    <div class="exs-range-plugin js-exs-range js-exs-swipe-lock" id="price-plugin"></div>
+                                </div>
+                            </div>
+                            <div class="exs-actions">
+                                <button type="button" class="filters-btn filters-btn_reset" data-action="reset">Сбросить</button>
+                                <button type="button" class="filters-btn filters-btn_apply" data-action="apply">Применить</button>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden">
+                            <input type="hidden" name="price[min]" value="25000">
+                            <input type="hidden" name="price[max]" value="70000">
+                        </div>
+                    </div>
+
+                    <div class="extra-select js-extra-select"
+                         data-type="checkbox"
+                         data-field="duration"
+                         data-placeholder="Длительность"
+                         data-max-label-chars="28"
+                         data-show-panel-xl="false"
+                         data-show-panel-m="false"
+                         data-show-panel-xs="false">
+                        <button type="button"
+                                class="exs-trigger js-exs-trigger"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="exs-popover-duration">&nbsp;</button>
+                        <div class="exs-popover js-exs-popover" id="exs-popover-duration" data-field-key="duration" role="listbox" hidden aria-multiselectable="true">
+                            <div class="exs-drag-handle"></div>
+                            <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
+                            <div class="exs-header">Длительность</div>
+                            <div class="exs-body js-exs-body">
+                                <label class="exs-custombox"><input type="checkbox" value="до 2 часов"><span>до 2 часов</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="от 2 до 4"><span>от 2 до 4</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="от 4 до 6"><span>от 4 до 6</span></label>
+                                <label class="exs-custombox"><input type="checkbox" value="6+ часов"><span>6+ часов</span></label>
+                            </div>
+                            <div class="exs-actions">
+                                <button type="button" class="filters-btn filters-btn_reset" data-action="reset">Сбросить</button>
+                                <button type="button" class="filters-btn filters-btn_apply" data-action="apply">Применить</button>
+                            </div>
+                        </div>
+                        <div class="exs-hidden js-exs-hidden"></div>
+                    </div>
+
                     <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="dialog"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-dates">
-                        <span class="exs-trigger-icon" aria-hidden="true">
-                            <svg preserveAspectRatio="none"
-                                 width="100%"
-                                 height="100%"
-                                 viewBox="0 0 24 24"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <g></g>
-                                <g>
-                                    <path d="M19,4h-1V2h-2v2H8V2H6v2H5C3.89,4,3.01,4.9,3.01,6L3,20c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V6C21,4.9,20.1,4,19,4z M19,20 H5V10h14V20z M9,14H7v-2h2V14z M13,14h-2v-2h2V14z M17,14h-2v-2h2V14z M9,18H7v-2h2V18z M13,18h-2v-2h2V18z M17,18h-2v-2h2V18z"></path>
-                                </g>
+                            class="filters-open js-filters-open"
+                            data-order="50"
+                            data-order-xs="20"
+                            data-filters-open
+                            data-show-panel-xl="true"
+                            data-show-panel-m="true"
+                            data-show-panel-xs="true">
+                        <span class="filters-open-icon" aria-hidden="true">
+                            <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path>
                             </svg>
                         </span>
-                        <span class="exs-trigger-label" data-trigger-label>Даты</span>
+                        <span class="filters-open-prefix">Все </span>фильтры
+                        <span class="filters-open-badge js-filters-open-badge" aria-hidden="true"></span>
                     </button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-dates" data-field-key="dates" role="dialog" hidden>
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Даты</div>
-                        <div class="exs-body">
-                            <div class="filters-dates js-filters-dates">
-                                <input type="text"
-                                       class="filters-dates-input js-dates-input"
-                                       inputmode="none"
-                                       value=""
-                                       data-datespicker-value=""
-                                       placeholder="Выберите даты"
-                                       readonly>
-                                <div class="filters-dates-picker js-dates-picker"></div>
-                            </div>
-                        </div>
-                        <div class="exs-actions">
-                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
-                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
-                        </div>
-                    </div>
-                    <div class="exs-hidden js-exs-hidden">
-                        <input type="hidden" name="dates[start]" value="2025-11-25">
-                        <input type="hidden" name="dates[end]" value="2025-11-25">
-                    </div>
-                </div>
 
-                <div class="extra-select js-extra-select"
-                     data-order="20"
-                     data-type="checkbox"
-                     data-field="format"
-                     data-placeholder="Формат экскурсий"
-                     data-max-label-chars="28"
-                     data-show-panel-xl="true"
-                     data-show-panel-m="true"
-                     data-show-panel-xs="false">
-                    <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-format">Формат экскурсий</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-format" data-field-key="format" role="listbox" aria-multiselectable="true" hidden>
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Формат экскурсий</div>
-                        <div class="exs-body js-exs-body">
-                            <label><input type="checkbox" value="Групповые"> Групповые</label>
-                            <label><input type="checkbox" value="Мини-группы"> Мини-группы</label>
-                            <label><input type="checkbox" value="Индивидуальные"> Индивидуальные</label>
-                        </div>
-                        <div class="exs-actions">
-                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
-                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
-                        </div>
-                    </div>
-                    <div class="exs-hidden js-exs-hidden">
-                        <input type="hidden" name="format[]" value="Групповые">
-                        <input type="hidden" name="format[]" value="Мини-группы">
-                    </div>
-                </div>
-
-                <div class="extra-select js-extra-select"
-                     data-order="30"
-                     data-type="checkbox"
-                     data-field="transport"
-                     data-placeholder="Способ передвижения"
-                     data-max-label-chars="28"
-                     data-show-panel-xl="true"
-                     data-show-panel-m="true"
-                     data-show-panel-xs="false">
-                    <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-transport">Способ передвижения</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-transport" data-field-key="transport" role="listbox" aria-multiselectable="true" hidden>
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Способ передвижения</div>
-                        <div class="exs-body js-exs-body">
-                            <label><input type="checkbox" value="Пешком"> Пешком</label>
-                            <label><input type="checkbox" value="На автобусе"> На автобусе</label>
-                            <label><input type="checkbox" value="На автомобиле"> На автомобиле</label>
-                            <label><input type="checkbox" value="На мотоцикле"> На мотоцикле</label>
-                            <label><input type="checkbox" value="На велосипеде"> На велосипеде</label>
-                            <label><input type="checkbox" value="На теплоходе"> На теплоходе</label>
-                            <label><input type="checkbox" value="На яхте"> На яхте</label>
-                            <label><input type="checkbox" value="На катере"> На катере</label>
-                            <label><input type="checkbox" value="Другое"> Другое</label>
-                        </div>
-                        <div class="exs-actions">
-                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
-                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
-                        </div>
-                    </div>
-                    <div class="exs-hidden js-exs-hidden"></div>
-                </div>
-
-                <div class="extra-select js-extra-select extra-select_full-value"
-                     data-order="40"
-                     data-type="range"
-                     data-field="price"
-                     data-placeholder="Цены"
-                     data-min="0"
-                     data-max="100000"
-                     data-step="1000"
-                     data-show-panel-xl="true"
-                     data-show-panel-m="false"
-                     data-show-panel-xs="false">
-                    <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="dialog"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-price">Цены</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-price" data-field-key="price" role="dialog" hidden>
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Цены</div>
-                        <div class="exs-body">
-                            <div class="exs-price-row">
-                                <label class="exs-price-field">
-                                    <span>От</span>
-                                    <input type="number" class="exs-from js-exs-from" inputmode="numeric" placeholder="от">
-                                </label>
-                                <label class="exs-price-field">
-                                    <span>До</span>
-                                    <input type="number" class="exs-to js-exs-to" inputmode="numeric" placeholder="до">
+                    <div class="filters-standalone-checks js-filters-standalone-checks"
+                         data-show-panel-xl="false"
+                         data-show-panel-m="false"
+                         data-show-panel-xs="false">
+                        <div class="check-row">
+                            <div class="check-row-item">
+                                <label class="exs-custombox">
+                                    <input type="checkbox" name="no_prepay" value="1">
+                                    <span>Без предоплаты</span>
                                 </label>
                             </div>
-                            <div class="exs-range">
-                                <div class="exs-range-plugin js-exs-range js-exs-swipe-lock" id="price-plugin"></div>
+                            <div class="check-row-item">
+                                <label class="exs-custombox">
+                                    <input type="checkbox" name="with_discount" value="1">
+                                    <span>Со скидкой</span>
+                                </label>
+                            </div>
+                            <div class="check-row-item">
+                                <label class="exs-custombox">
+                                    <input type="checkbox" name="editors_choice" value="1">
+                                    <span>Выбор редакции</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="exs-actions">
-                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
-                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
-                        </div>
                     </div>
-                    <div class="exs-hidden js-exs-hidden">
-                        <input type="hidden" name="price[min]" value="25000">
-                        <input type="hidden" name="price[max]" value="70000">
-                    </div>
-                </div>
-
-                <div class="extra-select js-extra-select"
-                     data-type="checkbox"
-                     data-field="duration"
-                     data-placeholder="Длительность"
-                     data-max-label-chars="28"
-                     data-show-panel-xl="false"
-                     data-show-panel-m="false"
-                     data-show-panel-xs="false">
-                    <button type="button"
-                            class="exs-trigger js-exs-trigger"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            aria-controls="exs-popover-duration">Длительность</button>
-                    <div class="exs-popover js-exs-popover" id="exs-popover-duration" data-field-key="duration" role="listbox" hidden aria-multiselectable="true">
-                        <div class="exs-drag-handle"></div>
-                        <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
-                        <div class="exs-header">Длительность</div>
-                        <div class="exs-body js-exs-body">
-                            <label><input type="checkbox" value="до 2 часов"> до 2 часов</label>
-                            <label><input type="checkbox" value="от 2 до 4"> от 2 до 4</label>
-                            <label><input type="checkbox" value="от 4 до 6"> от 4 до 6</label>
-                            <label><input type="checkbox" value="6+ часов"> 6+ часов</label>
-                        </div>
-                        <div class="exs-actions">
-                            <button type="button" class="filters-btn" data-action="reset">Сбросить</button>
-                            <button type="button" class="filters-btn primary" data-action="apply">Применить</button>
-                        </div>
-                    </div>
-                    <div class="exs-hidden js-exs-hidden"></div>
-                </div>
-
-                <button type="button"
-                        class="filters-open js-filters-open"
-                        data-order="50"
-                        data-order-xs="20"
-                        data-filters-open
-                        data-show-panel-xl="true"
-                        data-show-panel-m="true"
-                        data-show-panel-xs="true">
-                    <span class="filters-open-icon" aria-hidden="true">
-                        <svg preserveAspectRatio="none" width="100%" viewBox="0 0 24 24" height="100%" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path>
-                        </svg>
-                    </span>
-                    <span class="filters-open-prefix">Все </span>фильтры
-                    <span class="filters-open-badge js-filters-open-badge" aria-hidden="true"></span>
-                </button>
-
-                <div class="filters-extra-checks"
-                     data-show-panel-xl="false"
-                     data-show-panel-m="false"
-                     data-show-panel-xs="false">
-                    <div class="check-row">
-                        <label><input type="checkbox" name="no_prepay" value="1"> Без предоплаты</label>
-                        <label><input type="checkbox" name="with_discount" value="1"> Со скидкой</label>
-                        <label><input type="checkbox" name="editors_choice" value="1" checked> Выбор редакции</label>
-                    </div>
-                </div>
-
                 </div>
                 <div class="filters-meta">
                     <div class="extra-select js-extra-select extra-select_sort extra-select_has-icon"
@@ -310,15 +327,15 @@
                             <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                             <div class="exs-header">Показать сначала</div>
                             <div class="exs-body js-exs-body">
-                                <label><input type="radio" name="sort-radio" value="recommended" data-label="рекомендуемые" data-is-default="true"> рекомендуемые</label>
-                                <label><input type="radio" name="sort-radio" value="popular"     data-label="популярные"> популярные</label>
-                                <label><input type="radio" name="sort-radio" value="rating"      data-label="с высоким рейтингом" checked> с высоким рейтингом</label>
-                                <label><input type="radio" name="sort-radio" value="cheap"       data-label="дешевле"> дешевле</label>
-                                <label><input type="radio" name="sort-radio" value="expensive"   data-label="дороже"> дороже</label>
+                                <label class="exs-custombox"><input type="radio" name="_sort" value="recommended" data-label="рекомендуемые" data-is-default="true" checked><span>рекомендуемые</span></label>
+                                <label class="exs-custombox"><input type="radio" name="_sort" value="popular" data-label="популярные"><span>популярные</span></label>
+                                <label class="exs-custombox"><input type="radio" name="_sort" value="rating" data-label="с высоким рейтингом"><span>с высоким рейтингом</span></label>
+                                <label class="exs-custombox"><input type="radio" name="_sort" value="cheap" data-label="дешевле"><span>дешевле</span></label>
+                                <label class="exs-custombox"><input type="radio" name="_sort" value="expensive" data-label="дороже"><span>дороже</span></label>
                             </div>
                         </div>
                         <div class="exs-hidden js-exs-hidden">
-                            <input type="hidden" name="sort" value="rating">
+                            <input type="hidden" name="sort" value="recommended">
                         </div>
                     </div>
 
@@ -331,8 +348,8 @@
             </div>
 
             <div class="filters-footer">
-                <button type="button" class="filters-btn js-filters-reset-all" data-filters-reset-all>Сбросить всё</button>
-                <button type="button" class="filters-btn primary js-filters-apply-all" data-filters-apply-all>Показать</button>
+                <button type="button" class="filters-btn filters-btn_reset js-filters-reset-all" data-filters-reset-all>Сбросить всё</button>
+                <button type="button" class="filters-btn filters-btn_apply js-filters-apply-all" data-filters-apply-all>Показать</button>
             </div>
         </div>
     </form>
