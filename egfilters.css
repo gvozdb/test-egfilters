@@ -8,12 +8,22 @@
 .filters-ghost {
     font-size: 16px;
     line-height: 1.2;
-    opacity: .65;
+    /* opacity: .65; */
     pointer-events: none;
     user-select: none;
 }
 .filters-ghost .exs-popover {
     display: none !important;
+}
+
+.filters-sticky-placeholder {
+    display: none;
+    width: 100%;
+}
+.filters-sticky-target {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    z-index: 8000;
 }
 
 .filters-body {
