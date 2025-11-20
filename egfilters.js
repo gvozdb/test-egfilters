@@ -285,7 +285,8 @@
 (function () {
     "use strict";
 
-    const isMobile = () => window.matchMedia("(max-width:768px)").matches;
+    const mobileMedia = window.matchMedia("(max-width:768px)");
+    const isMobile = () => mobileMedia.matches;
 
     const filters = document.getElementById("filters");
     const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
@@ -424,7 +425,7 @@
         const removeJsClasses = (el) => {
             if (el.classList && el.classList.length) {
                 [...el.classList].forEach(cls => {
-                    if (cls.startsWith("js-")) {
+                    if (cls.startsWith("js-") && cls !== "js-filters-body") {
                         el.classList.remove(cls);
                     }
                 });
@@ -453,12 +454,146 @@
         sanitizeGhost(clone);
         ghostEl.appendChild(clone);
         filters.parentNode.insertBefore(ghostEl, filters);
+        scheduleStickyUpdate();
     }
     function removeGhost() {
         if (!ghostEl) return;
         ghostEl.remove();
         ghostEl = null;
+        scheduleStickyUpdate();
     }
+
+    const stickyState = {
+        placeholder: null,
+        target: null,
+        targetType: null,
+        isStuck: false
+    };
+
+    const getActiveFiltersBody = () => {
+        if (document.body.classList.contains("filters-modal") && ghostEl) {
+            return ghostEl.querySelector(".js-filters-body");
+        }
+        return filters?.querySelector(".js-filters-body") ?? null;
+    };
+
+    const getStickyNodes = () => {
+        const bodyNode = getActiveFiltersBody();
+        if (!bodyNode) {
+            return { bodyNode: null, targetNode: null, targetType: null };
+        }
+        const targetNode = isMobile()
+            ? bodyNode.querySelector(".filters-grid")
+            : bodyNode;
+        const targetType = isMobile() ? "grid" : "body";
+        return { bodyNode, targetNode, targetType };
+    };
+
+    const ensureStickyPlaceholder = (target) => {
+        if (!target || !target.parentNode) {
+            return null;
+        }
+        if (!stickyState.placeholder || stickyState.placeholder.parentNode !== target.parentNode) {
+            stickyState.placeholder?.remove();
+            stickyState.placeholder = document.createElement("div");
+            stickyState.placeholder.className = "filters-sticky-placeholder";
+            target.parentNode.insertBefore(stickyState.placeholder, target);
+        }
+        return stickyState.placeholder;
+    };
+
+    const resetSticky = () => {
+        document.body.classList.remove("filters-sticky");
+        delete document.body.dataset.filtersStickyTarget;
+        if (stickyState.placeholder) {
+            stickyState.placeholder.style.display = "none";
+            stickyState.placeholder.style.height = "";
+            stickyState.placeholder.style.width = "";
+        }
+        if (stickyState.target) {
+            stickyState.target.classList.remove("filters-sticky-target");
+            stickyState.target.style.position = "";
+            stickyState.target.style.left = "";
+            stickyState.target.style.top = "";
+            stickyState.target.style.width = "";
+            stickyState.target.style.right = "";
+            stickyState.target.style.zIndex = "";
+        }
+        stickyState.target = null;
+        stickyState.targetType = null;
+        stickyState.isStuck = false;
+    };
+
+    const applySticky = (target, targetType, rect) => {
+        const placeholder = ensureStickyPlaceholder(target);
+        if (!placeholder || !rect) {
+            resetSticky();
+            return;
+        }
+
+        placeholder.style.display = "block";
+        placeholder.style.height = `${rect.height}px`;
+        placeholder.style.width = `${rect.width}px`;
+
+        target.classList.add("filters-sticky-target");
+        target.style.position = "fixed";
+        target.style.top = "0px";
+        target.style.left = `${rect.left + window.scrollX}px`;
+        target.style.width = `${rect.width}px`;
+        target.style.right = "auto";
+        target.style.zIndex = "8000";
+
+        stickyState.target = target;
+        stickyState.targetType = targetType;
+        stickyState.isStuck = true;
+        document.body.classList.add("filters-sticky");
+        document.body.dataset.filtersStickyTarget = targetType;
+    };
+
+    const updateSticky = () => {
+        const { bodyNode, targetNode, targetType } = getStickyNodes();
+        if (!bodyNode || !targetNode) {
+            resetSticky();
+            return;
+        }
+
+        if (stickyState.target && stickyState.target !== targetNode) {
+            resetSticky();
+        }
+
+        const referenceNode = stickyState.isStuck && stickyState.placeholder
+            ? stickyState.placeholder
+            : bodyNode;
+        const referenceRect = referenceNode.getBoundingClientRect();
+        const referenceTop = referenceRect.top + window.scrollY;
+        const shouldStick = window.scrollY >= referenceTop;
+
+        if (!shouldStick) {
+            resetSticky();
+            return;
+        }
+
+        const rectSource = stickyState.placeholder && stickyState.isStuck
+            ? stickyState.placeholder
+            : targetNode;
+        const rect = rectSource.getBoundingClientRect();
+        applySticky(targetNode, targetType, rect);
+    };
+
+    let stickyQueued = false;
+    const scheduleStickyUpdate = () => {
+        if (stickyQueued) return;
+        stickyQueued = true;
+        requestAnimationFrame(() => {
+            stickyQueued = false;
+            updateSticky();
+        });
+    };
+
+    window.addEventListener("scroll", scheduleStickyUpdate, { passive: true });
+    window.addEventListener("resize", scheduleStickyUpdate);
+    mobileMedia.addEventListener("change", scheduleStickyUpdate);
+    scheduleStickyUpdate();
 
     function portalOpen(pop, trigger) {
         const placeholder = document.createComment("exs-portal-placeholder");
@@ -2186,7 +2321,7 @@
         createBackdrop();
         lockPage(true);
         document.addEventListener("keydown", modalFocusTrap);
-        closeBtn?.focus();
+        closeBtn?.focus({ preventScroll: true });
     };
 
     const closeModal = () => {
@@ -2196,7 +2331,7 @@
         removeGhost();
         lockPage(false);
         document.removeEventListener("keydown", modalFocusTrap);
-        openBtn?.focus();
+        openBtn?.focus({ preventScroll: true });
     };
 
     const applyModal = () => {
