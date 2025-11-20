@@ -430,6 +430,19 @@
         overlayMouseDown = false;
     };
 
+    const isInsideCurrentOpen = (target) => {
+        if (!currentOpen || !target) return false;
+        const { pop, trigger, root } = currentOpen;
+        return (pop && pop.contains(target)) || (trigger && trigger.contains(target)) || (root && root.contains(target));
+    };
+
+    document.addEventListener("pointerdown", (event) => {
+        if (isMobile()) return;
+        if (!currentOpen) return;
+        if (isInsideCurrentOpen(event.target)) return;
+        currentOpen.close();
+    }, { capture: true });
+
     function sanitizeGhost(root) {
         root.querySelectorAll(".exs-hidden").forEach(n => n.remove());
         const removeJsClasses = (el) => {
@@ -737,7 +750,7 @@
     function attachSwipe(pop, api) {
         if (!isMobile()) return () => {};
 
-        const scrollable = pop.querySelector(".exs-body, .filters-body") || pop;
+        // const scrollable = pop.querySelector(".exs-body, .filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
         const setSheetDragMeta = (active, distance = 0) => {
             if (active) {
@@ -802,14 +815,14 @@
             const distance = delta < 0 ? Math.max(0, -delta) : delta;
 
             if (!dragging) {
-                if (delta < -THRESH && scrollable.scrollTop <= 0) { dragging = true; setSheetDragMeta(true, distance); }
+                if (delta < -THRESH) { dragging = true; setSheetDragMeta(true, distance); }
                 else if (delta > THRESH) { dragging = true; setSheetDragMeta(true, distance); }
                 else { return; }
             } else {
                 updateSheetDragDistance(distance);
             }
 
-            if (delta < 0 && scrollable.scrollTop <= 0) {
+            if (delta < 0) {
                 const pull = Math.max(0, -delta);
                 dy = -rubberUpShifted(pull);
                 if (e && e.cancelable) e.preventDefault();
@@ -1250,11 +1263,13 @@
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
-                ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
                 if (isMobile()) {
+                    ensureOverlay();
+                    moveOverlayOnTop();
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
+                lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
                 (checks.find(x => x.checked) || checks[0])?.focus();
             };
@@ -1829,11 +1844,13 @@
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
-                ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
                 if (isMobile()) {
+                    ensureOverlay();
+                    moveOverlayOnTop();
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
+                lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
 
@@ -2012,11 +2029,13 @@
 
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
-                ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
                 if (isMobile()) {
+                    ensureOverlay();
+                    moveOverlayOnTop();
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
+                lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
 
@@ -2138,11 +2157,13 @@
 
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
-                ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
                 if (isMobile()) {
+                    ensureOverlay();
+                    moveOverlayOnTop();
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
+                lockScrollBody(true);
 
                 currentOpen = { root, pop, trigger: btn, close: api.close };
                 (radios.find(x => x.checked) || radios[0])?.focus();
@@ -2216,11 +2237,13 @@
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
-                ensureOverlay(); moveOverlayOnTop(); lockScrollBody(true);
                 if (isMobile()) {
+                    ensureOverlay();
+                    moveOverlayOnTop();
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
+                lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
             const reallyHide = () => { if (pop) pop.hidden = true; };
