@@ -376,6 +376,8 @@
     };
 
     let currentOpen = null;
+    let filtersSheetOpen = false;
+    let closeFiltersSheet = null;
     let overlayEl = null;
     let overlayMouseDown = false;
     let ghostEl = null;
@@ -394,7 +396,11 @@
 
             overlayEl.addEventListener("mouseup", () => {
                 if (overlayMouseDown) {
-                    if (currentOpen) currentOpen.close();
+                    if (filtersSheetOpen && typeof closeFiltersSheet === "function") {
+                        closeFiltersSheet();
+                    } else if (currentOpen) {
+                        currentOpen.close();
+                    }
                 }
                 overlayMouseDown = false;
             }, { capture: true });
@@ -413,6 +419,10 @@
         }
     };
     const removeOverlay = () => {
+        if (filtersSheetOpen) {
+            overlayMouseDown = false;
+            return;
+        }
         if (overlayEl) {
             overlayEl.remove();
             overlayEl = null;
@@ -506,9 +516,8 @@
         document.body.classList.remove("filters-sticky");
         delete document.body.dataset.filtersStickyTarget;
         if (stickyState.placeholder) {
-            stickyState.placeholder.style.display = "none";
-            stickyState.placeholder.style.height = "";
-            stickyState.placeholder.style.width = "";
+            stickyState.placeholder.remove();
+            stickyState.placeholder = null;
         }
         if (stickyState.target) {
             stickyState.target.classList.remove("filters-sticky-target");
@@ -551,6 +560,9 @@
     };
 
     const updateSticky = () => {
+        if (stickyState.isStuck && stickyState.placeholder) {
+            stickyState.placeholder.style.width = "";
+        }
         const { bodyNode, targetNode, targetType } = getStickyNodes();
         if (!bodyNode || !targetNode) {
             resetSticky();
@@ -725,7 +737,7 @@
     function attachSwipe(pop, api) {
         if (!isMobile()) return () => {};
 
-        const scrollable = pop.querySelector(".exs-body") || pop;
+        const scrollable = pop.querySelector(".exs-body, .filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
         const setSheetDragMeta = (active, distance = 0) => {
             if (active) {
@@ -2270,20 +2282,35 @@
     const scope    = filters.querySelector("[data-filters-scope]");
 
     let modalBackdrop = null;
+    let modalOpenedAsSheet = false;
+    let detachModalSwipe = null;
     const createBackdrop = () => {
         if (modalBackdrop) return;
         modalBackdrop = document.createElement("div");
         modalBackdrop.className = "modal-backdrop";
         let downOnBackdrop = false;
 
-        modalBackdrop.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
-        modalBackdrop.addEventListener("mouseup", () => {
+        // modalBackdrop.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
+        // modalBackdrop.addEventListener("mouseup", () => {
+        //     if (downOnBackdrop) {
+        //         if (currentOpen) { currentOpen.close(); }
+        //         else { closeModal(); }
+        //     }
+        //     downOnBackdrop = false;
+        // }, { passive: true });
+
+        const handleStart = () => { downOnBackdrop = true; };
+        const handleEnd = () => {
             if (downOnBackdrop) {
-                if (currentOpen) { currentOpen.close(); }
-                else { closeModal(); }
+                closeModal();
             }
             downOnBackdrop = false;
-        }, { passive: true });
+        };
+
+        modalBackdrop.addEventListener("mousedown", handleStart, { passive: true });
+        modalBackdrop.addEventListener("mouseup", handleEnd, { passive: true });
+        // modalBackdrop.addEventListener("touchstart", handleStart, { passive: true });
+        // modalBackdrop.addEventListener("touchend", handleEnd, { passive: true });
 
         document.body.appendChild(modalBackdrop);
     };
@@ -2291,10 +2318,6 @@
         if (!modalBackdrop) return;
         modalBackdrop.remove();
         modalBackdrop = null;
-    };
-
-    const lockPage = (on) => {
-        // document.body.style.overflow = on ? "hidden" : "";
     };
 
     const modalFocusTrap = (e) => {
@@ -2314,24 +2337,67 @@
         });
     };
 
+    const finalizeModalClose = () => {
+        filtersSheetOpen = false;
+        closeFiltersSheet = null;
+        document.body.classList.remove("filters-modal");
+        lockScrollBody(false);
+        removeBackdrop();
+        resetSticky();
+        removeGhost();
+        document.removeEventListener("keydown", modalFocusTrap);
+        if (detachModalSwipe) {
+            detachModalSwipe();
+            detachModalSwipe = null;
+        }
+        delete filters.dataset.open;
+        delete filters.dataset.closing;
+        filters.style.transform = "";
+        filters.style.animation = "";
+        modalOpenedAsSheet = false;
+        openBtn?.focus({ preventScroll: true });
+    };
+
     const openModal = () => {
         closeAllPopovers();
+        resetSticky();
         createGhost();
         document.body.classList.add("filters-modal");
+        modalOpenedAsSheet = isMobile();
         createBackdrop();
-        lockPage(true);
+        lockScrollBody(true);
+        if (modalOpenedAsSheet) {
+            lockScrollBody(true);
+            startKeyframe(filters, "open");
+            detachModalSwipe = attachSwipe(filters, { close: closeModal });
+            closeFiltersSheet = closeModal;
+        }
         document.addEventListener("keydown", modalFocusTrap);
         closeBtn?.focus({ preventScroll: true });
     };
 
-    const closeModal = () => {
+    const closeModal = (opts = {}) => {
+        const { animatedFromY = null, alreadyAnimated = false } = opts;
         closeAllPopovers();
-        document.body.classList.remove("filters-modal");
-        removeBackdrop();
-        removeGhost();
-        lockPage(false);
-        document.removeEventListener("keydown", modalFocusTrap);
-        openBtn?.focus({ preventScroll: true });
+
+        if (modalOpenedAsSheet) {
+            if (alreadyAnimated) {
+                finalizeModalClose();
+                return;
+            }
+            if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                animateFromTo(filters, animatedFromY, "translateY(100%)", 70, "ease", finalizeModalClose);
+            } else {
+                startKeyframe(filters, "close");
+                setTimeout(finalizeModalClose, 180);
+            }
+            setTimeout(() => {
+                filters.style.transform = "";
+                filters.style.animation = "";
+            }, 200);
+        } else {
+            finalizeModalClose();
+        }
     };
 
     const applyModal = () => {
