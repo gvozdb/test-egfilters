@@ -380,7 +380,7 @@
     let ghostEl = null;
 
     const lockScrollBody = (on) => {
-        document.documentElement.style.overflow = on ? "hidden" : "";
+        // document.documentElement.style.overflow = on ? "hidden" : "";
     };
     const ensureOverlay = () => {
         if (!overlayEl) {
@@ -521,7 +521,7 @@
         return { restore };
     }
 
-    function animateFromTo(pop, fromY, toY, duration = 180, easing = "ease", onEnd) {
+    function animateFromTo(pop, fromY, toY, duration = 70, easing = "ease", onEnd) {
         pop.style.animation = "";
         pop.dataset.open = "";
         pop.dataset.closing = "";
@@ -554,7 +554,7 @@
         }
     }
     function desktopFadeOut(pop, done) {
-        pop.style.transition = "opacity 140ms ease, transform 140ms ease";
+        pop.style.transition = "opacity 40ms ease, transform 40ms ease";
         let finished = false;
         const clear = () => {
             if (finished) return;
@@ -689,18 +689,18 @@
                     const threshold = 40;
                     const currentY = clampSheet(dy);
                     if (currentY > threshold) {
-                        animateFromTo(pop, currentY, "translateY(100%)", 180, "ease", () => {
+                        animateFromTo(pop, currentY, "translateY(100%)", 70, "ease", () => {
                             api.close({ animatedFromY: null, alreadyAnimated: true });
                         });
                     } else {
-                        animateFromTo(pop, currentY, 0, 180, "ease", () => {
+                        animateFromTo(pop, currentY, 0, 70, "ease", () => {
                             pop.style.transform = "";
                             pop.style.animation = "";
                         });
                     }
                 } else {
                     const currentY = clampSheet(dy);
-                    animateFromTo(pop, currentY, 0, 160, "cubic-bezier(.2,.8,.2,1)", () => {
+                    animateFromTo(pop, currentY, 0, 70, "cubic-bezier(.2,.8,.2,1)", () => {
                         pop.style.transform = "";
                         pop.style.animation = "";
                     });
@@ -809,6 +809,7 @@
     exsRoots.forEach((root) => {
         const type = (root.dataset.type || "checkbox").trim();
         const field = (root.dataset.field || "").trim();
+        const label = (root.dataset.label || "").trim();
         const placeholder = (root.dataset.placeholder || "Выбрать…").trim();
         const maxChars = +root.dataset.maxLabelChars || 28;
 
@@ -854,7 +855,7 @@
 
             if (type === "checkbox") {
                 if (!applied.length) {
-                    setButtonText(placeholder);
+                    setButtonText(label || placeholder);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
@@ -867,7 +868,7 @@
                 const min = Number(root.dataset.min ?? "0");
                 const max = Number(root.dataset.max ?? "0");
                 if (!applied.length || (applied[0] === "" && applied[1] === "")) {
-                    setButtonText(placeholder);
+                    setButtonText(label || placeholder);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
@@ -875,7 +876,7 @@
                     const a = aRaw === "" ? min : Number(aRaw);
                     const b = bRaw === "" ? max : Number(bRaw);
                     if (a === min && b === max) {
-                        setButtonText(placeholder);
+                        setButtonText(label || placeholder);
                         btn.classList.remove("is-active");
                         root.classList.remove("is-filled");
                     } else {
@@ -883,7 +884,7 @@
                         if (a !== min && b !== max) text = `${a} – ${b}`;
                         else if (a !== min)         text = `от ${a}`;
                         else if (b !== max)         text = `до ${b}`;
-                        setButtonText(text || placeholder);
+                        setButtonText(text || label || placeholder);
                         if (text) {
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
@@ -896,7 +897,7 @@
                 }
             } else if (type === "dates") {
                 if (!applied.length || !applied[0] || !applied[1]) {
-                    setButtonText(placeholder);
+                    setButtonText(label || placeholder);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                     if (datesInput) {
@@ -907,9 +908,9 @@
                     const startDate = parseISODate(applied[0]);
                     const endDate = parseISODate(applied[1]);
                     if (startDate && endDate) {
-                        const label = formatRangeHuman(startDate, endDate) || placeholder;
-                        setButtonText(label);
-                        if (label && label !== placeholder) {
+                        const labelText = formatRangeHuman(startDate, endDate) || label || placeholder;
+                        setButtonText(labelText);
+                        if (labelText && labelText !== (label || placeholder)) {
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
                             nextActive = true;
@@ -920,10 +921,10 @@
                         if (datesInput) {
                             const isoRange = `${toISODate(startDate)} – ${toISODate(endDate)}`;
                             datesInput.dataset.datespickerValue = isoRange;
-                            datesInput.value = label;
+                            datesInput.value = labelText;
                         }
                     } else {
-                        setButtonText(placeholder);
+                        setButtonText(label || placeholder);
                         btn.classList.remove("is-active");
                         root.classList.remove("is-filled");
                         if (datesInput) {
@@ -947,12 +948,12 @@
                     (current?.dataset?.label || "").trim() ||
                     current?.closest("label")?.textContent?.trim() ||
                     current?.value || "";
-                setButtonText(labelText || placeholder);
+                setButtonText(labelText || label || placeholder);
                 btn.classList.add("is-active");
                 nextActive = Boolean(current?.value) && current.value !== defaultRadioValue;
                 root.classList.remove("is-filled");
             } else if (type === "stub") {
-                setButtonText(placeholder);
+                setButtonText(label || placeholder);
                 root.classList.remove("is-filled");
             } else {
                 root.classList.remove("is-filled");
@@ -1130,7 +1131,7 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
                         setTimeout(finalize, 180);
@@ -1708,7 +1709,7 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
                         setTimeout(finalize, 180);
@@ -1891,7 +1892,7 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
                         setTimeout(finalize, 180);
@@ -2019,7 +2020,7 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
                         setTimeout(finalize, 180);
@@ -2089,7 +2090,7 @@
                 if (isMobile()) {
                     if (alreadyAnimated) { finalize(); }
                     else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 180, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
                         setTimeout(finalize, 180);
@@ -2157,7 +2158,9 @@
         modalBackdrop = null;
     };
 
-    const lockPage = (on) => { document.body.style.overflow = on ? "hidden" : ""; };
+    const lockPage = (on) => {
+        // document.body.style.overflow = on ? "hidden" : "";
+    };
 
     const modalFocusTrap = (e) => {
         if (!document.body.classList.contains("filters-modal")) return;
