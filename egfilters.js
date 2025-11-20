@@ -590,7 +590,7 @@
     function attachSwipe(pop, api) {
         if (!isMobile()) return () => {};
 
-        const scrollable = pop.querySelector(".exs-body") || pop;
+        const scrollable = pop.querySelector(".exs-body, .filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
         const setSheetDragMeta = (active, distance = 0) => {
             if (active) {
@@ -2135,6 +2135,7 @@
     const scope    = filters.querySelector("[data-filters-scope]");
 
     let modalBackdrop = null;
+    let detachFiltersSwipe = null;
     const createBackdrop = () => {
         if (modalBackdrop) return;
         modalBackdrop = document.createElement("div");
@@ -2186,17 +2187,48 @@
         createBackdrop();
         lockPage(true);
         document.addEventListener("keydown", modalFocusTrap);
+        if (detachFiltersSwipe) { detachFiltersSwipe(); detachFiltersSwipe = null; }
+        if (isMobile()) {
+            startKeyframe(filters, "open");
+            detachFiltersSwipe = attachSwipe(filters, { close: (opts) => closeModal(opts) });
+        }
         closeBtn?.focus();
     };
 
-    const closeModal = () => {
+    const closeModal = (opts = {}) => {
+        const { animatedFromY = null, alreadyAnimated = false } = opts;
+
         closeAllPopovers();
-        document.body.classList.remove("filters-modal");
-        removeBackdrop();
-        removeGhost();
-        lockPage(false);
-        document.removeEventListener("keydown", modalFocusTrap);
-        openBtn?.focus();
+
+        const finalize = () => {
+            document.body.classList.remove("filters-modal");
+            removeBackdrop();
+            removeGhost();
+            lockPage(false);
+            document.removeEventListener("keydown", modalFocusTrap);
+            filters.style.transform = "";
+            filters.style.animation = "";
+            delete filters.dataset.open;
+            delete filters.dataset.closing;
+            openBtn?.focus();
+        };
+
+        if (detachFiltersSwipe) { detachFiltersSwipe(); detachFiltersSwipe = null; }
+
+        if (isMobile()) {
+            if (alreadyAnimated) {
+                finalize();
+            } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                animateFromTo(filters, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+            } else {
+                startKeyframe(filters, "close");
+                setTimeout(finalize, 180);
+            }
+            setTimeout(() => { filters.style.transform = ""; filters.style.animation = ""; }, 200);
+            return;
+        }
+
+        finalize();
     };
 
     const applyModal = () => {
