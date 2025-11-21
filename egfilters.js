@@ -16,6 +16,16 @@
         return;
     }
 
+    const MOBILE_POPOVER_OPEN_MS = 70;
+    const MOBILE_POPOVER_CLOSE_MS = 40;
+    const DESKTOP_POPOVER_FADE_MS = 40;
+    const FILTERS_SHEET_CLOSE_MS = 40;
+    const SWIPE_CLOSE_DISTANCE_PX = 40;
+    const MOBILE_CLOSE_FINALIZE_MS = MOBILE_POPOVER_CLOSE_MS + 140;
+    const FILTERS_CLOSE_FINALIZE_MS = FILTERS_SHEET_CLOSE_MS + 140;
+    const MOBILE_ANIMATION_CLEANUP_MS = 200;
+    const DESKTOP_FADE_CLEANUP_MS = DESKTOP_POPOVER_FADE_MS + 140;
+
     const wrapperSelector = mSearch2.options && mSearch2.options.wrapper ? mSearch2.options.wrapper : "#mse2_mfilter";
     const paginationLinkSelector = mSearch2.options && mSearch2.options.pagination_link ? mSearch2.options.pagination_link : ".mse2_pagination a";
     const moreSelector = mSearch2.options && mSearch2.options.more ? mSearch2.options.more : ".btn_more";
@@ -697,7 +707,7 @@
         return { restore };
     }
 
-    function animateFromTo(pop, fromY, toY, duration = 70, easing = "ease", onEnd) {
+    function animateFromTo(pop, fromY, toY, duration = MOBILE_POPOVER_OPEN_MS, easing = "ease", onEnd) {
         pop.style.animation = "";
         pop.dataset.open = "";
         pop.dataset.closing = "";
@@ -730,7 +740,7 @@
         }
     }
     function desktopFadeOut(pop, done) {
-        pop.style.transition = "opacity 40ms ease, transform 40ms ease";
+        pop.style.transition = `opacity ${DESKTOP_POPOVER_FADE_MS}ms ease, transform ${DESKTOP_POPOVER_FADE_MS}ms ease`;
         let finished = false;
         const clear = () => {
             if (finished) return;
@@ -750,7 +760,7 @@
             clear();
         };
         pop.addEventListener("transitionend", onEnd);
-        setTimeout(clear, 180);
+        setTimeout(clear, DESKTOP_FADE_CLEANUP_MS);
     }
 
     const RUBBER_K = 160;
@@ -862,21 +872,21 @@
                 cancelAnimationFrame(rafId); rafId = null;
 
                 if (dy > 0) {
-                    const threshold = 40;
+                    const threshold = SWIPE_CLOSE_DISTANCE_PX;
                     const currentY = clampSheet(dy);
                     if (currentY > threshold) {
-                        animateFromTo(pop, currentY, "translateY(100%)", 70, "ease", () => {
+                        animateFromTo(pop, currentY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             api.close({ animatedFromY: null, alreadyAnimated: true });
                         });
                     } else {
-                        animateFromTo(pop, currentY, 0, 70, "ease", () => {
+                        animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             pop.style.transform = "";
                             pop.style.animation = "";
                         });
                     }
                 } else {
                     const currentY = clampSheet(dy);
-                    animateFromTo(pop, currentY, 0, 70, "cubic-bezier(.2,.8,.2,1)", () => {
+                    animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "cubic-bezier(.2,.8,.2,1)", () => {
                         pop.style.transform = "";
                         pop.style.animation = "";
                     });
@@ -1310,12 +1320,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -1891,12 +1901,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2077,12 +2087,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2207,12 +2217,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2280,12 +2290,12 @@
                 if (isMobile()) {
                     if (alreadyAnimated) { finalize(); }
                     else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2429,15 +2439,15 @@
                 return;
             }
             if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                animateFromTo(filters, animatedFromY, "translateY(100%)", 70, "ease", finalizeModalClose);
+                animateFromTo(filters, animatedFromY, "translateY(100%)", FILTERS_SHEET_CLOSE_MS, "ease", finalizeModalClose);
             } else {
                 startKeyframe(filters, "close");
-                setTimeout(finalizeModalClose, 180);
+                setTimeout(finalizeModalClose, FILTERS_CLOSE_FINALIZE_MS);
             }
             setTimeout(() => {
                 filters.style.transform = "";
                 filters.style.animation = "";
-            }, 200);
+            }, MOBILE_ANIMATION_CLEANUP_MS);
         } else {
             finalizeModalClose();
         }

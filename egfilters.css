@@ -1,4 +1,12 @@
 
+:root {
+    --exs-mobile-popover-open-duration: 70ms;
+    --exs-mobile-popover-close-duration: 40ms;
+    --exs-desktop-popover-fade-duration: 40ms;
+    --filters-mobile-popover-open-duration: 70ms;
+    --filters-mobile-popover-close-duration: 40ms;
+}
+
 .filters {
     position: relative;
     font-size: 16px;
@@ -986,8 +994,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         display: flex;
         flex-direction: column;
     }
-    .exs-popover[data-open="true"] { animation: exsSlideUp .07s cubic-bezier(.22,1,.36,1) both; }
-    .exs-popover[data-closing="true"] { animation: exsSlideDown .04s ease both; }
+    .exs-popover[data-open="true"] { animation: exsSlideUp var(--exs-mobile-popover-open-duration) cubic-bezier(.22,1,.36,1) both; }
+    .exs-popover[data-closing="true"] { animation: exsSlideDown var(--exs-mobile-popover-close-duration) ease both; }
     .exs-header { display: block; }
     .exs-body { max-height: calc(calc(80vh + 160px) - 60px - 40px); overflow: auto; }
     .exs-actions {
@@ -1026,8 +1034,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         touch-action: none;
         will-change: transform;
     }
-    body.filters-modal .filters[data-open="true"] { animation: exsSlideUp .07s cubic-bezier(.22,1,.36,1) both; }
-    body.filters-modal .filters[data-closing="true"] { animation: exsSlideDown .04s ease both; }
+    body.filters-modal .filters[data-open="true"] { animation: exsSlideUp var(--filters-mobile-popover-open-duration) cubic-bezier(.22,1,.36,1) both; }
+    body.filters-modal .filters[data-closing="true"] { animation: exsSlideDown var(--filters-mobile-popover-close-duration) ease both; }
     body.filters-modal .filters .filters-header {
         justify-content: center;
         padding: 16px 14px 8px;
