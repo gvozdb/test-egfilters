@@ -203,6 +203,11 @@ body.filters-modal .filters-ghost > .filters-body {
     border-bottom: 2px solid currentColor;
     transition: transform .15s ease;
 }
+
+.datespicker-mobile-sentinel {
+    width: 100%;
+    height: 24px;
+}
 .datespicker-nav-btn.datespicker-nav-btn_prev:after {
     left: 13px;
     transform: rotate(135deg);
@@ -342,6 +347,9 @@ body.filters-modal .filters-ghost > .filters-body {
     }
 }
 @media (max-width: 768px) {
+    .datespicker-nav {
+        display: none;
+    }
     .datespicker-calendars {
         grid-template-columns: repeat(auto-fit, min(100%, 422px));
     }

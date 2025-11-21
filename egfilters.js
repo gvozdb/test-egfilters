@@ -1542,6 +1542,9 @@
             let hasReadInitialDataset = false;
             const skipClickByIso = new Map();
             const SKIP_CLICK_WINDOW_MS = 1200;
+            const MOBILE_MONTH_BATCH = 5;
+            let mobileMonthsToRender = MOBILE_MONTH_BATCH;
+            let mobileInfiniteObserver = null;
 
             const armSkipForIso = (isoValue) => {
                 const existing = skipClickByIso.get(isoValue);
@@ -1864,9 +1867,51 @@
 
             const renderCalendar = () => {
                 if (!datesCalendarWrap) return;
+                const prevScroll = datesCalendarWrap.scrollTop;
+                if (mobileInfiniteObserver) {
+                    mobileInfiniteObserver.disconnect();
+                    mobileInfiniteObserver = null;
+                }
                 datesCalendarWrap.innerHTML = "";
                 const datespickerRoot = document.createElement("div");
                 datespickerRoot.className = "datespicker";
+
+                const calendarsWrap = document.createElement("div");
+                calendarsWrap.className = "datespicker-calendars";
+
+                if (isMobile()) {
+                    for (let i = 0; i < mobileMonthsToRender; i++) {
+                        const monthDate = addMonths(viewDate, i);
+                        calendarsWrap.appendChild(renderMonth(monthDate));
+                    }
+
+                    const sentinel = document.createElement("div");
+                    sentinel.className = "datespicker-mobile-sentinel";
+                    calendarsWrap.appendChild(sentinel);
+
+                    calendarsWrap.addEventListener("mouseleave", () => {
+                        if (!stagedDates[0] || stagedDates[1] || !hoverDate) return;
+                        hoverDate = null;
+                        renderCalendar();
+                    });
+
+                    datespickerRoot.appendChild(calendarsWrap);
+                    datesCalendarWrap.appendChild(datespickerRoot);
+                    datesCalendarWrap.scrollTop = prevScroll;
+
+                    mobileInfiniteObserver = new IntersectionObserver((entries) => {
+                        const touched = entries.some(entry => entry.isIntersecting);
+                        if (!touched) return;
+                        if (mobileInfiniteObserver) {
+                            mobileInfiniteObserver.disconnect();
+                            mobileInfiniteObserver = null;
+                        }
+                        mobileMonthsToRender += MOBILE_MONTH_BATCH;
+                        renderCalendar();
+                    }, { root: datesCalendarWrap, rootMargin: "320px" });
+                    mobileInfiniteObserver.observe(sentinel);
+                    return;
+                }
 
                 const nav = document.createElement("div");
                 nav.className = "datespicker-nav";
@@ -1956,8 +2001,6 @@
                 nav.appendChild(nextBtn);
                 datespickerRoot.appendChild(nav);
 
-                const calendarsWrap = document.createElement("div");
-                calendarsWrap.className = "datespicker-calendars";
                 calendarsWrap.appendChild(renderMonth(viewDate, 'datespicker-month_left'));
                 calendarsWrap.appendChild(renderMonth(nextMonth, 'datespicker-month_right'));
                 datespickerRoot.appendChild(calendarsWrap);
@@ -1993,6 +2036,7 @@
                 stagedDates = [null, null];
                 hoverDate = null;
                 viewDate = minViewDate;
+                mobileMonthsToRender = MOBILE_MONTH_BATCH;
                 if (datesInput) {
                     datesInput.dataset.datespickerValue = "";
                     datesInput.value = "";
@@ -2006,6 +2050,7 @@
             const open = () => {
                 if (currentOpen && currentOpen.root !== root) currentOpen.close();
                 setStagedFromApplied();
+                mobileMonthsToRender = MOBILE_MONTH_BATCH;
                 renderCalendar();
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
@@ -2030,6 +2075,10 @@
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
+                if (mobileInfiniteObserver) {
+                    mobileInfiniteObserver.disconnect();
+                    mobileInfiniteObserver = null;
+                }
 
                 const finalize = () => {
                     // lockScrollBody(false);
