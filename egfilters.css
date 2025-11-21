@@ -1,16 +1,16 @@
 :root {
+    /* Скорости анимации: JS считывает эти переменные, чтобы не дублировать значения */
 
     /* Скорость анимации поповера селектов на компах */
-    --exs-desktop-popover-fade-duration: 40ms;
+    --exs-desktop-popover-fade-duration: 7ms;
 
     /* Скорость анимации поповера селектов на мобилах */
-    --exs-mobile-popover-open-duration: 70ms;
-    --exs-mobile-popover-close-duration: 40ms;
+    --exs-mobile-popover-open-duration: 160ms;
+    --exs-mobile-popover-close-duration: 160ms;
 
     /* Скорость анимации модалки-поповера на мобилах */
-    --filters-mobile-popover-open-duration: 70ms;
-    --filters-mobile-popover-close-duration: 40ms;
-
+    --filters-mobile-popover-open-duration: 160ms;
+    --filters-mobile-popover-close-duration: 160ms;
 }
 
 .filters {
@@ -1029,7 +1029,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     .exs-drag-handle { display: block; }
 
     .exs-popover[data-field-key="dates"] {
-        min-height: calc(80vh + 160px);
+        /* min-height: calc(80vh + 160px); */
     }
     .exs-popover[data-field-key="dates"] .exs-header,
     .exs-popover[data-field-key="dates"] .exs-close {
