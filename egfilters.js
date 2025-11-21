@@ -1127,6 +1127,11 @@
         return;
     }
 
+    const isModalInline = (root) => {
+        if (!root) return false;
+        return document.body.classList.contains("filters-modal") && root.dataset.modalInline === "true";
+    };
+
     exsRoots.forEach((root) => {
         const type = (root.dataset.type || "checkbox").trim();
         const field = (root.dataset.field || "").trim();
@@ -1417,6 +1422,13 @@
                 updateBtn();
             };
 
+            const applyInlineChecks = () => {
+                if (!isModalInline(root)) return;
+                commitFromChecks();
+                root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                updateFiltersBadge();
+            };
+
             const open = () => {
                 if (currentOpen && currentOpen.root !== root) currentOpen.close();
                 syncChecksFromApplied();
@@ -1510,6 +1522,13 @@
                     root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
                     api.close();
                     submitAjax();
+                }
+            });
+
+            (pop || root).addEventListener("change", (e) => {
+                const target = e.target;
+                if (target && target.type === "checkbox") {
+                    applyInlineChecks();
                 }
             });
 
@@ -1643,6 +1662,7 @@
                 hoverDate = null;
                 updateDisplayFromStaged();
                 renderCalendar();
+                applyInlineDates();
             };
 
             const renderMonth = (baseDate, addClass = '') => {
@@ -1988,6 +2008,13 @@
                 renderCalendar();
             };
 
+            const applyInlineDates = () => {
+                if (!isModalInline(root)) return;
+                commitDates();
+                root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                updateFiltersBadge();
+            };
+
             const resetDates = () => {
                 applied = ["", ""];
                 stagedDates = [null, null];
@@ -2137,6 +2164,7 @@
             });
 
             let staged = [min, max];
+            let inlineRangeLock = false;
 
             const setStagedFromApplied = () => {
                 let a = applied[0] === "" ? min : clamp(+applied[0]);
@@ -2172,12 +2200,22 @@
                 updateBtn();
             };
 
+            const applyInlineRange = () => {
+                if (!isModalInline(root) || inlineRangeLock) return;
+                inlineRangeLock = true;
+                commitRange();
+                root.dispatchEvent(new CustomEvent("exs-apply", { detail: { field: field, values: applied } }));
+                updateFiltersBadge();
+                inlineRangeLock = false;
+            };
+
             pluginEl.noUiSlider.on("update", (values) => {
                 const a = Math.round(values[0]); const b = Math.round(values[1]);
                 staged = [a, b];
                 if (document.activeElement !== fromNum) fromNum.value = a;
                 if (document.activeElement !== toNum) toNum.value = b;
             });
+            pluginEl.noUiSlider.on("change", applyInlineRange);
 
             const syncFrom = () => {
                 let v = clamp(+fromNum.value);
@@ -2193,6 +2231,8 @@
             };
             fromNum.addEventListener("input", syncFrom);
             toNum.addEventListener("input", syncTo);
+            fromNum.addEventListener("change", applyInlineRange);
+            toNum.addEventListener("change", applyInlineRange);
 
             const open = () => {
                 if (currentOpen && currentOpen.root !== root) currentOpen.close();
@@ -2497,6 +2537,38 @@
     let modalBackdrop = null;
     let modalOpenedAsSheet = false;
     let detachModalSwipe = null;
+    const modalInlineState = new Map();
+
+    const setModalInlineMode = (enabled) => {
+        exsRoots.forEach((root) => {
+            if (!root || root.classList.contains("extra-select_sort")) return;
+            const pop = root.querySelector(".js-exs-popover");
+            const trigger = root.querySelector(".js-exs-trigger");
+            if (!pop) return;
+
+            if (enabled) {
+                modalInlineState.set(pop, pop.hasAttribute("hidden"));
+                root.dataset.modalInline = "true";
+                pop.dataset.modalInline = "true";
+                pop.removeAttribute("hidden");
+                trigger?.setAttribute("aria-expanded", "true");
+            } else {
+                const wasHidden = modalInlineState.get(pop);
+                root.removeAttribute("data-modal-inline");
+                pop.removeAttribute("data-modal-inline");
+                if (wasHidden === false) {
+                    pop.removeAttribute("hidden");
+                } else {
+                    pop.setAttribute("hidden", "");
+                }
+                trigger?.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        if (!enabled) {
+            modalInlineState.clear();
+        }
+    };
 
     const createBackdrop = () => {
         if (modalBackdrop) return;
@@ -2543,6 +2615,7 @@
     };
 
     const finalizeModalClose = () => {
+        setModalInlineMode(false);
         filtersSheetOpen = false;
         closeFiltersSheet = null;
         document.body.classList.remove("filters-modal");
@@ -2573,6 +2646,7 @@
         createGhost();
         document.body.classList.add("filters-modal");
         modalOpenedAsSheet = isMobile();
+        setModalInlineMode(true);
         createBackdrop();
         lockScrollBody(true);
         if (modalOpenedAsSheet) {
