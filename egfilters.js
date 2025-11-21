@@ -180,6 +180,15 @@
         }
 
         mSearch2.load(params);
+        
+        const scrolltoElement = document.querySelector('.js-filters-scrollto');
+        if (scrolltoElement) {
+            const y = scrolltoElement.getBoundingClientRect().top + window.pageYOffset - 16;
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
     }
 
     // Любые изменения формы триггерят фильтрацию
@@ -383,7 +392,14 @@
     let ghostEl = null;
 
     const lockScrollBody = (on) => {
-        // document.documentElement.style.overflow = on ? "hidden" : "";
+        if (on) {
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.overflow = "hidden";
+            document.body.style.setProperty('padding-right', scrollbarWidth + 'px', 'important');
+        } else {
+            document.body.style.overflow = "";
+            document.body.style.setProperty('padding-right', '');
+        }
     };
     const ensureOverlay = () => {
         if (!overlayEl) {
@@ -1269,7 +1285,7 @@
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
-                lockScrollBody(true);
+                // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
                 (checks.find(x => x.checked) || checks[0])?.focus();
             };
@@ -1280,7 +1296,8 @@
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 const finalize = () => {
-                    removeOverlay(); lockScrollBody(false);
+                    removeOverlay();
+                    // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -1469,7 +1486,7 @@
                     if (normalized.getTime() < startSel.getTime()) {
                         stagedDates = [normalized, startSel];
                     } else if (isSameDay(normalized, startSel)) {
-                        stagedDates = [normalized, normalized];
+                        stagedDates = [normalized, null];
                     } else {
                         stagedDates = [startSel, normalized];
                     }
@@ -1850,7 +1867,7 @@
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
-                lockScrollBody(true);
+                // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
 
@@ -1860,7 +1877,8 @@
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 const finalize = () => {
-                    removeOverlay(); lockScrollBody(false);
+                    removeOverlay();
+                    // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -2035,7 +2053,7 @@
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
-                lockScrollBody(true);
+                // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
 
@@ -2045,7 +2063,8 @@
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 const finalize = () => {
-                    removeOverlay(); lockScrollBody(false);
+                    removeOverlay();
+                    // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -2163,8 +2182,7 @@
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
-                lockScrollBody(true);
-
+                // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
                 (radios.find(x => x.checked) || radios[0])?.focus();
             };
@@ -2175,7 +2193,8 @@
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 const finalize = () => {
-                    removeOverlay(); lockScrollBody(false);
+                    removeOverlay();
+                    // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -2243,14 +2262,15 @@
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api);
                 }
-                lockScrollBody(true);
+                // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
             };
             const reallyHide = () => { if (pop) pop.hidden = true; };
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
                 const finalize = () => {
-                    removeOverlay(); lockScrollBody(false);
+                    removeOverlay();
+                    // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
