@@ -1,4 +1,3 @@
-
 /**
  * Интеграция с mFilter2
  */
@@ -25,6 +24,39 @@
             mSearch2.initialize(wrapperSelector);
         } catch (e) {
         }
+    }
+
+    function updateTotalCount(total) {
+        const countEl = document.querySelector(".js-filters-count");
+        if (!countEl) return;
+
+        const numericTotal = Number(total);
+        const hasNumeric = Number.isFinite(numericTotal);
+        const totalValue = (hasNumeric ? numericTotal : total) || 0;
+
+        if (totalValue != null && String(totalValue) !== countEl.dataset.count) {
+            countEl.dataset.count = String(totalValue);
+        }
+    }
+    
+    const nativeLoad = typeof mSearch2.load === "function" ? mSearch2.load.bind(mSearch2) : null;
+    if (nativeLoad) {
+        mSearch2.load = function (params, callback, append) {
+            const wrappedCallback = function (response, params) {
+                // console.log('wrappedCallback response', response);
+                // console.log('wrappedCallback params', params);
+                
+                if (response?.success) {
+                    updateTotalCount(response?.data?.total);
+                }
+                
+                if (typeof callback === "function") {
+                    return callback.apply(this, arguments);
+                }
+            };
+
+            return nativeLoad(params, wrappedCallback, append);
+        };
     }
 
     const FIELD_MAP = {
@@ -294,10 +326,24 @@
 (function () {
     "use strict";
 
+    // Числа для тонкой настройки анимации поповеров, модалки итп
+    const MOBILE_POPOVER_OPEN_MS = 70;
+    const MOBILE_POPOVER_CLOSE_MS = 40;
+    const DESKTOP_POPOVER_FADE_MS = 40;
+    const FILTERS_SHEET_CLOSE_MS = 40;
+    const MOBILE_CLOSE_FINALIZE_MS = MOBILE_POPOVER_CLOSE_MS + 140;
+    const FILTERS_CLOSE_FINALIZE_MS = FILTERS_SHEET_CLOSE_MS + 140;
+    const MOBILE_ANIMATION_CLEANUP_MS = 200;
+    const DESKTOP_FADE_CLEANUP_MS = DESKTOP_POPOVER_FADE_MS + 140;
+
+    // Дистанция свайпа вниз (пикселей), чтобы закрылся поповер
+    const SWIPE_CLOSE_DISTANCE_PX = 40;
+
+
     const mobileMedia = window.matchMedia("(max-width:768px)");
     const isMobile = () => mobileMedia.matches;
 
-    const filters = document.getElementById("filters");
+    const filters = document.querySelector(".js-filters");
     const submitAjax = window.FiltersDebugForm?.submitAjax ?? (() => {});
 
     const MONTHS_NOMINATIVE = [
@@ -309,6 +355,7 @@
         "июл", "авг", "сен", "окт", "ноя", "дек"
     ];
     const WEEKDAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
 
     const clampToDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
@@ -485,7 +532,7 @@
     }
     function createGhost() {
         if (ghostEl) return;
-        const bodyNode = filters.querySelector(".filters-body");
+        const bodyNode = filters.querySelector(".js-filters-body");
         if (!bodyNode) return;
         ghostEl = document.createElement("div");
         ghostEl.className = "filters-ghost";
@@ -697,7 +744,7 @@
         return { restore };
     }
 
-    function animateFromTo(pop, fromY, toY, duration = 70, easing = "ease", onEnd) {
+    function animateFromTo(pop, fromY, toY, duration = MOBILE_POPOVER_OPEN_MS, easing = "ease", onEnd) {
         pop.style.animation = "";
         pop.dataset.open = "";
         pop.dataset.closing = "";
@@ -717,7 +764,7 @@
         };
         pop.addEventListener("transitionend", handler);
     }
-    function startKeyframe(pop, kind ) {
+    function startKeyframe(pop, kind) {
         pop.style.animation = "";
         pop.style.transform = "";
         void pop.offsetWidth;
@@ -730,7 +777,7 @@
         }
     }
     function desktopFadeOut(pop, done) {
-        pop.style.transition = "opacity 40ms ease, transform 40ms ease";
+        pop.style.transition = `opacity ${DESKTOP_POPOVER_FADE_MS}ms ease, transform ${DESKTOP_POPOVER_FADE_MS}ms ease`;
         let finished = false;
         const clear = () => {
             if (finished) return;
@@ -750,7 +797,7 @@
             clear();
         };
         pop.addEventListener("transitionend", onEnd);
-        setTimeout(clear, 180);
+        setTimeout(clear, DESKTOP_FADE_CLEANUP_MS);
     }
 
     const RUBBER_K = 160;
@@ -766,7 +813,7 @@
     function attachSwipe(pop, api) {
         if (!isMobile()) return () => {};
 
-        // const scrollable = pop.querySelector(".exs-body, .filters-body") || pop;
+        // const scrollable = pop.querySelector(".exs-body, .js-filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
         const setSheetDragMeta = (active, distance = 0) => {
             if (active) {
@@ -862,21 +909,21 @@
                 cancelAnimationFrame(rafId); rafId = null;
 
                 if (dy > 0) {
-                    const threshold = 40;
+                    const threshold = SWIPE_CLOSE_DISTANCE_PX;
                     const currentY = clampSheet(dy);
                     if (currentY > threshold) {
-                        animateFromTo(pop, currentY, "translateY(100%)", 70, "ease", () => {
+                        animateFromTo(pop, currentY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             api.close({ animatedFromY: null, alreadyAnimated: true });
                         });
                     } else {
-                        animateFromTo(pop, currentY, 0, 70, "ease", () => {
+                        animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             pop.style.transform = "";
                             pop.style.animation = "";
                         });
                     }
                 } else {
                     const currentY = clampSheet(dy);
-                    animateFromTo(pop, currentY, 0, 70, "cubic-bezier(.2,.8,.2,1)", () => {
+                    animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "cubic-bezier(.2,.8,.2,1)", () => {
                         pop.style.transform = "";
                         pop.style.animation = "";
                     });
@@ -988,7 +1035,6 @@
         const label = (root.dataset.label || "").trim();
         const placeholder = (root.dataset.placeholder || "Выбрать…").trim();
         const maxChars = +root.dataset.maxLabelChars || 28;
-
         const btn = root.querySelector(".js-exs-trigger");
         const pop = document.getElementById("exs-popover-" + field);
         const body = root.querySelector(".js-exs-body") || (pop ? pop.querySelector(".js-exs-body") : null);
@@ -1310,12 +1356,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -1891,12 +1937,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2077,12 +2123,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2207,12 +2253,12 @@
                     if (alreadyAnimated) {
                         finalize();
                     } else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2280,12 +2326,12 @@
                 if (isMobile()) {
                     if (alreadyAnimated) { finalize(); }
                     else if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                        animateFromTo(pop, animatedFromY, "translateY(100%)", 70, "ease", finalize);
+                        animateFromTo(pop, animatedFromY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", finalize);
                     } else {
                         startKeyframe(pop, "close");
-                        setTimeout(finalize, 180);
+                        setTimeout(finalize, MOBILE_CLOSE_FINALIZE_MS);
                     }
-                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, 200);
+                    setTimeout(() => { pop.style.transform = ""; pop.style.animation = ""; }, MOBILE_ANIMATION_CLEANUP_MS);
                 } else {
                     desktopFadeOut(pop, finalize);
                 }
@@ -2327,20 +2373,12 @@
     let modalBackdrop = null;
     let modalOpenedAsSheet = false;
     let detachModalSwipe = null;
+
     const createBackdrop = () => {
         if (modalBackdrop) return;
         modalBackdrop = document.createElement("div");
         modalBackdrop.className = "modal-backdrop";
         let downOnBackdrop = false;
-
-        // modalBackdrop.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
-        // modalBackdrop.addEventListener("mouseup", () => {
-        //     if (downOnBackdrop) {
-        //         if (currentOpen) { currentOpen.close(); }
-        //         else { closeModal(); }
-        //     }
-        //     downOnBackdrop = false;
-        // }, { passive: true });
 
         const handleStart = () => { downOnBackdrop = true; };
         const handleEnd = () => {
@@ -2429,15 +2467,15 @@
                 return;
             }
             if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                animateFromTo(filters, animatedFromY, "translateY(100%)", 70, "ease", finalizeModalClose);
+                animateFromTo(filters, animatedFromY, "translateY(100%)", FILTERS_SHEET_CLOSE_MS, "ease", finalizeModalClose);
             } else {
                 startKeyframe(filters, "close");
-                setTimeout(finalizeModalClose, 180);
+                setTimeout(finalizeModalClose, FILTERS_CLOSE_FINALIZE_MS);
             }
             setTimeout(() => {
                 filters.style.transform = "";
                 filters.style.animation = "";
-            }, 200);
+            }, MOBILE_ANIMATION_CLEANUP_MS);
         } else {
             finalizeModalClose();
         }
