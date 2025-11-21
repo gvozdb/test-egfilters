@@ -1,3 +1,17 @@
+:root {
+
+    /* Скорость анимации поповера селектов на компах */
+    --exs-desktop-popover-fade-duration: 40ms;
+
+    /* Скорость анимации поповера селектов на мобилах */
+    --exs-mobile-popover-open-duration: 70ms;
+    --exs-mobile-popover-close-duration: 40ms;
+
+    /* Скорость анимации модалки-поповера на мобилах */
+    --filters-mobile-popover-open-duration: 70ms;
+    --filters-mobile-popover-close-duration: 40ms;
+
+}
 
 .filters {
     position: relative;
@@ -88,6 +102,22 @@ body.filters-modal .filters-ghost > .filters-body {
 
 .filters-meta .filters-count {
     margin-left: auto;
+}
+/* Базовое (по умолчанию множественное "экскурсий") */
+.filters-meta .filters-count::after {
+    content: attr(data-count) " " attr(data-decl3);
+}
+
+/* 1, 21, 31, 41... но не 11 */
+.filters-meta .filters-count[data-count$="1"]:not([data-count$="11"])::after {
+    content: attr(data-count) " " attr(data-decl1);
+}
+
+/* 2, 3, 4, 22, 23, 24... но не 12, 13, 14 */
+.filters-meta .filters-count[data-count$="2"]:not([data-count$="12"])::after,
+.filters-meta .filters-count[data-count$="3"]:not([data-count$="13"])::after,
+.filters-meta .filters-count[data-count$="4"]:not([data-count$="14"])::after {
+    content: attr(data-count) " " attr(data-decl2);
 }
 
 .filters-dates {
@@ -986,8 +1016,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         display: flex;
         flex-direction: column;
     }
-    .exs-popover[data-open="true"] { animation: exsSlideUp .07s cubic-bezier(.22,1,.36,1) both; }
-    .exs-popover[data-closing="true"] { animation: exsSlideDown .04s ease both; }
+    .exs-popover[data-open="true"] { animation: exsSlideUp var(--exs-mobile-popover-open-duration) cubic-bezier(.22,1,.36,1) both; }
+    .exs-popover[data-closing="true"] { animation: exsSlideDown var(--exs-mobile-popover-close-duration) ease both; }
     .exs-header { display: block; }
     .exs-body { max-height: calc(calc(80vh + 160px) - 60px - 40px); overflow: auto; }
     .exs-actions {
@@ -1026,8 +1056,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         touch-action: none;
         will-change: transform;
     }
-    body.filters-modal .filters[data-open="true"] { animation: exsSlideUp .07s cubic-bezier(.22,1,.36,1) both; }
-    body.filters-modal .filters[data-closing="true"] { animation: exsSlideDown .04s ease both; }
+    body.filters-modal .filters[data-open="true"] { animation: exsSlideUp var(--filters-mobile-popover-open-duration) cubic-bezier(.22,1,.36,1) both; }
+    body.filters-modal .filters[data-closing="true"] { animation: exsSlideDown var(--filters-mobile-popover-close-duration) ease both; }
     body.filters-modal .filters .filters-header {
         justify-content: center;
         padding: 16px 14px 8px;
