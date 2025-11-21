@@ -107,10 +107,16 @@
         const fd = new FormData(form);
         const priceRange = { min: null, max: null };
         let hasPriceRange = false;
+        const defaultSortInput = form.querySelector('input[name="_sort"][data-is-default="true"]');
+        const defaultSortValue = defaultSortInput ? (defaultSortInput.value || "").trim() : null;
 
         // 2) накладываем значения из js-filters-form
         fd.forEach(function (value, rawKey) {
             if (value == null || value === "" || rawKey.startsWith("_")) {
+                return;
+            }
+
+            if (rawKey === "sort" && value && defaultSortValue !== null && value === defaultSortValue) {
                 return;
             }
 
@@ -326,20 +332,44 @@
 (function () {
     "use strict";
 
-    // Числа для тонкой настройки анимации поповеров, модалки итп
-    const MOBILE_POPOVER_OPEN_MS = 70;
-    const MOBILE_POPOVER_CLOSE_MS = 40;
-    const DESKTOP_POPOVER_FADE_MS = 40;
-    const FILTERS_SHEET_CLOSE_MS = 40;
-    const MOBILE_CLOSE_FINALIZE_MS = MOBILE_POPOVER_CLOSE_MS + 140;
-    const FILTERS_CLOSE_FINALIZE_MS = FILTERS_SHEET_CLOSE_MS + 140;
+    const rootStyle = getComputedStyle(document.documentElement);
+    const readDuration = (cssVar, fallback) => {
+        const raw = rootStyle.getPropertyValue(cssVar);
+        const parsed = Number.parseFloat(raw);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const ANIMATION_SPEED = {
+        desktopPopover: readDuration("--exs-desktop-popover-fade-duration", 40),
+        mobilePopover: {
+            open: readDuration("--exs-mobile-popover-open-duration", 70),
+            close: readDuration("--exs-mobile-popover-close-duration", 40),
+        },
+        filtersSheet: {
+            open: readDuration("--filters-mobile-popover-open-duration", 70),
+            close: readDuration("--filters-mobile-popover-close-duration", 40),
+        },
+    };
+
+    const MOBILE_POPOVER_OPEN_MS = ANIMATION_SPEED.mobilePopover.open;
+    const MOBILE_POPOVER_CLOSE_MS = ANIMATION_SPEED.mobilePopover.close;
+    const DESKTOP_POPOVER_FADE_MS = ANIMATION_SPEED.desktopPopover;
+    const FILTERS_SHEET_CLOSE_MS = ANIMATION_SPEED.filtersSheet.close;
+    const MOBILE_CLOSE_FINALIZE_MS = MOBILE_POPOVER_CLOSE_MS; // + 140;
+    const FILTERS_CLOSE_FINALIZE_MS = FILTERS_SHEET_CLOSE_MS; // + 140;
     const MOBILE_ANIMATION_CLEANUP_MS = 200;
-    const DESKTOP_FADE_CLEANUP_MS = DESKTOP_POPOVER_FADE_MS + 140;
+    const DESKTOP_FADE_CLEANUP_MS = DESKTOP_POPOVER_FADE_MS; // + 140;
 
     // Дистанция свайпа вниз (пикселей), чтобы закрылся поповер
     const SWIPE_CLOSE_DISTANCE_PX = 40;
 
+    // Включить постепенную прозрачность ПОПОВЕРА при закрытии свайпом вниз
+    const ENABLE_SWIPE_POPOVER_OPACITY = false;
 
+    // Включить постепенную прозрачность ПОДЛОЖКИ при закрытии свайпом вниз
+    const ENABLE_SWIPE_BACKDROP_OPACITY = true;
+
+    // Свойства, необходимые для корректной работы алгоритма фильтрации
     const mobileMedia = window.matchMedia("(max-width:768px)");
     const isMobile = () => mobileMedia.matches;
 
@@ -355,7 +385,6 @@
         "июл", "авг", "сен", "окт", "ноя", "дек"
     ];
     const WEEKDAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
 
     const clampToDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
@@ -810,8 +839,68 @@
         return Math.min(val, MAX_UP_ACTUAL);
     }
 
-    function attachSwipe(pop, api) {
+    function attachSwipe(pop, api, options = {}) {
         if (!isMobile()) return () => {};
+
+        const resolveBackdrop = (typeof options.resolveBackdrop === "function")
+            ? options.resolveBackdrop
+            : null;
+        const clamp01 = (value) => Math.max(0, Math.min(1, value));
+        const readOpacity = (el) => {
+            if (!el) return 1;
+            const parsed = parseFloat(window.getComputedStyle(el).opacity);
+            return Number.isFinite(parsed) ? parsed : 1;
+        };
+
+        let startPopOpacity = 1;
+        let startBackdropOpacity = null;
+        let basePopOpacity = 1;
+        let baseBackdropOpacity = null;
+
+        const applyOpacity = (offsetY) => {
+            if (!ENABLE_SWIPE_POPOVER_OPACITY && !ENABLE_SWIPE_BACKDROP_OPACITY) {
+                return;
+            }
+            const safeOffset = Math.max(0, offsetY);
+            const height = pop.getBoundingClientRect().height || pop.offsetHeight || 1;
+            const hiddenPart = clamp01(height > 0 ? safeOffset / height : 0);
+
+            if (ENABLE_SWIPE_POPOVER_OPACITY) {
+                const nextPopOpacity = clamp01(basePopOpacity * (1 - hiddenPart));
+                pop.style.opacity = String(nextPopOpacity);
+            }
+
+            if (ENABLE_SWIPE_BACKDROP_OPACITY && resolveBackdrop) {
+                const backdrop = resolveBackdrop();
+                if (backdrop) {
+                    if (baseBackdropOpacity == null) {
+                        baseBackdropOpacity = readOpacity(backdrop);
+                    }
+                    const nextBackdropOpacity = clamp01(baseBackdropOpacity * (1 - hiddenPart));
+                    backdrop.style.opacity = String(nextBackdropOpacity);
+                }
+            }
+        };
+
+        const restoreOpacity = () => {
+            if (ENABLE_SWIPE_POPOVER_OPACITY) {
+                pop.style.opacity = String(startPopOpacity);
+            } else {
+                pop.style.opacity = "";
+            }
+
+            if (resolveBackdrop) {
+                const backdrop = resolveBackdrop();
+                if (backdrop) {
+                    if (ENABLE_SWIPE_BACKDROP_OPACITY) {
+                        const fallback = startBackdropOpacity != null ? startBackdropOpacity : readOpacity(backdrop);
+                        backdrop.style.opacity = String(fallback);
+                    } else {
+                        backdrop.style.opacity = "";
+                    }
+                }
+            }
+        };
 
         // const scrollable = pop.querySelector(".exs-body, .js-filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
@@ -857,7 +946,11 @@
             const minUp = -MAX_UP_ACTUAL;
             return Math.max(minUp, Math.min(y, maxDown));
         };
-        const applyY = (y) => { pop.style.transform = `translateY(${clampSheet(y)}px)`; };
+        const applyY = (y) => {
+            const clamped = clampSheet(y);
+            pop.style.transform = `translateY(${clamped}px)`;
+            applyOpacity(clamped);
+        };
         const onFrame = () => { rafId = null; applyY(dy); };
 
         const tryStart = (clientY) => {
@@ -865,11 +958,14 @@
             dragging = false;
             y0 = clientY;
             dy = 0;
+            basePopOpacity = readOpacity(pop);
+            baseBackdropOpacity = null;
             pop.style.animation = "none";
             pop.dataset.open = "";
             pop.dataset.closing = "";
             pop.style.transition = "none";
             setSheetDragMeta(false);
+            applyOpacity(0);
         };
 
         const onMoveCore = (clientY, e) => {
@@ -919,6 +1015,7 @@
                         animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             pop.style.transform = "";
                             pop.style.animation = "";
+                            restoreOpacity();
                         });
                     }
                 } else {
@@ -926,6 +1023,7 @@
                     animateFromTo(pop, currentY, 0, MOBILE_POPOVER_OPEN_MS, "cubic-bezier(.2,.8,.2,1)", () => {
                         pop.style.transform = "";
                         pop.style.animation = "";
+                        restoreOpacity();
                     });
                 }
             }
@@ -1328,8 +1426,12 @@
                 if (isMobile()) {
                     ensureOverlay();
                     moveOverlayOnTop();
+                    pop.style.opacity = "1";
+                    if (overlayEl) {
+                        overlayEl.style.opacity = "1";
+                    }
                     startKeyframe(pop, "open");
-                    detachSwipe = attachSwipe(pop, api);
+                    detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -1341,8 +1443,9 @@
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
+                removeOverlay();
+
                 const finalize = () => {
-                    removeOverlay();
                     // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
@@ -1910,8 +2013,12 @@
                 if (isMobile()) {
                     ensureOverlay();
                     moveOverlayOnTop();
+                    pop.style.opacity = "1";
+                    if (overlayEl) {
+                        overlayEl.style.opacity = "1";
+                    }
                     startKeyframe(pop, "open");
-                    detachSwipe = attachSwipe(pop, api);
+                    detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -1922,8 +2029,9 @@
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
+                removeOverlay();
+
                 const finalize = () => {
-                    removeOverlay();
                     // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
@@ -2096,8 +2204,12 @@
                 if (isMobile()) {
                     ensureOverlay();
                     moveOverlayOnTop();
+                    pop.style.opacity = "1";
+                    if (overlayEl) {
+                        overlayEl.style.opacity = "1";
+                    }
                     startKeyframe(pop, "open");
-                    detachSwipe = attachSwipe(pop, api);
+                    detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -2108,8 +2220,9 @@
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
+                removeOverlay();
+
                 const finalize = () => {
-                    removeOverlay();
                     // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
@@ -2225,8 +2338,12 @@
                 if (isMobile()) {
                     ensureOverlay();
                     moveOverlayOnTop();
+                    pop.style.opacity = "1";
+                    if (overlayEl) {
+                        overlayEl.style.opacity = "1";
+                    }
                     startKeyframe(pop, "open");
-                    detachSwipe = attachSwipe(pop, api);
+                    detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -2238,8 +2355,9 @@
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
+                removeOverlay();
+
                 const finalize = () => {
-                    removeOverlay();
                     // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
@@ -2305,8 +2423,12 @@
                 if (isMobile()) {
                     ensureOverlay();
                     moveOverlayOnTop();
+                    pop.style.opacity = "1";
+                    if (overlayEl) {
+                        overlayEl.style.opacity = "1";
+                    }
                     startKeyframe(pop, "open");
-                    detachSwipe = attachSwipe(pop, api);
+                    detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -2314,8 +2436,10 @@
             const reallyHide = () => { if (pop) pop.hidden = true; };
             const close = (opts = {}) => {
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
+
+                removeOverlay();
+
                 const finalize = () => {
-                    removeOverlay();
                     // lockScrollBody(false);
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
@@ -2431,6 +2555,10 @@
             detachModalSwipe();
             detachModalSwipe = null;
         }
+        filters.style.opacity = "";
+        if (modalBackdrop) {
+            modalBackdrop.style.opacity = "";
+        }
         delete filters.dataset.open;
         delete filters.dataset.closing;
         filters.style.transform = "";
@@ -2449,8 +2577,12 @@
         lockScrollBody(true);
         if (modalOpenedAsSheet) {
             lockScrollBody(true);
+            filters.style.opacity = "1";
+            if (modalBackdrop) {
+                modalBackdrop.style.opacity = "1";
+            }
             startKeyframe(filters, "open");
-            detachModalSwipe = attachSwipe(filters, { close: closeModal });
+            detachModalSwipe = attachSwipe(filters, { close: closeModal }, { resolveBackdrop: () => modalBackdrop });
             closeFiltersSheet = closeModal;
         }
         document.addEventListener("keydown", modalFocusTrap);
@@ -2460,6 +2592,7 @@
     const closeModal = (opts = {}) => {
         const { animatedFromY = null, alreadyAnimated = false } = opts;
         closeAllPopovers();
+        removeBackdrop();
 
         if (modalOpenedAsSheet) {
             if (alreadyAnimated) {
