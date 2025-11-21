@@ -1543,6 +1543,7 @@
             const skipClickByIso = new Map();
             const SKIP_CLICK_WINDOW_MS = 1200;
             const MOBILE_MONTH_BATCH = 5;
+            const MOBILE_NEAR_BOTTOM_PX = 48;
             let mobileMonthsToRender = MOBILE_MONTH_BATCH;
             let mobileInfiniteObserver = null;
 
@@ -1901,14 +1902,22 @@
 
                     mobileInfiniteObserver = new IntersectionObserver((entries) => {
                         const touched = entries.some(entry => entry.isIntersecting);
-                        if (!touched) return;
+                        if (!touched) {
+                            return;
+                        }
+
+                        const nearBottom = (datesCalendarWrap.scrollHeight - (datesCalendarWrap.scrollTop + datesCalendarWrap.clientHeight)) <= MOBILE_NEAR_BOTTOM_PX;
+                        if (!nearBottom) {
+                            return;
+                        }
+
                         if (mobileInfiniteObserver) {
                             mobileInfiniteObserver.disconnect();
                             mobileInfiniteObserver = null;
                         }
                         mobileMonthsToRender += MOBILE_MONTH_BATCH;
                         renderCalendar();
-                    }, { root: datesCalendarWrap, rootMargin: "320px" });
+                    }, { root: datesCalendarWrap, rootMargin: "160px" });
                     mobileInfiniteObserver.observe(sentinel);
                     return;
                 }
