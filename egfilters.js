@@ -1620,7 +1620,7 @@
                     stagedDates = [null, null];
                 }
                 hoverDate = null;
-                const nextView = stagedDates[0] ? startOfMonth(stagedDates[0]) : minViewDate;
+                const nextView = isMobile() ? minViewDate : (stagedDates[0] ? startOfMonth(stagedDates[0]) : minViewDate);
                 viewDate = nextView.getTime() < minViewDate.getTime() ? minViewDate : nextView;
                 hasReadInitialDataset = true;
                 updateDisplayFromStaged();
@@ -1906,8 +1906,9 @@
                             return;
                         }
 
-                        const nearBottom = (datesCalendarWrap.scrollHeight - (datesCalendarWrap.scrollTop + datesCalendarWrap.clientHeight)) <= MOBILE_NEAR_BOTTOM_PX;
-                        if (!nearBottom) {
+                        const scrollGap = datesCalendarWrap.scrollHeight - (datesCalendarWrap.scrollTop + datesCalendarWrap.clientHeight);
+                        const hasScrollableArea = (datesCalendarWrap.scrollHeight - datesCalendarWrap.clientHeight) > MOBILE_NEAR_BOTTOM_PX;
+                        if (!hasScrollableArea || scrollGap > MOBILE_NEAR_BOTTOM_PX) {
                             return;
                         }
 
