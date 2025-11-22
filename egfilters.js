@@ -221,11 +221,14 @@
         
         const scrolltoElement = document.querySelector('.js-filters-scrollto');
         if (scrolltoElement) {
-            const y = scrolltoElement.getBoundingClientRect().top + window.pageYOffset - 16;
-            window.scrollTo({
-                top: y,
-                behavior: 'smooth'
-            });
+            const targetY = scrolltoElement.getBoundingClientRect().top + window.pageYOffset - 16;
+            const currentY = window.pageYOffset;
+            if (currentY > targetY) {
+                window.scrollTo({
+                    top: targetY,
+                    behavior: 'smooth'
+                });
+            }
         }
     }
 
@@ -904,6 +907,25 @@
 
         // const scrollable = pop.querySelector(".exs-body, .js-filters-body") || pop;
         const isSwipeLocked = (target) => Boolean(target && target.closest(".js-exs-swipe-lock"));
+        const resolveSwipeGuard = (target) => target ? target.closest(".js-exs-swipe-guard") : null;
+        const canGuardScroll = (node, direction) => {
+            if (!node) {
+                return false;
+            }
+            const scrollableHeight = node.scrollHeight - node.clientHeight;
+            if (scrollableHeight <= 0) {
+                return false;
+            }
+            const top = node.scrollTop;
+            const bottom = top + node.clientHeight;
+            if (direction === "up") {
+                return bottom < node.scrollHeight - 1;
+            }
+            if (direction === "down") {
+                return top > 1;
+            }
+            return false;
+        };
         const setSheetDragMeta = (active, distance = 0) => {
             if (active) {
                 pop.dataset.sheetDragging = "true";
@@ -930,6 +952,7 @@
             started = false;
             dragging = false;
             dy = 0;
+            startTarget = null;
             if (rafId != null) {
                 cancelAnimationFrame(rafId);
                 rafId = null;
@@ -939,6 +962,7 @@
 
         let started = false, dragging = false;
         let y0 = 0, dy = 0, rafId = null;
+        let startTarget = null;
 
         const THRESH = 6;
         const clampSheet = (y) => {
@@ -953,11 +977,12 @@
         };
         const onFrame = () => { rafId = null; applyY(dy); };
 
-        const tryStart = (clientY) => {
+        const tryStart = (clientY, target) => {
             started = true;
             dragging = false;
             y0 = clientY;
             dy = 0;
+            startTarget = target || null;
             basePopOpacity = readOpacity(pop);
             baseBackdropOpacity = null;
             pop.style.animation = "none";
@@ -968,14 +993,33 @@
             applyOpacity(0);
         };
 
+        const deferSwipeToScroll = (delta, clientY) => {
+            const guard = resolveSwipeGuard(startTarget);
+            if (!guard) {
+                return false;
+            }
+            const direction = delta < 0 ? "up" : "down";
+            if (canGuardScroll(guard, direction)) {
+                y0 = clientY;
+                return true;
+            }
+            return false;
+        };
+
         const onMoveCore = (clientY, e) => {
             if (!started) return;
             const delta = clientY - y0;
             const distance = delta < 0 ? Math.max(0, -delta) : delta;
 
             if (!dragging) {
-                if (delta < -THRESH) { dragging = true; setSheetDragMeta(true, distance); }
-                else if (delta > THRESH) { dragging = true; setSheetDragMeta(true, distance); }
+                if (delta < -THRESH) {
+                    if (deferSwipeToScroll(delta, clientY)) { return; }
+                    dragging = true; setSheetDragMeta(true, distance);
+                }
+                else if (delta > THRESH) {
+                    if (deferSwipeToScroll(delta, clientY)) { return; }
+                    dragging = true; setSheetDragMeta(true, distance);
+                }
                 else { return; }
             } else {
                 updateSheetDragDistance(distance);
@@ -1000,6 +1044,7 @@
         const endCore = () => {
             if (!started) return;
             started = false;
+            startTarget = null;
 
             if (dragging) {
                 cancelAnimationFrame(rafId); rafId = null;
@@ -1041,7 +1086,7 @@
                 abortSwipeGesture();
                 return;
             }
-            tryStart(e.clientY);
+            tryStart(e.clientY, e.target);
         }, { passive: true });
         pop.addEventListener("pointermove", (e) => onMoveCore(e.clientY, e), { passive: false });
         pop.addEventListener("pointerup", endCore, { passive: true });
@@ -1056,7 +1101,7 @@
                 abortSwipeGesture();
                 return;
             }
-            tryStart(touch.clientY);
+            tryStart(touch.clientY, e.target);
         }, { passive: true });
         pop.addEventListener("touchmove", (e) => onMoveCore(e.touches[0].clientY, e), { passive: false });
         pop.addEventListener("touchend", endCore, { passive: true });
