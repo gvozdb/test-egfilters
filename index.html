@@ -55,7 +55,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.026
+        Build: 0.0.027
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -64,7 +64,7 @@
                 <div class="filters-title">Все фильтры</div>
                 <button type="button" class="filters-close js-filters-close" aria-label="Закрыть">×</button>
             </div>
-            <div class="filters-body js-filters-body js-exs-swipe-lock">
+            <div class="filters-body js-filters-body js-exs-swipe-guard">
                 <div class="filters-grid" data-filters-scope>
 
                     <!-- extra-select_full-value -->
@@ -101,7 +101,7 @@
                             <div class="exs-drag-handle"></div>
                             <button type="button" class="exs-close js-exs-close" aria-label="Закрыть">×</button>
                             <div class="exs-header">Даты</div>
-                            <div class="exs-body">
+                            <div class="exs-body js-exs-swipe-guard">
                                 <div class="filters-dates js-filters-dates">
                                     <input type="text"
                                            class="filters-dates-input js-dates-input"
