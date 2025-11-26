@@ -1997,7 +1997,7 @@
                 title.textContent = `${formatMonthTitle(viewDate)} – ${formatMonthTitle(nextMonth)}`;
 
                 nav.appendChild(prevBtn);
-                nav.appendChild(title);
+                // nav.appendChild(title);
                 nav.appendChild(nextBtn);
                 datespickerRoot.appendChild(nav);
 
@@ -2170,22 +2170,120 @@
             const toNum = pop.querySelector(".js-exs-to");
             const pluginEl = pop.querySelector(".js-exs-range");
 
-            const clamp = (v) => Math.min(max, Math.max(min, v));
+            let sliderMin = min;
+            const clamp = (v) => Math.min(max, Math.max(sliderMin, v));
 
-            noUiSlider.create(pluginEl, {
-                start: [min, max],
-                connect: true,
-                step: step,
-                range: { min: min, max: max },
-                // behaviour: "drag",
-                keyboardSupport: true,
-            });
+            (function initPriceSlider(pluginEl, min, max) {
+                if (!pluginEl || typeof noUiSlider === 'undefined') return;
+            
+                let realMin = Math.max(1, Number(min));
+                let realMax = Math.max(realMin + 1, Number(max));
+            
+                if (pluginEl.noUiSlider) {
+                    pluginEl.noUiSlider.destroy();
+                }
+            
+                function stepForValue(v) {
+                    if (v < 100)    return 10;
+                    if (v < 1000)   return 100;
+                    if (v < 10000)  return 1000;
+                    if (v < 100000) return 10000;
+                    return 100000;
+                }
+
+                sliderMin = realMin;
+            
+                const BREAKPOINTS = [10, 100, 1000, 10000, 100000];
+            
+                function buildNonLinearRange(realMin, realMax) {
+                    const range = {};
+            
+                    const logMin  = Math.log10(Math.max(realMin, 1));
+                    const logMax  = Math.log10(realMax);
+                    const logSpan = logMax - logMin || 1;
+            
+                    function pos(v) {
+                        const t = (Math.log10(v) - logMin) / logSpan;
+                        return (t * 100).toFixed(3) + '%';
+                    }
+
+                    const baseStepMin = stepForValue(realMin);
+                    const mod = realMin % baseStepMin;
+                    const firstNice = mod === 0 ? realMin : realMin + (baseStepMin - mod);
+
+                    if (firstNice <= realMin || firstNice >= realMax) {
+                        range.min = [realMin, baseStepMin];
+                    } else {
+                        const firstStep = firstNice - realMin;
+                        range.min = [realMin, firstStep];
+                        range[pos(firstNice)] = [firstNice, baseStepMin];
+                    }
+            
+                    BREAKPOINTS.forEach((bp) => {
+                        if (bp > realMin && bp < realMax) {
+                            range[pos(bp)] = [bp, stepForValue(bp)];
+                        }
+                    });
+                    
+                    range.max = [realMax];
+                    
+                    return range;
+                }
+            
+                function buildPipValues(realMin, realMax) {
+                    const base = [10, 100, 1000, 10000, 100000];
+                    const values = [realMin];
+            
+                    base.forEach((v) => {
+                        if (v > realMin && v < realMax) values.push(v);
+                    });
+            
+                    values.push(realMax);
+            
+                    return Array.from(new Set(values));
+                }
+            
+                function formatPrice(v) {
+                    const value = Math.round(v);
+                    if (value < 1000)      return String(value);
+                    if (value < 1000000)   return (value / 1000) + 'k';
+                    return (value / 1000000) + 'M';
+                }
+            
+                const range     = buildNonLinearRange(realMin, realMax);
+                const pipValues = buildPipValues(realMin, realMax);
+            
+                noUiSlider.create(pluginEl, {
+                    start: [realMin, realMax],
+                    connect: true,
+                    range: range,
+                    keyboardSupport: true,
+                    format: {
+                        to:   v => Math.round(v),
+                        from: v => Number(v)
+                    }
+                });
+            
+                pluginEl.noUiSlider.updateOptions({
+                    pips: {
+                        mode: 'values',
+                        values: pipValues,
+                        density: 999,
+                        stepped: true,
+                        format: {
+                            to: formatPrice
+                        }
+                    }
+                });
+            
+            })(pluginEl, min, max);
+
 
             let staged = [min, max];
 
             const setStagedFromApplied = () => {
-                let a = applied[0] === "" ? min : clamp(+applied[0]);
-                let b = applied[1] === "" ? max : clamp(+applied[1]);
+                let a = applied[0] === "" ? sliderMin : clamp(+applied[0]);
+                let b = applied[1] === "" ? max       : clamp(+applied[1]);
                 if (a > b) [a, b] = [b, a];
                 staged = [a, b];
                 pluginEl.noUiSlider.set(staged);
@@ -2208,17 +2306,18 @@
             };
 
             const resetRange = () => {
-                applied = [String(min), String(max)];
-                pluginEl.noUiSlider.set([min, max]);
-                staged = [min, max];
-                fromNum.value = min;
+                applied = [String(sliderMin), String(max)];
+                pluginEl.noUiSlider.set([sliderMin, max]);
+                staged = [sliderMin, max];
+                fromNum.value = sliderMin;
                 toNum.value = max;
                 writeHidden();
                 updateBtn();
             };
 
             pluginEl.noUiSlider.on("update", (values) => {
-                const a = Math.round(values[0]); const b = Math.round(values[1]);
+                const a = Math.round(values[0]); 
+                const b = Math.round(values[1]);
                 staged = [a, b];
                 if (document.activeElement !== fromNum) fromNum.value = a;
                 if (document.activeElement !== toNum) toNum.value = b;
@@ -2228,13 +2327,15 @@
                 let v = clamp(+fromNum.value);
                 let other = staged[1];
                 if (v > other) other = v;
-                pluginEl.noUiSlider.set([v, other]); staged = [v, other];
+                pluginEl.noUiSlider.set([v, other]); 
+                staged = [v, other];
             };
             const syncTo = () => {
                 let v = clamp(+toNum.value);
                 let other = staged[0];
                 if (v < other) other = v;
-                pluginEl.noUiSlider.set([other, v]); staged = [other, v];
+                pluginEl.noUiSlider.set([other, v]); 
+                staged = [other, v];
             };
             fromNum.addEventListener("input", syncFrom);
             toNum.addEventListener("input", syncTo);
@@ -2330,7 +2431,7 @@
 
             readHidden();
             if (!applied.length) {
-                applied = [String(min), String(max)];
+                applied = [String(sliderMin), String(max)];
                 writeHidden();
             }
             setStagedFromApplied();
