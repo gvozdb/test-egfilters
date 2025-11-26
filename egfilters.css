@@ -431,7 +431,7 @@ body.filters-modal .filters {
     top: 50%;
     transform: translate(-50%, -50%);
     background: #fff;
-    width: min(700px, 90vw);
+    width: min(520px, 90vw);
     max-height: max(700px, 80vh);
     margin: 0;
     padding: 0;
@@ -461,6 +461,11 @@ body.filters-modal .filters .filters-meta {
     padding: 0;
     margin-left: 0;
     border: 0;
+}
+
+body.filters-modal .filters .filters-grid,
+body.filters-modal .filters .filters-meta {
+    width: 100%;
 }
 
 .modal-backdrop {
@@ -504,7 +509,10 @@ body.filters-modal .filters .filters-grid {
     flex: 1 1 auto;
     overflow: initial;
     padding: 0;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    flex-wrap: nowrap;
 }
 body.filters-modal .filters .filters-footer {
     display: flex;
@@ -588,8 +596,8 @@ body.filters-modal .filters .filters-standalone-checks {
 
 @media (min-width: 769px) {
     body.filters-modal .filters .filters-grid .extra-select:not(.extra-select_sort) {
-        flex: 1 1 calc(50% - 6px);
-        max-width: calc(50% - 6px);
+        flex: 1 1 100%;
+        max-width: 100%;
     }
 }
 
@@ -803,6 +811,41 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     margin-bottom: initial;
     font-weight: initial;
     cursor: pointer;
+}
+
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-trigger {
+    cursor: default;
+    pointer-events: none;
+    padding-right: 12px;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-trigger::after {
+    display: none;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-popover {
+    position: static;
+    inset: auto;
+    box-shadow: none;
+    margin-top: 8px;
+    border-radius: 6px;
+    width: 100%;
+    min-width: 0;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-popover[hidden] {
+    display: block !important;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-drag-handle,
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-actions,
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-close {
+    display: none !important;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-header {
+    display: block;
+    text-align: left;
+    padding: 10px 10px 0;
+}
+body.filters-modal .filters .extra-select[data-modal-inline="true"] .exs-body {
+    max-height: none;
+    padding: 10px;
 }
 
 .exs-body {
@@ -1300,6 +1343,7 @@ body.filters-modal .filters .filters-meta > .filters-count {
 
 body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
+    width: 100%;
 }
 @media (max-width: 768px) {
     body.filters-modal .filters .filters-body .filters-grid {
@@ -1307,5 +1351,6 @@ body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     }
     body.filters-modal .filters .filters-body .filters-grid > * {
         flex: 1 0 100%;
+        width: 100%;
     }
 }
