@@ -131,7 +131,7 @@ body.filters-modal .filters-ghost > .filters-body {
     background: #fff;
     font-size: 15px;
     line-height: 1.4;
-    color: #1f2933;
+    color: #101519;
     cursor: pointer;
 }
 .filters-dates-input:focus {
@@ -164,6 +164,7 @@ body.filters-modal .filters-ghost > .filters-body {
     width: 100%;
     gap: 12px;
     z-index: 2;
+    padding: 0 5px 0 5px;
 }
 .datespicker-nav-title {
     display: none;
@@ -171,22 +172,22 @@ body.filters-modal .filters-ghost > .filters-body {
     text-align: center;
     font-weight: 600;
     font-size: 15px;
-    color: #1f2933;
+    color: #101519;
 }
 .datespicker-nav-btn {
     position: relative;
     flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: .75rem;
     border: none;
     background: #f1f5f9;
-    color: #1f2933;
+    color: #44596d;
     cursor: pointer;
-    font-family: math, 'Tahoma';
+    font-family: math, '#E9EEF3ma';
     font-weight: 100;
     font-size: 25px;
     line-height: 1;
@@ -196,8 +197,8 @@ body.filters-modal .filters-ghost > .filters-body {
     content: "";
     position: absolute;
     top: 50%;
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     margin-top: -5px;
     border-right: 2px solid currentColor;
     border-bottom: 2px solid currentColor;
@@ -208,11 +209,11 @@ body.filters-modal .filters-ghost > .filters-body {
     transform: rotate(135deg);
 }
 .datespicker-nav-btn.datespicker-nav-btn_next:after {
-    right: 13px;
+    right: 12px;
     transform: rotate(-45deg);
 }
 .datespicker-nav-btn[disabled] {
-    opacity: .25;
+    opacity: 0;
 }
 .datespicker-nav-btn:hover {
     background: #e2e8f0;
@@ -234,7 +235,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .datespicker-month-name {
     padding-top: 1.6rem;
     padding-bottom: 1rem;
-    color: #1f2933;
+    color: #101519;
     font-size: 16px;
     font-weight: 500;
     text-transform: capitalize;
@@ -244,7 +245,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .datespicker-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+    gap: 4px 0;
 }
 .datespicker-weekday {
     color: #889eb4;
@@ -258,13 +259,13 @@ body.filters-modal .filters-ghost > .filters-body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 8px;
+    padding: 10px 11px 10px 11px;
     border: none;
-    border-radius: .75rem;
+    border-radius: 6px;
     background: transparent;
-    color: #1f2933;
+    color: #101519;
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1;
     cursor: pointer;
     transition: background-color 120ms ease, color 120ms ease;
 }
@@ -288,7 +289,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .datespicker-day.is-range {
     border-radius: 0;
     background: rgba(73, 190, 84, 0.18);
-    color: #1f2933;
+    color: #101519;
 }
 .datespicker-day.is-range.is-outside {
     background: rgba(73, 190, 84, 0.07);
@@ -305,19 +306,19 @@ body.filters-modal .filters-ghost > .filters-body {
     color: #ffffff;
 }
 .datespicker-day.is-range-start.is-range-end {
-    border-radius: .75rem;
+    border-radius: 6px;
 }
 .datespicker-day.is-range.is-to-left.is-range-start {
-    border-radius: 0 .75rem .75rem 0;
+    border-radius: 0 6px 6px 0;
 }
 .datespicker-day.is-range.is-to-left.is-range-end {
-    border-radius: 0 .75rem .75rem 0;
+    border-radius: 0 6px 6px 0;
 }
 .datespicker-day.is-to-right.is-range-start {
-    border-radius: .75rem 0 0 .75rem;
+    border-radius: 6px 0 0 6px;
 }
 .datespicker-day.is-to-right.is-range-end {
-    border-radius: .75rem 0 0 .75rem;
+    border-radius: 6px 0 0 6px;
 }
 .datespicker-day.is-disabled {
     color: #cbd2d9;
@@ -329,12 +330,12 @@ body.filters-modal .filters-ghost > .filters-body {
 @media (min-width: 769px) {
     .datespicker-month_left {
         padding-right: 1rem;
-        padding-bottom: 1rem;
+        padding-bottom: 0.6rem;
         border-right: 1px solid #E9EEF3;
     }
     .datespicker-month_right {
         padding-left: 1rem;
-        padding-bottom: 1rem;
+        padding-bottom: 0.6rem;
     }
     body:not(.filters-modal) .filters > .filters-body > .filters-grid,
     body.filters-modal .filters-ghost > .filters-body > .filters-grid {
@@ -378,7 +379,8 @@ body.filters-modal .filters-ghost > .filters-body {
     position: relative;
 }
 .filters-open:hover {
-    background-color: #f8fafc;
+    /*background-color: #f8fafc;*/
+    border-color: #98b2cb;
 }
 .filters-open-badge {
     position: absolute;
@@ -432,10 +434,10 @@ body.filters-modal .filters {
     transform: translate(-50%, -50%);
     background: #fff;
     width: min(700px, 90vw);
-    max-height: max(700px, 80vh);
+    max-height: max(700px, 90vh);
     margin: 0;
     padding: 0;
-    border-radius: 4px;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -450,8 +452,8 @@ body.filters-modal .filters .filters-body {
     flex-direction: column;
     flex: 1 1 auto;
     gap: 12px;
-    padding: 16px 16px;
-    max-height: calc(80vh - 90px);
+    padding: 16px 16px 10px 16px;
+    max-height: calc(90vh - 90px);
     overflow: auto;
 }
 
@@ -474,31 +476,36 @@ body.filters-modal .filters .filters-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid #eee;
+    padding: 14px 16px 0 16px;
+    border-bottom: 0 solid #E9EEF3;
     position: relative;
     z-index: 1;
 }
 body.filters-modal .filters .filters-title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.5;
 }
 body.filters-modal .filters .filters-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    width: 36px;
     height: 32px;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    background: #fff;
+    border-radius: 6px;
+    border: 0;
     cursor: pointer;
-    color: #44596d;
+    color: #adbdca;
     font-family: "Roboto",sans-serif;
-    font-size: 16px;
-    font-weight: 100;
+    font-size: 26px;
+    font-weight: 400;
     line-height: 1;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+}
+body.filters-modal .filters .filters-close:hover {
+    color: #89a0b2;
 }
 body.filters-modal .filters .filters-grid {
     flex: 1 1 auto;
@@ -511,21 +518,22 @@ body.filters-modal .filters .filters-footer {
     gap: 8px;
     align-items: center;
     justify-content: flex-end;
-    padding: 12px 16px;
-    border-top: 1px solid #eee;
+    padding: 14px 16px;
+    border-top: 1px solid #E9EEF3;
     background: #fff;
     position: relative;
     z-index: 1;
 }
 .filters-btn {
     background: #fff;
-    padding: 6px 14px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
     font-family: "Roboto", sans-serif;
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1;
     cursor: pointer;
+    font-weight: 500;
 }
 .filters-btn_reset {
     background-color: #ffffff;
@@ -535,21 +543,32 @@ body.filters-modal .filters .filters-footer {
     border-bottom: 1px dotted #58c462;
     padding: 0;
     border-radius: 0;
-    margin-right: 10px;
+    margin-right: 11px;
 }
 .filters-btn_apply {
-    background: #49be54;
-    border-color: #49be54;
+    background: #38c04f;
+    border-color: #38c04f;
     color: #fff;
+    border: none;
 }
 .filters-btn_reset:hover {
     background-color: #fff;
     color: #3ba645;
+    border-bottom: 1px dotted #34b149;
 }
 .filters-btn_apply:hover {
-    background-color: #34b149;
+    background-color: #36b84c;
+    border-color: #36b84c;
     color: #fff;
+    border: 0;
 }
+
+.js-filters-apply-all {
+    padding: 10px 14px;
+    border: none;
+    line-height: 1;
+}
+
 
 @media (max-width: 768px) {
     /*
@@ -575,8 +594,8 @@ body.filters-modal .filters .filters-footer {
     gap: 8px;
     cursor: pointer;
     user-select: none;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    border: 1px solid #E9EEF3;
+    border-radius: 6px;
     padding: 2.5px 10px;
     max-width: initial;
     margin-bottom: initial;
@@ -620,7 +639,7 @@ body.filters-modal .filters .extra-select.is-filled:not(.extra-select_sort)::bef
     left: 12px;
     font-size: 12px;
     line-height: 1;
-    color: #44596d;
+    color: #536d85;
     pointer-events: none;
     max-width: calc(100% - 48px);
     overflow: hidden;
@@ -630,7 +649,7 @@ body.filters-modal .filters .extra-select.is-filled:not(.extra-select_sort)::bef
     padding-left: 1px;
 }
 body.filters-modal .filters .extra-select.is-filled:not(.extra-select_sort) .exs-trigger {
-    padding: 17px 36px 3px 12px;
+    padding: 19px 36px 5px 12px;
 }
 body.filters-modal .filters .extra-select_has-icon.is-filled:not(.extra-select_sort)::before {
     left: 33.1px;
@@ -654,10 +673,14 @@ body.filters-modal .filters .extra-select_has-icon.is-filled:not(.extra-select_s
     cursor: pointer;
 }
 .extra-select:not(.extra-select_sort) .exs-trigger:hover {
-    background-color: #f8fafc;
+    /*background-color: #f8fafc;*/
+    border-color: #98b2cb;
+}
+.extra-select:not(.extra-select_sort) .exs-trigger.is-active:hover {
+    border-color: #91d898;
 }
 body.filters-modal .filters .exs-trigger {
-    padding: 10px 36px 10px 12px;
+    padding: 12px 36px 12px 12px;
 }
 .extra-select:not(.extra-select_has-icon) .exs-trigger {
     white-space: nowrap;
@@ -668,11 +691,15 @@ body.filters-modal .filters .exs-trigger {
     padding-left: 32px !important;
 }
 .exs-trigger[aria-expanded="true"] {
-    border-color: #49be54;
+    border-color: #98b2cb;
 }
 .exs-trigger.is-active {
-    border-color: #49be54;
+    border-color: #91d898;
     color: #49be54;
+    font-weight: 500;
+}
+.extra-select:not(.extra-select_has-icon) .exs-trigger.is-active:hover {
+    border-color: #91d898;
 }
 .exs-trigger::after {
     content: "";
@@ -685,7 +712,7 @@ body.filters-modal .filters .exs-trigger {
     border-right: 2px solid currentColor;
     border-bottom: 2px solid currentColor;
     transform: rotate(45deg);
-    transition: transform .15s ease;
+    /*transition: transform .15s ease;*/
 }
 .exs-trigger[aria-expanded="true"]::after {
     transform: rotate(-135deg);
@@ -696,19 +723,19 @@ body.filters-modal .filters .exs-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     color: inherit;
     pointer-events: none;
 }
 .extra-select_has-icon:not(.extra-select_sort) .exs-trigger .exs-trigger-icon {
     position: absolute;
-    left: 7px;
+    left: 8px;
     top: 50%;
     transform: translateY(-52%);
 }
 .extra-select_has-icon:not(.extra-select_sort) .exs-trigger:not(.is-active) .exs-trigger-icon {
-    color: #5b7791;
+    color: #4c6379;
 }
 .exs-trigger-icon svg {
     display: block;
@@ -736,12 +763,13 @@ body.filters-modal .filters .exs-trigger {
 .extra-select_sort .exs-trigger {
     display: inline-flex;
     align-items: center;
-    gap: .16rem;
-    padding-left: 2px;
-    padding-right: 10px;
+    gap: .4rem;
+    padding-left: 4px;
+    padding-right: 8px;
     background: transparent;
     border-color: transparent;
     color: #2079bf;
+    font-weight: 400;
 }
 body.filters-modal .filters .extra-select_sort .exs-trigger {
     padding-left: 0;
@@ -778,12 +806,12 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     background: #fff;
     padding: 0;
     border: 1px solid #E9EEF3;
-    border-radius: 4px;
+    border-radius: 6px;
     box-shadow: 2px 3px 6px 0 rgba(20, 30, 41, .1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    min-width: 280px;
+    min-width: 270px;
     opacity: 1;
     transform: translateY(0);
     font-size: 16px;
@@ -809,7 +837,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     flex: 1;
     max-height: calc(70vh - 52px);
     overflow: auto;
-    padding: 10px;
+    padding: 10px 14px;
 }
 .exs-popover[data-field-key="dates"] .exs-body {
     padding-top: 0;
@@ -821,8 +849,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    padding: 10px;
-    border-top: 1px solid #eee;
+    padding: 14px;
+    border-top: 1px solid #E9EEF3;
     background: #fff;
 }
 
@@ -834,17 +862,20 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     z-index: 2;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    width: 34px;
     height: 32px;
-    border-radius: 10px;
-    border: 1px solid #eee;
+    border-radius: 6px;
+    border: 0 solid #E9EEF3;
     background: #fff;
     cursor: pointer;
-    color: #44596d;
+    color: #adbdca;
     font-family: "Roboto",sans-serif;
-    font-size: 16px;
-    font-weight: 100;
+    font-size: 26px;
+    font-weight: 400;
     line-height: 1;
+}
+.exs-close:hover {
+    color: #89a0b2;
 }
 .exs-drag-handle {
     display: none;
@@ -870,11 +901,11 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
 }
 .exs-header {
     display: none;
-    padding: 22px 14px 0;
-    font-size: 17px;
+    padding: 22px 14px 0 16px;
+    font-size: 16px;
     font-weight: 500;
     line-height: 1;
-    text-align: center;
+    text-align: left;
 }
 
 
@@ -990,11 +1021,11 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         flex: none;
     }
     .exs-popover[data-field-key="dates"] {
-        min-width: 540px;
+        min-width: 612px;
     }
     .exs-popover[data-field-key="sort"] .exs-header {
         display: block;
-        padding: 16px 14px 7px;
+        padding: 18px 14px 0 16px;
     }
 }
 @media (max-width: 768px) {
@@ -1004,9 +1035,10 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         right: 0;
         bottom: -160px;
         top: auto;
-        max-height: calc(80vh + 160px);
+        max-height: calc(90vh + 160px);
         height: auto;
         border-radius: 16px 16px 0 0;
+        border: 0;
         margin: 0;
         padding-top: 0;
         padding-bottom: 160px;
@@ -1019,17 +1051,17 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     .exs-popover[data-open="true"] { animation: exsSlideUp var(--exs-mobile-popover-open-duration) cubic-bezier(.22,1,.36,1) both; }
     .exs-popover[data-closing="true"] { animation: exsSlideDown var(--exs-mobile-popover-close-duration) ease both; }
     .exs-header { display: block; }
-    .exs-body { max-height: calc(calc(80vh + 160px) - 60px - 40px); overflow: auto; }
+    .exs-body { max-height: calc(calc(90vh + 160px) - 60px - 40px); overflow: auto; }
     .exs-actions {
         /* justify-content: space-between; */
         position: relative;
-        padding: 10px 14px;
+        padding: 18px;
     }
     .exs-close { display: inline-flex; }
     .exs-drag-handle { display: block; }
 
     .exs-popover[data-field-key="dates"] {
-        /* min-height: calc(80vh + 160px); */
+        /* min-height: calc(90vh + 160px); */
     }
     .exs-popover[data-field-key="dates"] .exs-header,
     .exs-popover[data-field-key="dates"] .exs-close {
@@ -1045,7 +1077,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         bottom: -160px;
         width: auto;
         max-width: none;
-        max-height: calc(80vh + 160px);
+        max-height: calc(90vh + 160px);
         height: auto;
         transform: translateY(0);
         border-radius: 16px 16px 0 0;
@@ -1077,18 +1109,18 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         flex: 1 1 auto;
         align-items: stretch;
         gap: 10px;
-        padding: 10px 14px 14px;
-        max-height: calc(calc(80vh + 160px) - 60px - 40px);
+        padding: 10px 14px 10px 14px;
+        max-height: calc(calc(90vh + 160px) - 60px - 40px);
         overflow: auto;
     }
     body.filters-modal .filters .filters-grid {
         padding: 0;
-        gap: 10px 12px;
+        gap: 12px 12px;
     }
     body.filters-modal .filters .filters-footer {
         position: relative;
-        padding: 10px 14px 18px;
-        border-top: 1px solid #eee;
+        padding: 18px;
+        border-top: 1px solid #E9EEF3;
         background: #fff;
     }
 }
@@ -1103,7 +1135,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
 .noUi-target { border: 0; box-shadow: none; }
 .noUi-horizontal { height: 6px; }
 .noUi-connect { background: #49be54; }
-.noUi-base, .noUi-connects { border-radius: 3px; background: #eee; }
+.noUi-base, .noUi-connects { border-radius: 3px; background: #E9EEF3; }
 .noUi-handle {
     border-radius: 50%;
     width: 18px !important;
@@ -1123,6 +1155,17 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     width: calc(100% + 16px);
     height: calc(100% + 16px);
 }
+.noUi-pips {
+    position: relative;
+    height: initial;
+    padding: 7px 0;
+    font-size: 12px;
+    line-height: 1.2;
+}
+.noUi-pips .noUi-marker-horizontal.noUi-marker {
+    width: 1px !important;
+    height: 5px !important;
+}
 
 .exs-price-row {
     display: flex;
@@ -1137,6 +1180,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     gap: 6px;
     flex: 1 1 0;
     padding: 6px 4px;
+    margin-top: 2px;
 }
 .exs-price-field span {
     position: absolute;
@@ -1145,24 +1189,30 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     transform: translateY(-52%);
     width: 20px;
     text-align: right;
-    /* font-weight: 300; */
-    color: #777;
+    color: #7d97ab;
 }
 .exs-price-field input[type="number"] {
     width: 100%;
-    padding: 10px 10px 10px 3rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 10px 10px 10px 3.2rem;
+    border: 1px solid #bfcfdf;
+    border-radius: 6px;
     box-sizing: border-box;
     -moz-appearance: textfield;
+    color: #44596d;
 }
 .exs-price-field input[type="number"]::-webkit-outer-spin-button,
 .exs-price-field input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
+
+.exs-price-field input[type="number"]:active, .exs-price-field input[type="number"]:focus, .exs-price-field[aria-expanded="true"] {
+    border: 1px solid #49be54;
+    outline: none;
+}
+
 .exs-range {
     padding: 18px 14px 25px;
-    margin-bottom: -10px;
+    margin-bottom: 10px;
 }
 .exs-range-plugin {
     margin: 0;
