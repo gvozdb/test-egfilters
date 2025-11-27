@@ -55,7 +55,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.027
+        Build: 0.0.032
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -201,8 +201,8 @@
                          data-field="price"
                          data-placeholder="Цены"
                          data-min="0"
-                         data-max="100000"
-                         data-step="1000"
+                         data-max="2150"
+                         data-step="1"
                          data-show-panel-xl="true"
                          data-show-panel-m="false"
                          data-show-panel-xs="false">
@@ -236,8 +236,8 @@
                             </div>
                         </div>
                         <div class="exs-hidden js-exs-hidden">
-                            <input type="hidden" name="price[min]" value="25000">
-                            <input type="hidden" name="price[max]" value="70000">
+                            <input type="hidden" name="price[min]" value="25">
+                            <input type="hidden" name="price[max]" value="250">
                         </div>
                     </div>
 
@@ -316,14 +316,25 @@
                     </div>
                 </div>
                 <div class="filters-meta">
-                    <div class="extra-select js-extra-select extra-select_sort extra-select_has-icon"
+                    <div class="filters-count js-filters-count"
+                         data-show-panel-xl="false"
+                         data-show-panel-m="false"
+                         data-show-panel-xs="true"
+                         data-order="60"
+                         data-count="0"
+                         data-decl1="экскурсия"
+                         data-decl2="экскурсии"
+                         data-decl3="экскурсий"
+                    ></div>
+
+                    <div class="filters-sort extra-select js-extra-select extra-select_sort extra-select_has-icon"
                          data-type="radio"
                          data-field="sort"
                          data-placeholder="Сортировка"
                          data-show-panel-xl="true"
                          data-show-panel-m="true"
                          data-show-panel-xs="true"
-                         data-order="60">
+                         data-order="70">
                         <button type="button"
                                 class="exs-trigger js-exs-trigger"
                                 aria-haspopup="listbox"
@@ -352,17 +363,6 @@
                             <input type="hidden" name="sort" value="recommended">
                         </div>
                     </div>
-
-                    <div class="filters-count js-filters-count"
-                         data-show-panel-xl="false"
-                         data-show-panel-m="false"
-                         data-show-panel-xs="true"
-                         data-order="70"
-                         data-count="0"
-                         data-decl1="экскурсия"
-                         data-decl2="экскурсии"
-                         data-decl3="экскурсий"
-                    ></div>
 
                     <!--
                     <div class="filters-count"
