@@ -39,6 +39,20 @@
     border-top-right-radius: 0 !important;
     z-index: 8000;
 }
+.filters-sticky .filters-sticky-target {
+    border-radius: 0 !important;
+}
+.filters-sticky .filters-sticky-target::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--filters-sticky-backdrop-height, 0);
+    background-color: #f2f5f8;
+    box-shadow: 0px 2px 4px 0 rgba(20, 30, 41, .1);
+    z-index: -1;
+}
 
 .filters-body {
     display: flex;
@@ -75,6 +89,10 @@ body.filters-modal .filters-ghost > .filters-body {
     .filters-body {
         gap: 0;
     }
+    body:not(.filters-modal) .filters .filters-meta,
+    body.filters-modal .filters-ghost .filters-meta {
+        margin: 6px 0 -7px;
+    }
     body:not(.filters-modal) .filters > .filters-body,
     body.filters-modal .filters-ghost > .filters-body {
         flex-direction: column;
@@ -96,12 +114,14 @@ body.filters-modal .filters-ghost > .filters-body {
     body:not(.filters-modal) .filters > .filters-body > .filters-meta,
     body.filters-modal .filters-ghost > .filters-body > .filters-meta {
         margin-left: 0;
-        justify-content: flex-start;
+        justify-content: space-between;
     }
 }
 
 .filters-meta .filters-count {
-    margin-left: auto;
+}
+.filters-meta .filters-sort {
+    flex: inherit !important;
 }
 /* Базовое (по умолчанию множественное "экскурсий") */
 .filters-meta .filters-count::after {
@@ -655,6 +675,20 @@ body.filters-modal .filters .extra-select_has-icon.is-filled:not(.extra-select_s
     left: 33.1px;
     max-width: calc(100% - 80px);
 }
+body.filters-modal .filters .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort) .exs-trigger-icon,
+body:not(.filters-modal) .filters-ghost .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort) .exs-trigger-icon {
+    display: none;
+}
+body.filters-modal .filters .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort) .exs-trigger,
+body:not(.filters-modal) .filters-ghost .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort) .exs-trigger {
+    padding-left: 12px !important;
+}
+body.filters-modal .filters .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort)::before,
+body:not(.filters-modal) .filters-ghost .extra-select_has-icon[data-type="dates"].is-filled:not(.extra-select_sort)::before {
+    left: 12px;
+    max-width: calc(100% - 48px);
+}
+
 .extra-select_sort {
     flex: 0 0 auto;
     min-width: inherit !important;
@@ -686,6 +720,9 @@ body.filters-modal .filters .exs-trigger {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.extra-select:not(.extra-select_has-icon) .exs-trigger .exs-trigger-icon {
+    display: none;
 }
 .extra-select.extra-select_has-icon:not(.extra-select_sort) .exs-trigger {
     padding-left: 32px !important;
@@ -1247,7 +1284,7 @@ body.filters-modal .filters-ghost > .filters-body > .filters-meta > [data-order=
 body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count,
 body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count {
     white-space: nowrap;
-    color: #44596d;
+    color: #768a9d;
     font-size: 16px;
 }
 
