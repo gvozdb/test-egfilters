@@ -451,16 +451,16 @@
         if (!(start instanceof Date) || !(end instanceof Date)) return "";
         const sameDay = isSameDay(start, end);
         if (sameDay) {
-            return `${formatDateHuman(start)} ${start.getFullYear()}`;
+            return formatDateHuman(start);
         }
         const sameYear = start.getFullYear() === end.getFullYear();
         if (sameYear) {
             if (start.getMonth() === end.getMonth()) {
-                return `${start.getDate()} – ${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]} ${end.getFullYear()}`;
+                return `${start.getDate()} – ${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]}`;
             }
-            return `${formatDateHuman(start)} – ${formatDateHuman(end)} ${end.getFullYear()}`;
+            return `${formatDateHuman(start)} – ${formatDateHuman(end)}`;
         }
-        return `${formatDateHuman(start)} ${start.getFullYear()} – ${formatDateHuman(end)} ${end.getFullYear()}`;
+        return `${formatDateHuman(start)} – ${formatDateHuman(end)}`;
     };
 
     let currentOpen = null;
@@ -620,9 +620,16 @@
         return stickyState.placeholder;
     };
 
+    const syncStickyTargetType = (targetType) => {
+        if (targetType) {
+            document.body.dataset.filtersStickyTarget = targetType;
+        } else {
+            delete document.body.dataset.filtersStickyTarget;
+        }
+    };
+
     const resetSticky = () => {
         document.body.classList.remove("filters-sticky");
-        delete document.body.dataset.filtersStickyTarget;
         if (stickyState.placeholder) {
             stickyState.placeholder.remove();
             stickyState.placeholder = null;
@@ -635,6 +642,7 @@
             stickyState.target.style.width = "";
             stickyState.target.style.right = "";
             stickyState.target.style.zIndex = "";
+            // stickyState.target.style.removeProperty("--filters-sticky-backdrop-height");
         }
         stickyState.target = null;
         stickyState.targetType = null;
@@ -659,6 +667,7 @@
         target.style.width = `${rect.width}px`;
         target.style.right = "auto";
         target.style.zIndex = "8000";
+        target.style.setProperty("--filters-sticky-backdrop-height", `${rect.height}px`);
 
         stickyState.target = target;
         stickyState.targetType = targetType;
@@ -672,6 +681,7 @@
             stickyState.placeholder.style.width = "";
         }
         const { bodyNode, targetNode, targetType } = getStickyNodes();
+        syncStickyTargetType(targetType);
         if (!bodyNode || !targetNode) {
             resetSticky();
             return;
@@ -1078,7 +1088,7 @@
             setSheetDragMeta(false);
         };
 
-        pop.addEventListener("pointerdown", (e) => {
+        const onPointerDown = (e) => {
             if (e.pointerType !== "touch") {
                 return;
             }
@@ -1087,12 +1097,9 @@
                 return;
             }
             tryStart(e.clientY, e.target);
-        }, { passive: true });
-        pop.addEventListener("pointermove", (e) => onMoveCore(e.clientY, e), { passive: false });
-        pop.addEventListener("pointerup", endCore, { passive: true });
-        pop.addEventListener("pointercancel", endCore, { passive: true });
-
-        pop.addEventListener("touchstart", (e) => {
+        };
+        const onPointerMove = (e) => onMoveCore(e.clientY, e);
+        const onTouchStart = (e) => {
             const touch = e.touches[0];
             if (!touch) {
                 return;
@@ -1102,12 +1109,35 @@
                 return;
             }
             tryStart(touch.clientY, e.target);
-        }, { passive: true });
-        pop.addEventListener("touchmove", (e) => onMoveCore(e.touches[0].clientY, e), { passive: false });
+        };
+        const onTouchMove = (e) => onMoveCore(e.touches[0].clientY, e);
+
+        pop.addEventListener("pointerdown", onPointerDown, { passive: true });
+        pop.addEventListener("pointermove", onPointerMove, { passive: false });
+        pop.addEventListener("pointerup", endCore, { passive: true });
+        pop.addEventListener("pointercancel", endCore, { passive: true });
+
+        pop.addEventListener("touchstart", onTouchStart, { passive: true });
+        pop.addEventListener("touchmove", onTouchMove, { passive: false });
         pop.addEventListener("touchend", endCore, { passive: true });
         pop.addEventListener("touchcancel", endCore, { passive: true });
 
-        return () => {};
+        return () => {
+            abortSwipeGesture();
+            restoreOpacity();
+            pop.style.transform = "";
+            pop.style.animation = "";
+            pop.style.transition = "";
+            setSheetDragMeta(false);
+            pop.removeEventListener("pointerdown", onPointerDown, { passive: true });
+            pop.removeEventListener("pointermove", onPointerMove, { passive: false });
+            pop.removeEventListener("pointerup", endCore, { passive: true });
+            pop.removeEventListener("pointercancel", endCore, { passive: true });
+            pop.removeEventListener("touchstart", onTouchStart, { passive: true });
+            pop.removeEventListener("touchmove", onTouchMove, { passive: false });
+            pop.removeEventListener("touchend", endCore, { passive: true });
+            pop.removeEventListener("touchcancel", endCore, { passive: true });
+        };
     }
 
     (function outsideClickOnly() {
@@ -1631,7 +1661,7 @@
                     const a = clampToDate(startSel);
                     const isoRange = toISODate(a);
                     datesInput.dataset.datespickerValue = isoRange;
-                    datesInput.value = `${formatDateHuman(a)} ${a.getFullYear()}`;
+                    datesInput.value = formatDateHuman(a);
                 } else {
                     datesInput.dataset.datespickerValue = "";
                     datesInput.value = "";
@@ -2172,6 +2202,7 @@
 
             let sliderMin = min;
             const clamp = (v) => Math.min(max, Math.max(sliderMin, v));
+            let isSyncingFromInput = false;
 
             (function initPriceSlider(pluginEl, min, max) {
                 if (!pluginEl || typeof noUiSlider === 'undefined') return;
@@ -2231,11 +2262,19 @@
                 }
             
                 function buildPipValues(realMin, realMax) {
-                    const base = [10, 100, 1000, 10000, 100000];
+                    const base = [
+                        100,
+                        1000,
+                        10000,
+                        100000,
+                    ];
                     const values = [realMin];
+                    const SKIP_FACTOR = 2; // если max < B * SKIP_FACTOR, пипс B выкидываем
             
-                    base.forEach((v) => {
-                        if (v > realMin && v < realMax) values.push(v);
+                    base.forEach((B) => {
+                        if (B <= realMin || B >= realMax) return;
+                        if (realMax < B * SKIP_FACTOR) return;
+                        values.push(B);
                     });
             
                     values.push(realMax);
@@ -2245,9 +2284,28 @@
             
                 function formatPrice(v) {
                     const value = Math.round(v);
-                    if (value < 1000)      return String(value);
-                    if (value < 1000000)   return (value / 1000) + 'k';
-                    return (value / 1000000) + 'M';
+
+                    if (value < 1000) {
+                        return String(value);
+                    }
+
+                    if (value < 10000) {
+                        // 2525 -> 2.5k, 2725 -> 2.7k, 2777 -> 2.8k
+                        let kTenths = Math.round(value / 100) / 10; // одна десятичная
+                        const isInt = Math.abs(kTenths - Math.round(kTenths)) < 1e-6;
+                        return (isInt ? kTenths.toFixed(0) : kTenths.toFixed(1)) + 'k';
+                    }
+
+                    if (value < 1000000) {
+                        // десятки тысяч и выше -> просто целые k
+                        const k = Math.round(value / 1000);
+                        return k + 'k';
+                    }
+
+                    // миллионы — одна десятичная M
+                    const mTenths = Math.round(value / 100000) / 10;
+                    const isIntM = Math.abs(mTenths - Math.round(mTenths)) < 1e-6;
+                    return (isIntM ? mTenths.toFixed(0) : mTenths.toFixed(1)) + 'M';
                 }
             
                 const range     = buildNonLinearRange(realMin, realMax);
@@ -2268,7 +2326,7 @@
                     pips: {
                         mode: 'values',
                         values: pipValues,
-                        density: 999,
+                        density: 7,
                         stepped: true,
                         format: {
                             to: formatPrice
@@ -2286,7 +2344,9 @@
                 let b = applied[1] === "" ? max       : clamp(+applied[1]);
                 if (a > b) [a, b] = [b, a];
                 staged = [a, b];
+                isSyncingFromInput = true;
                 pluginEl.noUiSlider.set(staged);
+                isSyncingFromInput = false;
                 fromNum.value = a;
                 toNum.value = b;
             };
@@ -2297,7 +2357,9 @@
                 const lo = Math.min(a, b);
                 const hi = Math.max(a, b);
                 applied = [String(lo), String(hi)];
+                isSyncingFromInput = true;
                 pluginEl.noUiSlider.set([lo, hi]);
+                isSyncingFromInput = false;
                 staged = [lo, hi];
                 fromNum.value = lo;
                 toNum.value = hi;
@@ -2307,7 +2369,9 @@
 
             const resetRange = () => {
                 applied = [String(sliderMin), String(max)];
+                isSyncingFromInput = true;
                 pluginEl.noUiSlider.set([sliderMin, max]);
+                isSyncingFromInput = false;
                 staged = [sliderMin, max];
                 fromNum.value = sliderMin;
                 toNum.value = max;
@@ -2315,27 +2379,48 @@
                 updateBtn();
             };
 
-            pluginEl.noUiSlider.on("update", (values) => {
+            pluginEl.noUiSlider.on("update", (values, handle) => {
                 const a = Math.round(values[0]); 
                 const b = Math.round(values[1]);
-                staged = [a, b];
-                if (document.activeElement !== fromNum) fromNum.value = a;
-                if (document.activeElement !== toNum) toNum.value = b;
+
+                if (typeof staged[0] === "undefined") staged[0] = a;
+                if (typeof staged[1] === "undefined") staged[1] = b;
+
+                if (handle === 0) {
+                    staged[0] = a;
+                } else if (handle === 1) {
+                    staged[1] = b;
+                }
+
+                if (!isSyncingFromInput) {
+                    if (handle === 0 && document.activeElement !== fromNum) {
+                        fromNum.value = a;
+                    }
+                    if (handle === 1 && document.activeElement !== toNum) {
+                        toNum.value = b;
+                    }
+                }
             });
 
             const syncFrom = () => {
                 let v = clamp(+fromNum.value);
                 let other = staged[1];
                 if (v > other) other = v;
+                isSyncingFromInput = true;
                 pluginEl.noUiSlider.set([v, other]); 
-                staged = [v, other];
+                isSyncingFromInput = false;
+                staged[0] = v;
+                staged[1] = other;
             };
             const syncTo = () => {
                 let v = clamp(+toNum.value);
                 let other = staged[0];
                 if (v < other) other = v;
+                isSyncingFromInput = true;
                 pluginEl.noUiSlider.set([other, v]); 
-                staged = [other, v];
+                isSyncingFromInput = false;
+                staged[0] = other;
+                staged[1] = v;
             };
             fromNum.addEventListener("input", syncFrom);
             toNum.addEventListener("input", syncTo);
