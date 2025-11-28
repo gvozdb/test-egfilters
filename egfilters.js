@@ -2261,27 +2261,6 @@
                     return range;
                 }
             
-                function buildPipValues(realMin, realMax) {
-                    const base = [
-                        100,
-                        1000,
-                        10000,
-                        100000,
-                    ];
-                    const values = [realMin];
-                    const SKIP_FACTOR = 2; // если max < B * SKIP_FACTOR, пипс B выкидываем
-            
-                    base.forEach((B) => {
-                        if (B <= realMin || B >= realMax) return;
-                        if (realMax < B * SKIP_FACTOR) return;
-                        values.push(B);
-                    });
-            
-                    values.push(realMax);
-            
-                    return Array.from(new Set(values));
-                }
-            
                 function formatPrice(v) {
                     const value = Math.round(v);
 
@@ -2290,22 +2269,96 @@
                     }
 
                     if (value < 10000) {
-                        // 2525 -> 2.5k, 2725 -> 2.7k, 2777 -> 2.8k
                         let kTenths = Math.round(value / 100) / 10; // одна десятичная
                         const isInt = Math.abs(kTenths - Math.round(kTenths)) < 1e-6;
                         return (isInt ? kTenths.toFixed(0) : kTenths.toFixed(1)) + 'k';
                     }
 
                     if (value < 1000000) {
-                        // десятки тысяч и выше -> просто целые k
                         const k = Math.round(value / 1000);
                         return k + 'k';
                     }
 
-                    // миллионы — одна десятичная M
                     const mTenths = Math.round(value / 100000) / 10;
                     const isIntM = Math.abs(mTenths - Math.round(mTenths)) < 1e-6;
                     return (isIntM ? mTenths.toFixed(0) : mTenths.toFixed(1)) + 'M';
+                }
+
+                function buildPipValues(realMin, realMax) {
+                    const base = [
+                        100,
+                        1000,
+                        10000,
+                        100000,
+                    ];
+                    const TRACK_PX = 240; // ширина полоски
+                    const CHAR_PX  = 7.9; // ширина одного символа
+                    const MIN_GAP  = 9;   // минимальный зазор между подписями, px
+
+                    const candidates = [realMin];
+
+                    base.forEach((B) => {
+                        if (B > realMin && B < realMax) {
+                            candidates.push(B);
+                        }
+                    });
+
+                    candidates.push(realMax);
+
+                    const uniq = Array.from(new Set(candidates)).sort((a, b) => a - b);
+
+                    const logMin  = Math.log10(Math.max(realMin, 1));
+                    const logMax  = Math.log10(realMax);
+                    const logSpan = logMax - logMin || 1;
+
+                    function pos01(v) {
+                        return (Math.log10(v) - logMin) / logSpan;
+                    }
+
+                    const accepted = [];
+                    let lastRight = -Infinity;
+
+                    uniq.forEach((v) => {
+                        const label = formatPrice(v);
+                        const width = label.length * CHAR_PX;
+                        const center = pos01(v) * TRACK_PX;
+                        const left = center - width / 2;
+                        const right = center + width / 2;
+                        const isMin = v === realMin;
+                        const isMax = v === realMax;
+
+                        if (!accepted.length) {
+                            accepted.push({ v, left, right });
+                            lastRight = right;
+                            return;
+                        }
+
+                        const gap = left - lastRight;
+
+                        if (gap >= MIN_GAP) {
+                            accepted.push({ v, left, right });
+                            lastRight = right;
+                        } else if (isMax) {
+                            if (accepted.length === 1 && accepted[0].v === realMin) {
+                                accepted.push({ v, left, right });
+                                lastRight = right;
+                            } else {
+                                const last = accepted[accepted.length - 1];
+                                if (last && last.v !== realMin) {
+                                    accepted[accepted.length - 1] = { v, left, right };
+                                } else {
+                                    accepted.push({ v, left, right });
+                                }
+                                lastRight = right;
+                            }
+                        } else if (isMin) {
+                            // min уже первый, сюда не попадём, но на всякий случай ничего не делаем
+                        } else {
+                            // середину, которая не влезла — пропускаем
+                        }
+                    });
+
+                    return accepted.map(p => p.v);
                 }
             
                 const range     = buildNonLinearRange(realMin, realMax);
