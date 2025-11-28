@@ -373,7 +373,7 @@
     const ENABLE_SWIPE_BACKDROP_OPACITY = true;
 
     // Свойства, необходимые для корректной работы алгоритма фильтрации
-    const mobileMedia = window.matchMedia("(max-width:768px)");
+    const mobileMedia = window.matchMedia("(max-width:768.25px)");
     const isMobile = () => mobileMedia.matches;
 
     const filters = document.querySelector(".js-filters");
