@@ -57,7 +57,7 @@
 .filters-body {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 18px;
 }
 .filters-grid {
     display: flex;
@@ -85,13 +85,13 @@ body.filters-modal .filters-ghost > .filters-body {
     border: 1px solid #f1f4f7;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     .filters-body {
         gap: 0;
     }
     body:not(.filters-modal) .filters .filters-meta,
     body.filters-modal .filters-ghost .filters-meta {
-        margin: 6px 0 -7px;
+        margin: 11px 0 -7px;
     }
     body:not(.filters-modal) .filters > .filters-body,
     body.filters-modal .filters-ghost > .filters-body {
@@ -347,7 +347,7 @@ body.filters-modal .filters-ghost > .filters-body {
 }
 
 
-@media (min-width: 769px) {
+@media (min-width: 768.70px) {
     .datespicker-month_left {
         padding-right: 1rem;
         padding-bottom: 0.6rem;
@@ -362,7 +362,7 @@ body.filters-modal .filters-ghost > .filters-body {
         flex-wrap: nowrap;
     }
 }
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     .datespicker-calendars {
         grid-template-columns: repeat(auto-fit, min(100%, 422px));
     }
@@ -437,7 +437,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .filters-open-prefix {
     display: inline;
 }
-@media (max-width: 991px) {
+@media (max-width: 991.25px) {
     .filters-open-prefix {
         display: none;
     }
@@ -590,7 +590,7 @@ body.filters-modal .filters .filters-footer {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     /*
     body.filters-modal .filters .filters-footer {
         justify-content: space-between;
@@ -625,7 +625,7 @@ body.filters-modal .filters .filters-standalone-checks {
     display: block;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768.70px) {
     body.filters-modal .filters .filters-grid .extra-select:not(.extra-select_sort) {
         flex: 1 1 calc(50% - 6px);
         max-width: calc(50% - 6px);
@@ -697,7 +697,7 @@ body:not(.filters-modal) .filters-ghost .extra-select_has-icon[data-type="dates"
 .exs-trigger {
     position: relative;
     width: 100%;
-    padding: 7px 36px 7px 10px;
+    padding: 7px 32px 7px 10px;
     border: 1px solid #bfcfdf;
     border-radius: 6px;
     background: #fff;
@@ -801,7 +801,7 @@ body.filters-modal .filters .exs-trigger {
     display: inline-flex;
     align-items: center;
     gap: .4rem;
-    padding-left: 4px;
+    padding-left: 0;
     padding-right: 8px;
     background: transparent;
     border-color: transparent;
@@ -1053,7 +1053,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     to   { transform: translateY(100%); }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768.70px) {
     .extra-select.extra-select_full-value {
         flex: none;
     }
@@ -1065,7 +1065,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         padding: 18px 14px 0 16px;
     }
 }
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     .exs-popover {
         position: fixed;
         left: 0;
@@ -1106,7 +1106,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     body.filters-modal .filters {
         left: 0;
         right: 0;
@@ -1288,7 +1288,7 @@ body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-cou
     font-size: 16px;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 991.70px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
     body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-xl="true"],
@@ -1309,7 +1309,7 @@ body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-cou
     }
 }
 
-@media (min-width: 769px) and (max-width: 991px) {
+@media (min-width: 768.70px) and (max-width: 991.25px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-m="true"],
     body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-m="true"],
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-m="true"],
@@ -1334,12 +1334,12 @@ body.filters-modal .filters .filters-meta > .filters-count {
     display: none !important;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 991.70px) {
     .extra-select { min-width: 97px; }
     .extra-select.extra-select_full-value { /* min-width: 124px; */ }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.25px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
     body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
         min-width: 97px;
@@ -1350,7 +1350,7 @@ body.filters-modal .filters .filters-meta > .filters-count {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid,
     body.filters-modal .filters-ghost > .filters-body > .filters-grid {
         gap: 10px 12px;
@@ -1388,11 +1388,14 @@ body.filters-modal .filters .filters-meta > .filters-count {
 body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
 }
-@media (max-width: 768px) {
+@media (max-width: 769.25px) {
     body.filters-modal .filters .filters-body .filters-grid {
         align-items: stretch;
     }
     body.filters-modal .filters .filters-body .filters-grid > * {
         flex: 1 0 100%;
+    }
+    .extra-select_sort .exs-trigger {
+    padding-right: 0;
     }
 }
