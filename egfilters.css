@@ -85,7 +85,7 @@ body.filters-modal .filters-ghost > .filters-body {
     border: 1px solid #f1f4f7;
 }
 
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     .filters-body {
         gap: 0;
     }
@@ -362,7 +362,7 @@ body.filters-modal .filters-ghost > .filters-body {
         flex-wrap: nowrap;
     }
 }
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     .datespicker-calendars {
         grid-template-columns: repeat(auto-fit, min(100%, 422px));
     }
@@ -590,7 +590,7 @@ body.filters-modal .filters .filters-footer {
 }
 
 
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     /*
     body.filters-modal .filters .filters-footer {
         justify-content: space-between;
@@ -692,6 +692,27 @@ body:not(.filters-modal) .filters-ghost .extra-select_has-icon[data-type="dates"
 .extra-select_sort {
     flex: 0 0 auto;
     min-width: inherit !important;
+}
+
+.extra-select[data-placeholder-full="true"]:not(.is-filled) {
+    min-width: auto !important;
+}
+.extra-select[data-placeholder-full="true"]:not(.is-filled) .exs-trigger,
+.extra-select[data-placeholder-full="true"]:not(.is-filled) .exs-trigger-label {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: initial;
+}
+
+.extra-select[data-value-full="true"].is-filled {
+    min-width: auto !important;
+}
+.extra-select[data-value-full="true"].is-filled .exs-trigger,
+.extra-select[data-value-full="true"].is-filled .exs-trigger-label {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: initial;
+    word-break: break-word;
 }
 
 .exs-trigger {
@@ -1065,7 +1086,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
         padding: 18px 14px 0 16px;
     }
 }
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     .exs-popover {
         position: fixed;
         left: 0;
@@ -1106,7 +1127,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     }
 }
 
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     body.filters-modal .filters {
         left: 0;
         right: 0;
@@ -1288,7 +1309,28 @@ body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-cou
     font-size: 16px;
 }
 
-@media (min-width: 991.70px) {
+@media (min-width: 1199.70px) {
+    body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-xxl="true"],
+    body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-xxl="true"],
+    body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-xxl="true"],
+    body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-open[data-show-panel-xxl="true"] {
+        display: inline-flex;
+    }
+    body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xxl="true"],
+    body.filters-modal .filters-ghost > .filters-body > .filters-grid > .filters-break-line[data-show-panel-xxl="true"] {
+        display: block;
+    }
+    body:not(.filters-modal) .filters > .filters-body > .filters-meta > .extra-select[data-show-panel-xxl="true"],
+    body.filters-modal .filters-ghost > .filters-body > .filters-meta > .extra-select[data-show-panel-xxl="true"] {
+        display: inline-flex;
+    }
+    body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count[data-show-panel-xxl="true"],
+    body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count[data-show-panel-xxl="true"] {
+        display: block;
+    }
+}
+
+@media (min-width: 991.70px) and (max-width: 1199.25px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
     body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select[data-show-panel-xl="true"],
     body:not(.filters-modal) .filters > .filters-body > .filters-grid > .filters-open[data-show-panel-xl="true"],
@@ -1350,7 +1392,7 @@ body.filters-modal .filters .filters-meta > .filters-count {
     }
 }
 
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     body:not(.filters-modal) .filters > .filters-body > .filters-grid,
     body.filters-modal .filters-ghost > .filters-body > .filters-grid {
         gap: 10px 12px;
@@ -1388,7 +1430,7 @@ body.filters-modal .filters .filters-meta > .filters-count {
 body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
 }
-@media (max-width: 769.25px) {
+@media (max-width: 768.25px) {
     body.filters-modal .filters .filters-body .filters-grid {
         align-items: stretch;
     }
