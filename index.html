@@ -55,7 +55,7 @@
 
     <div class="container">
     <div class="build-version">
-        Build: 0.0.034
+        Build: 0.0.035
     </div>
 
     <form class="filters-form js-filters-form" action="" method="GET">
@@ -74,7 +74,10 @@
                          data-field="dates"
                          data-label="Выберите даты"
                          data-placeholder="Даты"
+                         data-placeholder-full="true"
+                         data-value-full="true"
                          data-max-label-chars="28"
+                         data-show-panel-xxl="true"
                          data-show-panel-xl="true"
                          data-show-panel-m="true"
                          data-show-panel-xs="true">
@@ -129,7 +132,9 @@
                          data-type="checkbox"
                          data-field="format"
                          data-placeholder="Формат экскурсий"
+                         data-placeholder-full="true"
                          data-max-label-chars="28"
+                         data-show-panel-xxl="true"
                          data-show-panel-xl="true"
                          data-show-panel-m="true"
                          data-show-panel-xs="false">
@@ -163,9 +168,11 @@
                          data-type="checkbox"
                          data-field="transport"
                          data-placeholder="Способ передвижения"
+                         data-placeholder-full="true"
                          data-max-label-chars="28"
-                         data-show-panel-xl="true"
-                         data-show-panel-m="true"
+                         data-show-panel-xxl="true"
+                         data-show-panel-xl="false"
+                         data-show-panel-m="false"
                          data-show-panel-xs="false">
                         <button type="button"
                                 class="exs-trigger js-exs-trigger"
@@ -200,9 +207,11 @@
                          data-type="range"
                          data-field="price"
                          data-placeholder="Цены"
+                         data-placeholder-full="true"
                          data-min="600"
                          data-max="42000"
                          data-step="1"
+                         data-show-panel-xxl="true"
                          data-show-panel-xl="true"
                          data-show-panel-m="false"
                          data-show-panel-xs="false">
@@ -245,7 +254,9 @@
                          data-type="checkbox"
                          data-field="duration"
                          data-placeholder="Длительность"
+                         data-placeholder-full="true"
                          data-max-label-chars="28"
+                         data-show-panel-xxl="false"
                          data-show-panel-xl="false"
                          data-show-panel-m="false"
                          data-show-panel-xs="false">
@@ -277,6 +288,7 @@
                             data-order="50"
                             data-order-xs="20"
                             data-filters-open
+                            data-show-panel-xxl="true"
                             data-show-panel-xl="true"
                             data-show-panel-m="true"
                             data-show-panel-xs="true">
@@ -290,6 +302,7 @@
                     </button>
 
                     <div class="filters-standalone-checks js-filters-standalone-checks"
+                         data-show-panel-xxl="false"
                          data-show-panel-xl="false"
                          data-show-panel-m="false"
                          data-show-panel-xs="false">
@@ -317,6 +330,7 @@
                 </div>
                 <div class="filters-meta">
                     <div class="filters-count js-filters-count"
+                         data-show-panel-xxl="false"
                          data-show-panel-xl="false"
                          data-show-panel-m="false"
                          data-show-panel-xs="true"
@@ -331,6 +345,7 @@
                          data-type="radio"
                          data-field="sort"
                          data-placeholder="Сортировка"
+                         data-show-panel-xxl="true"
                          data-show-panel-xl="true"
                          data-show-panel-m="true"
                          data-show-panel-xs="true"
