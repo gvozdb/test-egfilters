@@ -1224,59 +1224,86 @@
         
         const delimiter = "–";
         const ellipsis = "…";
+        const labelTarget = btn?.querySelector("[data-trigger-label]") || btn;
+
+        const pickFittingText = (variants, fallbackText = "") => {
+            const pool = (Array.isArray(variants) ? variants : []).filter(Boolean);
+            if (!pool.length && fallbackText) {
+                pool.push(fallbackText);
+            }
+            if (!pool.length) {
+                return "";
+            }
+            if (!labelTarget) {
+                return pool[0];
+            }
+            const original = labelTarget.textContent;
+            const hasWidth = (labelTarget.clientWidth || labelTarget.getBoundingClientRect().width || 0) > 0;
+            let chosen = pool[pool.length - 1];
+            for (let i = 0; i < pool.length; i++) {
+                const candidate = pool[i];
+                labelTarget.textContent = candidate;
+                const fits = !hasWidth || labelTarget.scrollWidth <= labelTarget.clientWidth + 0.6;
+                if (fits) {
+                    chosen = candidate;
+                    break;
+                }
+            }
+            labelTarget.textContent = original;
+            return chosen;
+        };
+
+        const applyButtonText = (variants, fallbackText = "") => {
+            if (!labelTarget) {
+                return "";
+            }
+            const nextText = pickFittingText(variants, fallbackText);
+            labelTarget.textContent = nextText;
+            return nextText;
+        };
 
         const setButtonText = (text) => {
-            if (!btn) return;
-            const labelHolder = btn.querySelector("[data-trigger-label]");
-            if (labelHolder) {
-                labelHolder.textContent = text;
-            } else {
-                btn.textContent = text;
-            }
+            applyButtonText([text]);
         };
 
-        const makeLabel = (arr, maxChars) => {
-            if (!arr.length) return "";
-            
-            const postfix = ", " + ellipsis;
-            const firstWithPostfix = () => {
-                const reserve = Math.max(1, maxChars - postfix.length);
-                const trimmedFirst = (arr[0] || "").slice(0, reserve);
-                return trimmedFirst + postfix;
-            };
-            let out = "";
-            for (let i = 0; i < arr.length; i++) {
-                const next = (out ? out + ", " : "") + arr[i];
-                if (next.length > maxChars) {
-                    if (i === 0 && arr.length > 1) {
-                        return firstWithPostfix();
-                    }
-                    return out ? (out + postfix) : ellipsis;
+        const makeLabelVariants = (arr) => {
+            if (!arr.length) return [];
+            if (arr.length === 1) return [arr[0]];
+
+            const first = arr[0];
+            const second = arr[1] || "";
+            const hasMore = arr.length > 2;
+            const variants = [];
+
+            variants.push(arr.join(", "));
+
+            if (second) {
+                const ellipsisSuffix = hasMore ? ", " + ellipsis : ellipsis;
+                variants.push(`${first}, ${second}${ellipsisSuffix}`);
+                for (let len = second.length - 1; len >= 1; len--) {
+                    variants.push(`${first}, ${second.slice(0, len)}${ellipsisSuffix}`);
                 }
-                out = next;
             }
-            return out;
+
+            variants.push(`${first}, ${ellipsis}`);
+
+            return Array.from(new Set(variants.filter(Boolean)));
         };
-        
-        const formatPriceRangeLabel = (fromValue, toValue, maxChars) => {
+
+        const buildPriceRangeVariants = (fromValue, toValue) => {
             const fromText = String(fromValue);
             const toText = String(toValue);
-            const fullLabel = fromText + delimiter + toText;
-            if (fullLabel.length <= maxChars) {
-                return fullLabel;
-            }
-            
-            const minEllipsisLabel = fromText + delimiter + ellipsis;
-            const availableForTo = maxChars - (fromText.length + delimiter.length + ellipsis.length);
+            const variants = [];
 
-            if (availableForTo <= 0) {
-                return minEllipsisLabel;
+            variants.push(fromText + delimiter + toText);
+
+            for (let len = toText.length - 1; len >= 1; len--) {
+                variants.push(fromText + delimiter + toText.slice(0, len) + ellipsis);
             }
 
-            const safeLength = Math.max(1, availableForTo);
-            const toFragment = toText.slice(0, safeLength);
-            
-            return fromText + delimiter + toFragment + ellipsis;
+            variants.push(fromText + delimiter + ellipsis);
+
+            return Array.from(new Set(variants));
         };
 
         const updateBtn = () => {
@@ -1286,11 +1313,11 @@
 
             if (type === "checkbox") {
                 if (!applied.length) {
-                    setButtonText(label || placeholder);
+                    applyButtonText([label || placeholder]);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
-                    setButtonText(makeLabel(applied, maxChars));
+                    applyButtonText(makeLabelVariants(applied), label || placeholder);
                     btn.classList.add("is-active");
                     root.classList.add("is-filled");
                     nextActive = true;
@@ -1299,7 +1326,7 @@
                 const min = Number(root.dataset.min ?? "0");
                 const max = Number(root.dataset.max ?? "0");
                 if (!applied.length || (applied[0] === "" && applied[1] === "")) {
-                    setButtonText(label || placeholder);
+                    applyButtonText([label || placeholder]);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
@@ -1307,31 +1334,25 @@
                     const a = aRaw === "" ? min : Number(aRaw);
                     const b = bRaw === "" ? max : Number(bRaw);
                     if (a === min && b === max) {
-                        setButtonText(label || placeholder);
+                        applyButtonText([label || placeholder]);
                         btn.classList.remove("is-active");
                         root.classList.remove("is-filled");
                     } else {
-                        let text = "";
+                        let labelVariants = [];
                         if (a !== min && b !== max) {
                             if (field === "price") {
-                                const fromText = String(a);
-                                const toText = String(b);
-                                const toDigitReserve = Math.max(1, Math.min(3, Math.ceil(toText.length / 2)));
-                                const priceLabelLimit = Math.min(
-                                    maxChars,
-                                    fromText.length + delimiter.length + ellipsis.length + toDigitReserve
-                                );
-                                text = formatPriceRangeLabel(fromText, toText, priceLabelLimit);
+                                labelVariants = buildPriceRangeVariants(a, b);
                             } else {
-                                text = `${a}–${b}`;
+                                labelVariants = [`${a}–${b}`];
                             }
                         } else if (a !== min) {
-                            text = `от ${a}`;
+                            labelVariants = [`от ${a}`];
                         } else if (b !== max) {
-                            text = `до ${b}`;
+                            labelVariants = [`до ${b}`];
                         }
-                        setButtonText(text || label || placeholder);
-                        if (text) {
+                        const hasCustomLabel = labelVariants.length > 0;
+                        const resolvedText = applyButtonText(labelVariants, label || placeholder);
+                        if (hasCustomLabel && resolvedText) {
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
                             nextActive = true;
@@ -1656,6 +1677,7 @@
                 type,
                 commitFromUi: commitFromChecks,
                 resetForAll: resetChecks,
+                refreshLabel: updateBtn,
                 isActive: () => hasActive
             });
 
@@ -2239,6 +2261,7 @@
                 type,
                 commitFromUi: commitDates,
                 resetForAll: resetDates,
+                refreshLabel: updateBtn,
                 isActive: () => hasActive
             });
 
@@ -2632,6 +2655,7 @@
                 type,
                 commitFromUi: commitRange,
                 resetForAll: resetRange,
+                refreshLabel: updateBtn,
                 isActive: () => hasActive
             });
 
@@ -2746,6 +2770,7 @@
                 commitFromUi: commitFromRadios,
                 resetForAll: resetRadios,
                 defaultValue: defaultRadioValue,
+                refreshLabel: updateBtn,
                 isActive: () => hasActive
             });
 
@@ -2816,10 +2841,26 @@
                 type,
                 commitFromUi: null,
                 resetForAll: null,
+                refreshLabel: updateBtn,
                 isActive: () => hasActive
             });
         }
     });
+
+    const refreshAllLabels = () => {
+        extraSelectRegistry.forEach((api) => {
+            if (typeof api.refreshLabel === "function") {
+                api.refreshLabel();
+            }
+        });
+    };
+
+    window.addEventListener("resize", refreshAllLabels);
+    if (typeof mobileMedia.addEventListener === "function") {
+        mobileMedia.addEventListener("change", refreshAllLabels);
+    } else if (typeof mobileMedia.addListener === "function") {
+        mobileMedia.addListener(refreshAllLabels);
+    }
 
     updateFiltersBadge();
 
