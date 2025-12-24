@@ -1221,6 +1221,9 @@
         let portalRestore = null;
         let hasActive = false;
         let defaultRadioValue = "";
+        
+        const delimiter = "–";
+        const ellipsis = "…";
 
         const setButtonText = (text) => {
             if (!btn) return;
@@ -1234,7 +1237,7 @@
 
         const makeLabel = (arr, maxChars) => {
             if (!arr.length) return "";
-            const ellipsis = "…";
+            
             const postfix = ", " + ellipsis;
             const firstWithPostfix = () => {
                 const reserve = Math.max(1, maxChars - postfix.length);
@@ -1258,14 +1261,21 @@
         const formatPriceRangeLabel = (fromValue, toValue, maxChars) => {
             const fromText = String(fromValue);
             const toText = String(toValue);
-            const delimiter = "–";
-            const ellipsis = "…";
             const fullLabel = fromText + delimiter + toText;
             if (fullLabel.length <= maxChars) {
                 return fullLabel;
             }
-            const reserveForTo = maxChars - (fromText.length + delimiter.length + ellipsis.length);
-            const toFragment = reserveForTo > 0 ? toText.slice(0, reserveForTo) : "";
+            
+            const minEllipsisLabel = fromText + delimiter + ellipsis;
+            const availableForTo = maxChars - (fromText.length + delimiter.length + ellipsis.length);
+
+            if (availableForTo <= 0) {
+                return minEllipsisLabel;
+            }
+
+            const safeLength = Math.max(1, availableForTo);
+            const toFragment = toText.slice(0, safeLength);
+            
             return fromText + delimiter + toFragment + ellipsis;
         };
 
@@ -1304,7 +1314,14 @@
                         let text = "";
                         if (a !== min && b !== max) {
                             if (field === "price") {
-                                text = formatPriceRangeLabel(a, b, maxChars);
+                                const fromText = String(a);
+                                const toText = String(b);
+                                const toDigitReserve = Math.max(1, Math.min(3, Math.ceil(toText.length / 2)));
+                                const priceLabelLimit = Math.min(
+                                    maxChars,
+                                    fromText.length + delimiter.length + ellipsis.length + toDigitReserve
+                                );
+                                text = formatPriceRangeLabel(fromText, toText, priceLabelLimit);
                             } else {
                                 text = `${a}–${b}`;
                             }
