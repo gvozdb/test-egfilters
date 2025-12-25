@@ -1431,6 +1431,12 @@ body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
     max-width: none !important;
 }
+
+body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
+body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
+    flex: 1;
+}
+
 @media (max-width: 768.25px) {
     body.filters-modal .filters .filters-body .filters-grid {
         align-items: stretch;
