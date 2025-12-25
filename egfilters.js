@@ -561,6 +561,7 @@
 
         return {
             root,
+            type: state.type || "",
             minWidth,
             desiredWidth,
             grow,
@@ -658,6 +659,11 @@
         selectEntries.forEach((entry) => {
             const width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
             entry.root.style.minWidth = `${width}px`;
+            if (entry.type === "range") {
+                entry.root.style.maxWidth = `${width}px`;
+            } else {
+                entry.root.style.maxWidth = "";
+            }
         });
     }
 
