@@ -1222,7 +1222,6 @@
         let hasActive = false;
         let defaultRadioValue = "";
         
-        const delimiter = "–";
         const ellipsis = "…";
 
         const setButtonText = (text) => {
@@ -1239,44 +1238,14 @@
             if (!arr.length) return "";
             
             const postfix = ", " + ellipsis;
-            const firstWithPostfix = () => {
-                const reserve = Math.max(1, maxChars - postfix.length);
-                const trimmedFirst = (arr[0] || "").slice(0, reserve);
-                return trimmedFirst + postfix;
-            };
+            
             let out = "";
             for (let i = 0; i < arr.length; i++) {
                 const next = (out ? out + ", " : "") + arr[i];
-                if (next.length > maxChars) {
-                    if (i === 0 && arr.length > 1) {
-                        return firstWithPostfix();
-                    }
-                    return out ? (out + postfix) : ellipsis;
-                }
+                if (next.length > maxChars) return out ? (out + postfix) : ellipsis;
                 out = next;
             }
             return out;
-        };
-        
-        const formatPriceRangeLabel = (fromValue, toValue, maxChars) => {
-            const fromText = String(fromValue);
-            const toText = String(toValue);
-            const fullLabel = fromText + delimiter + toText;
-            if (fullLabel.length <= maxChars) {
-                return fullLabel;
-            }
-            
-            const minEllipsisLabel = fromText + delimiter + ellipsis;
-            const availableForTo = maxChars - (fromText.length + delimiter.length + ellipsis.length);
-
-            if (availableForTo <= 0) {
-                return minEllipsisLabel;
-            }
-
-            const safeLength = Math.max(1, availableForTo);
-            const toFragment = toText.slice(0, safeLength);
-            
-            return fromText + delimiter + toFragment + ellipsis;
         };
 
         const updateBtn = () => {
@@ -1312,24 +1281,11 @@
                         root.classList.remove("is-filled");
                     } else {
                         let text = "";
-                        if (a !== min && b !== max) {
-                            if (field === "price") {
-                                const fromText = String(a);
-                                const toText = String(b);
-                                const toDigitReserve = Math.max(1, Math.min(3, Math.ceil(toText.length / 2)));
-                                const priceLabelLimit = Math.min(
-                                    maxChars,
-                                    fromText.length + delimiter.length + ellipsis.length + toDigitReserve
-                                );
-                                text = formatPriceRangeLabel(fromText, toText, priceLabelLimit);
-                            } else {
-                                text = `${a}–${b}`;
-                            }
-                        } else if (a !== min) {
-                            text = `от ${a}`;
-                        } else if (b !== max) {
-                            text = `до ${b}`;
-                        }
+                        
+                        if (a !== min && b !== max) text = `${a}–${b}`;
+                        else if (a !== min)         text = `от ${a}`;
+                        else if (b !== max)         text = `до ${b}`;
+                        
                         setButtonText(text || label || placeholder);
                         if (text) {
                             btn.classList.add("is-active");
