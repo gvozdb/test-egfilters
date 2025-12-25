@@ -1429,6 +1429,7 @@ body.filters-modal .filters .filters-meta > .filters-count {
 
 body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
+    max-width: none !important;
 }
 @media (max-width: 768.25px) {
     body.filters-modal .filters .filters-body .filters-grid {
