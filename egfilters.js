@@ -613,10 +613,25 @@
         let remaining = Math.max(0, availableWidth - totalMin);
 
         if (cannotExpand && totalMin > 0) {
-            const scale = availableWidth > 0 ? (availableWidth / totalMin) : 0;
-            selectEntries.forEach((entry) => {
-                entry.assigned = Math.max(48, entry.minWidth * scale);
+            let deficit = totalMin - availableWidth;
+            const MIN_CLAMP = 48;
+            const sorted = [...selectEntries].sort((a, b) => a.priority - b.priority);
+            sorted.forEach((entry) => {
+                if (deficit <= 0) {
+                    return;
+                }
+                const canShrink = Math.max(0, entry.minWidth - MIN_CLAMP);
+                const shrinkBy = Math.min(deficit, canShrink);
+                entry.assigned = entry.minWidth - shrinkBy;
+                deficit -= shrinkBy;
             });
+            if (deficit > 0) {
+                const scalePool = sorted.reduce((sum, entry) => sum + (entry.assigned || entry.minWidth), 0);
+                const scale = scalePool > 0 ? Math.max(0, (availableWidth) / scalePool) : 0;
+                sorted.forEach((entry) => {
+                    entry.assigned = Math.max(MIN_CLAMP, (entry.assigned || entry.minWidth) * scale);
+                });
+            }
         } else {
             const priorities = [...new Set(selectEntries.map((entry) => entry.priority))].sort((a, b) => b - a);
             priorities.forEach((priority) => {
@@ -1549,7 +1564,7 @@
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
                             nextActive = true;
-                            priority = 2;
+                            priority = 0;
                         } else {
                             btn.classList.remove("is-active");
                             root.classList.remove("is-filled");
