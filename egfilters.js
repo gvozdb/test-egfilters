@@ -658,12 +658,10 @@
 
         selectEntries.forEach((entry) => {
             const width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
+            const maxWidth = Math.max(width, entry.desiredWidth || width);
             entry.root.style.minWidth = `${width}px`;
-            if (entry.type === "range") {
-                entry.root.style.maxWidth = `${width}px`;
-            } else {
-                entry.root.style.maxWidth = "";
-            }
+            entry.root.style.flexBasis = `${width}px`;
+            entry.root.style.maxWidth = `${maxWidth}px`;
         });
     }
 
