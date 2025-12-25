@@ -459,6 +459,7 @@
     let layoutScheduled = false;
 
     const initialMinWidthByRoot = new WeakMap();
+    const initialMaxWidthByRoot = new WeakMap();
 
     const rememberInitialMinWidth = (root) => {
         if (!root) {
@@ -468,6 +469,16 @@
             initialMinWidthByRoot.set(root, root.style.minWidth || "");
         }
         return initialMinWidthByRoot.get(root);
+    };
+
+    const rememberInitialMaxWidth = (root) => {
+        if (!root) {
+            return "";
+        }
+        if (!initialMaxWidthByRoot.has(root)) {
+            initialMaxWidthByRoot.set(root, root.style.maxWidth || "");
+        }
+        return initialMaxWidthByRoot.get(root);
     };
 
     const scheduleLayoutUpdate = () => {
@@ -570,6 +581,11 @@
         const desiredWidth = Math.max(measuredFull, minWidth);
         const grow = Math.max(0, desiredWidth - minWidth);
         const priority = Number.isFinite(state.priority) ? state.priority : 0;
+        const type = state.type || "";
+        const extraPadding = 7;
+        const maxWidth = type === "range"
+            ? Math.max(minWidth, desiredWidth) + extraPadding
+            : Number.POSITIVE_INFINITY;
 
         return {
             root,
@@ -578,6 +594,7 @@
             grow,
             priority,
             assigned: minWidth,
+            maxWidth,
         };
     };
 
@@ -607,7 +624,9 @@
         const selectNodes = visibleChildren.filter((node) => node.classList.contains("js-extra-select"));
         selectNodes.forEach((node) => {
             const originalMin = rememberInitialMinWidth(node);
+            const originalMax = rememberInitialMaxWidth(node);
             node.style.minWidth = originalMin;
+            node.style.maxWidth = originalMax;
         });
 
         const gap = readGap(grid);
@@ -674,7 +693,13 @@
         }
 
         selectEntries.forEach((entry) => {
-            const width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
+            let width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
+            if (Number.isFinite(entry.maxWidth)) {
+                width = Math.min(width, entry.maxWidth);
+                entry.root.style.maxWidth = `${entry.maxWidth}px`;
+            } else {
+                entry.root.style.maxWidth = rememberInitialMaxWidth(entry.root);
+            }
             entry.root.style.minWidth = `${width}px`;
         });
     }
