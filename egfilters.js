@@ -458,6 +458,18 @@
     const layoutStateByRoot = new WeakMap();
     let layoutScheduled = false;
 
+    const initialMinWidthByRoot = new WeakMap();
+
+    const rememberInitialMinWidth = (root) => {
+        if (!root) {
+            return "";
+        }
+        if (!initialMinWidthByRoot.has(root)) {
+            initialMinWidthByRoot.set(root, root.style.minWidth || "");
+        }
+        return initialMinWidthByRoot.get(root);
+    };
+
     const scheduleLayoutUpdate = () => {
         if (layoutScheduled) {
             return;
@@ -591,6 +603,12 @@
         if (!visibleChildren.length) {
             return;
         }
+
+        const selectNodes = visibleChildren.filter((node) => node.classList.contains("js-extra-select"));
+        selectNodes.forEach((node) => {
+            const originalMin = rememberInitialMinWidth(node);
+            node.style.minWidth = originalMin;
+        });
 
         const gap = readGap(grid);
         const gapTotal = gap * Math.max(0, visibleChildren.length - 1);
