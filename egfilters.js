@@ -549,10 +549,18 @@
         if (!filters) {
             return;
         }
+        const filtersBody = filters.querySelector(".filters-body");
         const grid = filters.querySelector(".filters-grid");
         if (!grid) {
             return;
         }
+        const meta = filters.querySelector(".filters-meta");
+        const bodyStyle = filtersBody ? getComputedStyle(filtersBody) : null;
+        const bodyGap = bodyStyle ? Number.parseFloat(bodyStyle.columnGap || bodyStyle.gap || "0") : 0;
+        const bodyWidth = filtersBody ? filtersBody.clientWidth : grid.clientWidth;
+        const metaVisible = meta && isElementVisible(meta);
+        const metaWidth = metaVisible ? meta.getBoundingClientRect().width : 0;
+        const gridAvailableWidth = Math.max(0, bodyWidth - metaWidth - (metaVisible ? bodyGap : 0));
 
         const visibleChildren = [...grid.children].filter(isElementVisible);
         if (!visibleChildren.length) {
@@ -564,7 +572,7 @@
         const fixedWidth = visibleChildren
             .filter((node) => !node.classList.contains("js-extra-select"))
             .reduce((sum, node) => sum + measureStaticNode(node), 0);
-        const availableWidth = Math.max(0, grid.clientWidth - gapTotal - fixedWidth);
+        const availableWidth = Math.max(0, gridAvailableWidth - gapTotal - fixedWidth);
 
         const selectEntries = visibleChildren
             .filter((node) => node.classList.contains("js-extra-select"))
@@ -576,28 +584,36 @@
         }
 
         const totalMin = selectEntries.reduce((sum, entry) => sum + entry.minWidth, 0);
+        const cannotExpand = totalMin > availableWidth;
         let remaining = Math.max(0, availableWidth - totalMin);
 
-        const priorities = [...new Set(selectEntries.map((entry) => entry.priority))].sort((a, b) => b - a);
-        priorities.forEach((priority) => {
-            if (remaining <= 0) {
-                return;
-            }
-            const group = selectEntries.filter((entry) => entry.priority === priority && entry.grow > 0);
-            if (!group.length) {
-                return;
-            }
-            const groupGrow = group.reduce((sum, entry) => sum + entry.grow, 0);
-            if (groupGrow <= 0) {
-                return;
-            }
-            const take = Math.min(remaining, groupGrow);
-            group.forEach((entry) => {
-                const share = take * (entry.grow / groupGrow);
-                entry.assigned = entry.minWidth + share;
+        if (cannotExpand && totalMin > 0) {
+            const scale = availableWidth > 0 ? (availableWidth / totalMin) : 0;
+            selectEntries.forEach((entry) => {
+                entry.assigned = Math.max(48, entry.minWidth * scale);
             });
-            remaining -= take;
-        });
+        } else {
+            const priorities = [...new Set(selectEntries.map((entry) => entry.priority))].sort((a, b) => b - a);
+            priorities.forEach((priority) => {
+                if (remaining <= 0) {
+                    return;
+                }
+                const group = selectEntries.filter((entry) => entry.priority === priority && entry.grow > 0);
+                if (!group.length) {
+                    return;
+                }
+                const groupGrow = group.reduce((sum, entry) => sum + entry.grow, 0);
+                if (groupGrow <= 0) {
+                    return;
+                }
+                const take = Math.min(remaining, groupGrow);
+                group.forEach((entry) => {
+                    const share = take * (entry.grow / groupGrow);
+                    entry.assigned = entry.minWidth + share;
+                });
+                remaining -= take;
+            });
+        }
 
         selectEntries.forEach((entry) => {
             const width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
