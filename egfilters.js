@@ -507,15 +507,40 @@
         return Number.isFinite(gap) ? gap : 0;
     };
 
+    const cloneForMeasure = (node) => {
+        if (!node || !node.parentNode) {
+            return null;
+        }
+        const host = ensureMeasureHost();
+        const clone = node.cloneNode(true);
+        const style = getComputedStyle(node);
+        clone.style.position = "absolute";
+        clone.style.left = "-99999px";
+        clone.style.top = "-99999px";
+        clone.style.width = "auto";
+        clone.style.minWidth = style.minWidth || "auto";
+        clone.style.maxWidth = "none";
+        host.appendChild(clone);
+        return { host, clone };
+    };
+
     const measureStaticNode = (node) => {
         if (!node) {
             return 0;
         }
-        const rect = node.getBoundingClientRect();
         const style = getComputedStyle(node);
         const cssMin = Number.parseFloat(style.minWidth) || 0;
-        const width = rect.width || node.scrollWidth || 0;
-        return Math.max(width, cssMin);
+        const direct = Math.max(node.scrollWidth || 0, node.getBoundingClientRect().width || 0, cssMin);
+        const measured = (() => {
+            const snapshot = cloneForMeasure(node);
+            if (!snapshot) {
+                return direct;
+            }
+            const rect = snapshot.clone.getBoundingClientRect();
+            snapshot.host.removeChild(snapshot.clone);
+            return rect.width;
+        })();
+        return Math.max(cssMin, measured, direct);
     };
 
     const buildLayoutEntry = (root) => {
@@ -559,7 +584,7 @@
         const bodyGap = bodyStyle ? Number.parseFloat(bodyStyle.columnGap || bodyStyle.gap || "0") : 0;
         const bodyWidth = filtersBody ? filtersBody.clientWidth : grid.clientWidth;
         const metaVisible = meta && isElementVisible(meta);
-        const metaWidth = metaVisible ? meta.getBoundingClientRect().width : 0;
+        const metaWidth = metaVisible ? measureStaticNode(meta) : 0;
         const gridAvailableWidth = Math.max(0, bodyWidth - metaWidth - (metaVisible ? bodyGap : 0));
 
         const visibleChildren = [...grid.children].filter(isElementVisible);
