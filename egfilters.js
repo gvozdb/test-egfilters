@@ -389,6 +389,278 @@
     ];
     const WEEKDAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
+    const applyButtonLabel = (button, text) => {
+        if (!button) {
+            return;
+        }
+        const holder = button.querySelector("[data-trigger-label]");
+        if (holder) {
+            holder.textContent = text;
+        } else {
+            button.textContent = text;
+        }
+    };
+
+    const readButtonLabel = (button) => {
+        if (!button) {
+            return "";
+        }
+        const holder = button.querySelector("[data-trigger-label]");
+        if (holder) {
+            return holder.textContent || "";
+        }
+        return button.textContent || "";
+    };
+
+    let measureHost = null;
+    const ensureMeasureHost = () => {
+        if (measureHost && document.body.contains(measureHost)) {
+            return measureHost;
+        }
+        measureHost = document.createElement("div");
+        measureHost.setAttribute("aria-hidden", "true");
+        measureHost.style.position = "absolute";
+        measureHost.style.left = "-99999px";
+        measureHost.style.top = "-99999px";
+        measureHost.style.visibility = "hidden";
+        measureHost.style.pointerEvents = "none";
+        measureHost.style.width = "auto";
+        measureHost.style.height = "0";
+        document.body.appendChild(measureHost);
+        return measureHost;
+    };
+
+    const measureButtonWidth = (root, button, text) => {
+        if (!root || !button) {
+            return 0;
+        }
+        const host = ensureMeasureHost();
+        const cloneRoot = root.cloneNode(false);
+        cloneRoot.className = root.className;
+        cloneRoot.style.minWidth = "0";
+        cloneRoot.style.maxWidth = "none";
+        cloneRoot.style.position = "relative";
+
+        const cloneBtn = button.cloneNode(true);
+        applyButtonLabel(cloneBtn, text || "");
+        cloneBtn.style.minWidth = "0";
+        cloneBtn.style.maxWidth = "none";
+        cloneBtn.style.width = "auto";
+
+        cloneRoot.appendChild(cloneBtn);
+        host.appendChild(cloneRoot);
+        const rect = cloneRoot.getBoundingClientRect();
+        host.removeChild(cloneRoot);
+
+        return rect.width;
+    };
+
+    const layoutStateByRoot = new WeakMap();
+    let layoutScheduled = false;
+
+    const scheduleLayoutUpdate = () => {
+        if (layoutScheduled) {
+            return;
+        }
+        layoutScheduled = true;
+        requestAnimationFrame(applyLayoutWidths);
+    };
+
+    const isElementVisible = (node) => {
+        if (!node) {
+            return false;
+        }
+        const style = getComputedStyle(node);
+        if (style.display === "none" || style.visibility === "hidden") {
+            return false;
+        }
+        if (node.closest("[hidden]")) {
+            return false;
+        }
+        return node.offsetParent !== null || style.position === "fixed";
+    };
+
+    const registerLayoutState = (root, button, next) => {
+        if (!root || !button) {
+            return;
+        }
+        const prev = layoutStateByRoot.get(root) || {};
+        const nextState = {
+            button,
+            type: next?.type ?? prev.type,
+            fullText: next?.fullText ?? prev.fullText ?? "",
+            minText: next?.minText ?? prev.minText ?? next?.fullText ?? "",
+            priority: Number.isFinite(next?.priority) ? next.priority : (prev.priority ?? 0),
+            isFilled: next?.isFilled ?? prev.isFilled ?? false,
+            selectedCount: Number.isFinite(next?.selectedCount) ? next.selectedCount : (prev.selectedCount ?? 0),
+        };
+        layoutStateByRoot.set(root, nextState);
+        scheduleLayoutUpdate();
+    };
+
+    const readGap = (node) => {
+        if (!node) {
+            return 0;
+        }
+        const style = getComputedStyle(node);
+        const gap = Number.parseFloat(style.columnGap || style.gap || "0");
+        return Number.isFinite(gap) ? gap : 0;
+    };
+
+    const cloneForMeasure = (node) => {
+        if (!node || !node.parentNode) {
+            return null;
+        }
+        const host = ensureMeasureHost();
+        const clone = node.cloneNode(true);
+        const style = getComputedStyle(node);
+        clone.style.position = "absolute";
+        clone.style.left = "-99999px";
+        clone.style.top = "-99999px";
+        clone.style.width = "auto";
+        clone.style.minWidth = style.minWidth || "auto";
+        clone.style.maxWidth = "none";
+        host.appendChild(clone);
+        return { host, clone };
+    };
+
+    const measureStaticNode = (node) => {
+        if (!node) {
+            return 0;
+        }
+        const style = getComputedStyle(node);
+        const cssMin = Number.parseFloat(style.minWidth) || 0;
+        const direct = Math.max(node.scrollWidth || 0, node.getBoundingClientRect().width || 0, cssMin);
+        const measured = (() => {
+            const snapshot = cloneForMeasure(node);
+            if (!snapshot) {
+                return direct;
+            }
+            const rect = snapshot.clone.getBoundingClientRect();
+            snapshot.host.removeChild(snapshot.clone);
+            return rect.width;
+        })();
+        return Math.max(cssMin, measured, direct);
+    };
+
+    const buildLayoutEntry = (root) => {
+        const state = layoutStateByRoot.get(root) || {};
+        const button = state.button || root.querySelector(".js-exs-trigger");
+        if (!button) {
+            return null;
+        }
+        const fullText = state.fullText ?? readButtonLabel(button);
+        const minText = state.minText || fullText;
+        const measuredMin = measureButtonWidth(root, button, minText);
+        const measuredFull = measureButtonWidth(root, button, fullText);
+        const cssMin = Number.parseFloat(getComputedStyle(root).minWidth) || 0;
+        const minWidth = Math.max(measuredMin, cssMin);
+        const desiredWidth = Math.max(measuredFull, minWidth);
+        const grow = Math.max(0, desiredWidth - minWidth);
+        const priority = Number.isFinite(state.priority) ? state.priority : 0;
+
+        return {
+            root,
+            minWidth,
+            desiredWidth,
+            grow,
+            priority,
+            assigned: minWidth,
+        };
+    };
+
+    function applyLayoutWidths() {
+        layoutScheduled = false;
+        if (!filters) {
+            return;
+        }
+        const filtersBody = filters.querySelector(".filters-body");
+        const grid = filters.querySelector(".filters-grid");
+        if (!grid) {
+            return;
+        }
+        const meta = filters.querySelector(".filters-meta");
+        const bodyStyle = filtersBody ? getComputedStyle(filtersBody) : null;
+        const bodyGap = bodyStyle ? Number.parseFloat(bodyStyle.columnGap || bodyStyle.gap || "0") : 0;
+        const bodyWidth = filtersBody ? filtersBody.clientWidth : grid.clientWidth;
+        const metaVisible = meta && isElementVisible(meta);
+        const metaWidth = metaVisible ? measureStaticNode(meta) : 0;
+        const gridAvailableWidth = Math.max(0, bodyWidth - metaWidth - (metaVisible ? bodyGap : 0));
+
+        const visibleChildren = [...grid.children].filter(isElementVisible);
+        if (!visibleChildren.length) {
+            return;
+        }
+
+        const gap = readGap(grid);
+        const gapTotal = gap * Math.max(0, visibleChildren.length - 1);
+        const fixedWidth = visibleChildren
+            .filter((node) => !node.classList.contains("js-extra-select"))
+            .reduce((sum, node) => sum + measureStaticNode(node), 0);
+        const availableWidth = Math.max(0, gridAvailableWidth - gapTotal - fixedWidth);
+
+        const selectEntries = visibleChildren
+            .filter((node) => node.classList.contains("js-extra-select"))
+            .map(buildLayoutEntry)
+            .filter(Boolean);
+
+        if (!selectEntries.length) {
+            return;
+        }
+
+        const totalMin = selectEntries.reduce((sum, entry) => sum + entry.minWidth, 0);
+        const cannotExpand = totalMin > availableWidth;
+        let remaining = Math.max(0, availableWidth - totalMin);
+
+        if (cannotExpand && totalMin > 0) {
+            let deficit = totalMin - availableWidth;
+            const MIN_CLAMP = 48;
+            const sorted = [...selectEntries].sort((a, b) => a.priority - b.priority);
+            sorted.forEach((entry) => {
+                if (deficit <= 0) {
+                    return;
+                }
+                const canShrink = Math.max(0, entry.minWidth - MIN_CLAMP);
+                const shrinkBy = Math.min(deficit, canShrink);
+                entry.assigned = entry.minWidth - shrinkBy;
+                deficit -= shrinkBy;
+            });
+            if (deficit > 0) {
+                const scalePool = sorted.reduce((sum, entry) => sum + (entry.assigned || entry.minWidth), 0);
+                const scale = scalePool > 0 ? Math.max(0, (availableWidth) / scalePool) : 0;
+                sorted.forEach((entry) => {
+                    entry.assigned = Math.max(MIN_CLAMP, (entry.assigned || entry.minWidth) * scale);
+                });
+            }
+        } else {
+            const priorities = [...new Set(selectEntries.map((entry) => entry.priority))].sort((a, b) => b - a);
+            priorities.forEach((priority) => {
+                if (remaining <= 0) {
+                    return;
+                }
+                const group = selectEntries.filter((entry) => entry.priority === priority && entry.grow > 0);
+                if (!group.length) {
+                    return;
+                }
+                const groupGrow = group.reduce((sum, entry) => sum + entry.grow, 0);
+                if (groupGrow <= 0) {
+                    return;
+                }
+                const take = Math.min(remaining, groupGrow);
+                group.forEach((entry) => {
+                    const share = take * (entry.grow / groupGrow);
+                    entry.assigned = entry.minWidth + share;
+                });
+                remaining -= take;
+            });
+        }
+
+        selectEntries.forEach((entry) => {
+            const width = Math.max(entry.minWidth, entry.assigned || entry.minWidth);
+            entry.root.style.minWidth = `${width}px`;
+        });
+    }
+
     const clampToDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
     const addMonths = (date, diff) => {
@@ -721,9 +993,16 @@
     };
 
     window.addEventListener("scroll", scheduleStickyUpdate, { passive: true });
-    window.addEventListener("resize", scheduleStickyUpdate);
-    mobileMedia.addEventListener("change", scheduleStickyUpdate);
+    window.addEventListener("resize", () => {
+        scheduleStickyUpdate();
+        scheduleLayoutUpdate();
+    });
+    mobileMedia.addEventListener("change", () => {
+        scheduleStickyUpdate();
+        scheduleLayoutUpdate();
+    });
     scheduleStickyUpdate();
+    scheduleLayoutUpdate();
 
     function portalOpen(pop, trigger) {
         const placeholder = document.createComment("exs-portal-placeholder");
@@ -1175,6 +1454,7 @@
         });
         filtersOpenBadge.textContent = String(count);
         filtersOpenBadge.classList.toggle("is-visible", count > 0);
+        scheduleLayoutUpdate();
     };
 
     standaloneChecks.forEach((checkbox) => {
@@ -1207,7 +1487,6 @@
         const field = (root.dataset.field || "").trim();
         const label = (root.dataset.label || "").trim();
         const placeholder = (root.dataset.placeholder || "Выбрать…").trim();
-        const maxChars = +root.dataset.maxLabelChars || 28;
         const btn = root.querySelector(".js-exs-trigger");
         const pop = document.getElementById("exs-popover-" + field);
         const body = root.querySelector(".js-exs-body") || (pop ? pop.querySelector(".js-exs-body") : null);
@@ -1221,54 +1500,42 @@
         let portalRestore = null;
         let hasActive = false;
         let defaultRadioValue = "";
-        
-        const ellipsis = "…";
 
         const setButtonText = (text) => {
             if (!btn) return;
-            const labelHolder = btn.querySelector("[data-trigger-label]");
-            if (labelHolder) {
-                labelHolder.textContent = text;
-            } else {
-                btn.textContent = text;
-            }
-        };
-
-        const makeLabel = (arr, maxChars) => {
-            if (!arr.length) return "";
-            
-            const postfix = ", " + ellipsis;
-            
-            let out = "";
-            for (let i = 0; i < arr.length; i++) {
-                const next = (out ? out + ", " : "") + arr[i];
-                if (next.length > maxChars) return out ? (out + postfix) : ellipsis;
-                out = next;
-            }
-            return out;
+            applyButtonLabel(btn, text);
         };
 
         const updateBtn = () => {
             if (!btn) return;
 
             let nextActive = false;
+            let displayText = label || placeholder;
+            let minLabelText = displayText;
+            let priority = 0;
+            let selectedCount = 0;
 
             if (type === "checkbox") {
+                selectedCount = applied.length;
                 if (!applied.length) {
-                    setButtonText(label || placeholder);
+                    setButtonText(displayText);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
-                    setButtonText(makeLabel(applied, maxChars));
+                    displayText = applied.join(", ") || displayText;
+                    minLabelText = applied.length > 1 ? `${applied[0]}, ...` : applied[0];
+                    setButtonText(displayText);
                     btn.classList.add("is-active");
                     root.classList.add("is-filled");
                     nextActive = true;
+                    priority = applied.length > 1 ? 3 : 2;
                 }
             } else if (type === "range") {
                 const min = Number(root.dataset.min ?? "0");
                 const max = Number(root.dataset.max ?? "0");
+                minLabelText = label || placeholder;
                 if (!applied.length || (applied[0] === "" && applied[1] === "")) {
-                    setButtonText(label || placeholder);
+                    setButtonText(displayText);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                 } else {
@@ -1276,7 +1543,7 @@
                     const a = aRaw === "" ? min : Number(aRaw);
                     const b = bRaw === "" ? max : Number(bRaw);
                     if (a === min && b === max) {
-                        setButtonText(label || placeholder);
+                        setButtonText(displayText);
                         btn.classList.remove("is-active");
                         root.classList.remove("is-filled");
                     } else {
@@ -1286,11 +1553,18 @@
                         else if (a !== min)         text = `от ${a}`;
                         else if (b !== max)         text = `до ${b}`;
                         
-                        setButtonText(text || label || placeholder);
+                        displayText = text || displayText;
+                        minLabelText = displayText;
+                        if (a !== min && b !== max && text) {
+                            const compactMax = String(b || "").slice(0, 1) + "...";
+                            minLabelText = `${a}–${compactMax}`;
+                        }
+                        setButtonText(displayText);
                         if (text) {
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
                             nextActive = true;
+                            priority = 0;
                         } else {
                             btn.classList.remove("is-active");
                             root.classList.remove("is-filled");
@@ -1298,8 +1572,9 @@
                     }
                 }
             } else if (type === "dates") {
+                priority = 1;
                 if (!applied.length || !applied[0] || !applied[1]) {
-                    setButtonText(label || placeholder);
+                    setButtonText(displayText);
                     btn.classList.remove("is-active");
                     root.classList.remove("is-filled");
                     if (datesInput) {
@@ -1311,11 +1586,14 @@
                     const endDate = parseISODate(applied[1]);
                     if (startDate && endDate) {
                         const labelText = formatRangeHuman(startDate, endDate) || label || placeholder;
-                        setButtonText(labelText);
+                        displayText = labelText;
+                        minLabelText = labelText;
+                        setButtonText(displayText);
                         if (labelText && labelText !== (label || placeholder)) {
                             btn.classList.add("is-active");
                             root.classList.add("is-filled");
                             nextActive = true;
+                            priority = 2;
                         } else {
                             btn.classList.remove("is-active");
                             root.classList.remove("is-filled");
@@ -1350,18 +1628,28 @@
                     (current?.dataset?.label || "").trim() ||
                     current?.closest("label")?.textContent?.trim() ||
                     current?.value || "";
-                setButtonText(labelText || label || placeholder);
+                displayText = labelText || label || placeholder;
+                minLabelText = displayText;
+                setButtonText(displayText);
                 btn.classList.add("is-active");
                 nextActive = Boolean(current?.value) && current.value !== defaultRadioValue;
                 root.classList.remove("is-filled");
             } else if (type === "stub") {
-                setButtonText(label || placeholder);
+                setButtonText(displayText);
                 root.classList.remove("is-filled");
             } else {
                 root.classList.remove("is-filled");
             }
             hasActive = nextActive;
             updateFiltersBadge();
+            registerLayoutState(root, btn, {
+                type,
+                fullText: displayText,
+                minText: minLabelText || displayText,
+                priority,
+                isFilled: root.classList.contains("is-filled"),
+                selectedCount
+            });
         };
 
         const writeHidden = () => {
