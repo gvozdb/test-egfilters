@@ -627,8 +627,8 @@ body.filters-modal .filters .filters-standalone-checks {
 
 @media (min-width: 768.70px) {
     body.filters-modal .filters .filters-grid .extra-select:not(.extra-select_sort) {
-        flex: 1 1 calc(50% - 6px);
-        max-width: calc(50% - 6px);
+        flex: 1 1 calc(50% - 6px) !important;
+        max-width: calc(50% - 6px) !important;
     }
 }
 
@@ -1429,13 +1429,14 @@ body.filters-modal .filters .filters-meta > .filters-count {
 
 body.filters-modal .filters .filters-body .filters-grid > .extra-select {
     display: inline-flex !important;
-    max-width: none !important;
 }
 
+/*
 body:not(.filters-modal) .filters > .filters-body > .filters-grid > .extra-select,
 body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-select {
-    flex: 1;
+    flex: auto;
 }
+*/
 
 @media (max-width: 768.25px) {
     body.filters-modal .filters .filters-body .filters-grid {
