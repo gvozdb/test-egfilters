@@ -488,7 +488,7 @@ body.filters-modal .filters .filters-meta {
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(31,31,32,.22);
+    background: rgba(31,31,32,.25);
     z-index: 9000;
 }
 
@@ -528,10 +528,11 @@ body.filters-modal .filters .filters-close:hover {
     color: #89a0b2;
 }
 body.filters-modal .filters .filters-grid {
+    flex-wrap: wrap;
     flex: 1 1 auto;
+    width: 100%;
     overflow: initial;
     padding: 0;
-    flex-wrap: wrap;
 }
 body.filters-modal .filters .filters-footer {
     display: flex;
@@ -1446,6 +1447,11 @@ body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-selec
         flex: 1 0 100%;
     }
     .extra-select_sort .exs-trigger {
-    padding-right: 0;
+        padding-right: 0;
+    }
+    body.filters-modal .filters .filters-body .filters-grid > .extra-select[data-field="price"] {
+        max-width: initial !important;
     }
 }
+
+
