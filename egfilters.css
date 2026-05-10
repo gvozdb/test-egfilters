@@ -2,15 +2,15 @@
     /* Скорости анимации: JS считывает эти переменные, чтобы не дублировать значения */
 
     /* Скорость анимации поповера селектов на компах */
-    --exs-desktop-popover-fade-duration: 7ms;
+    --exs-desktop-popover-fade-duration: 6ms;
 
     /* Скорость анимации поповера селектов на мобилах */
-    --exs-mobile-popover-open-duration: 160ms;
-    --exs-mobile-popover-close-duration: 160ms;
+    --exs-mobile-popover-open-duration: 300ms;
+    --exs-mobile-popover-close-duration: 300ms;
 
     /* Скорость анимации модалки-поповера на мобилах */
-    --filters-mobile-popover-open-duration: 160ms;
-    --filters-mobile-popover-close-duration: 160ms;
+    --filters-mobile-popover-open-duration: 300ms;
+    --filters-mobile-popover-close-duration: 300ms;
 }
 
 .filters {
@@ -79,7 +79,7 @@ body:not(.filters-modal) .filters > .filters-body,
 body.filters-modal .filters-ghost > .filters-body {
     position: relative;
     margin: 0 auto;
-    padding: 7px 12px;
+    padding: 7px 11px;
     background-color: #f2f5f8;
     border-radius: 6px;
     border: 1px solid #f1f4f7;
@@ -106,7 +106,7 @@ body.filters-modal .filters-ghost > .filters-body {
     body.filters-modal .filters-ghost > .filters-body > .filters-grid {
         position: relative;
         max-width: 1100px;
-        padding: 0.7rem 0.9rem;
+        padding: 8px 9px;
         background-color: #f2f5f8;
         border: 1px solid #f1f4f7;
         border-radius: 6px;
@@ -151,7 +151,7 @@ body.filters-modal .filters-ghost > .filters-body {
     background: #fff;
     font-size: 15px;
     line-height: 1.4;
-    color: #101519;
+    color: #1C252E;
     cursor: pointer;
 }
 .filters-dates-input:focus {
@@ -192,7 +192,7 @@ body.filters-modal .filters-ghost > .filters-body {
     text-align: center;
     font-weight: 600;
     font-size: 15px;
-    color: #101519;
+    color: #1C252E;
 }
 .datespicker-nav-btn {
     position: relative;
@@ -255,7 +255,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .datespicker-month-name {
     padding-top: 1.6rem;
     padding-bottom: 1rem;
-    color: #101519;
+    color: #1C252E;
     font-size: 16px;
     font-weight: 500;
     text-transform: capitalize;
@@ -283,7 +283,7 @@ body.filters-modal .filters-ghost > .filters-body {
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: #101519;
+    color: #1C252E;
     font-size: 16px;
     line-height: 1;
     cursor: pointer;
@@ -309,7 +309,7 @@ body.filters-modal .filters-ghost > .filters-body {
 .datespicker-day.is-range {
     border-radius: 0;
     background: rgba(73, 190, 84, 0.18);
-    color: #101519;
+    color: #1C252E;
 }
 .datespicker-day.is-range.is-outside {
     background: rgba(73, 190, 84, 0.07);
@@ -367,12 +367,20 @@ body.filters-modal .filters-ghost > .filters-body {
         grid-template-columns: repeat(auto-fit, min(100%, 422px));
     }
     .datespicker-month.datespicker-month_right {
-        padding-top: 8px;
+        padding-top: 0;
     }
     .datespicker-month.datespicker-month_right .datespicker-weekdays {
         display: none;
     }
     .datespicker-month-name {
+        padding-top: 1.6rem;
+        padding-bottom: 0.5rem;
+    }
+    .datespicker-weekdays {
+        margin-top: 8px;
+    }
+    .datespicker-nav {
+        padding: 0 9px 0 9px;
     }
 }
 
@@ -406,14 +414,15 @@ body.filters-modal .filters-ghost > .filters-body {
     position: absolute;
     top: -6px;
     right: -6px;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    padding: 0;
     border-radius: 999px;
     background: #ff4d4f;
     color: #fff;
     font-size: 12px;
-    line-height: 20px;
+    line-height: 1;
     display: none;
     align-items: center;
     justify-content: center;
@@ -558,7 +567,7 @@ body.filters-modal .filters .filters-footer {
 }
 .filters-btn_reset {
     background-color: #ffffff;
-    color: #34b149;
+    color: #27AE4B;
     border: none;
     font-weight: 400;
     border-bottom: 1px dotted #58c462;
@@ -575,7 +584,7 @@ body.filters-modal .filters .filters-footer {
 .filters-btn_reset:hover {
     background-color: #fff;
     color: #3ba645;
-    border-bottom: 1px dotted #34b149;
+    border-bottom: 1px dotted #27AE4B;
 }
 .filters-btn_apply:hover {
     background-color: #36b84c;
@@ -845,7 +854,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
 }
 .extra-select_sort .exs-trigger[aria-expanded="true"],
 .extra-select_sort:hover .exs-trigger {
-    color: #34b149;
+    color: #27AE4B;
 }
 .extra-select_sort .exs-trigger[aria-expanded="true"] .exs-trigger-label,
 .extra-select_sort:hover .exs-trigger-label {
@@ -899,7 +908,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     padding: 10px 14px;
 }
 .exs-popover[data-field-key="dates"] .exs-body {
-    padding-top: 0;
+    padding-top: 2px;
     padding-bottom: 0;
 }
 
@@ -1039,7 +1048,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     left: 0.25rem;
     width: 0.6rem;
     height: 1.5rem;
-    border: solid #34b149;
+    border: solid #27AE4B;
     border-width: 0 2px 2px 0;
     transition: background 250ms;
     transform: translateY(-79%) translateX(79%) rotate(40deg);
@@ -1051,7 +1060,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     flex-shrink: 0;
     width: 0.8rem;
     height: 0.8rem;
-    background: #34b149;
+    background: #27AE4B;
     border: 0;
     transition: background 250ms;
     border-radius: 50%;
@@ -1114,7 +1123,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     .exs-actions {
         /* justify-content: space-between; */
         position: relative;
-        padding: 18px;
+        padding: 18px 18px 22px 18px;
     }
     .exs-close { display: inline-flex; }
     .exs-drag-handle { display: block; }
@@ -1126,6 +1135,10 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     .exs-popover[data-field-key="dates"] .exs-close {
         display: none !important;
     }
+    .exs-popover[data-field-key="dates"] .exs-body {
+    padding-top: 6px;
+    padding-bottom: 4px;
+}
 }
 
 @media (max-width: 768.25px) {
@@ -1178,7 +1191,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     }
     body.filters-modal .filters .filters-footer {
         position: relative;
-        padding: 18px;
+        padding: 18px 18px 22px 18px;
         border-top: 1px solid #E9EEF3;
         background: #fff;
     }
@@ -1187,7 +1200,7 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
 .exs-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.12);
+    background: rgba(31,31,32,.25);
     z-index: 10990;
 }
 
@@ -1270,8 +1283,8 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
 }
 
 .exs-range {
-    padding: 18px 14px 25px;
-    margin-bottom: 10px;
+    padding: 18px 14px 26px;
+    margin-bottom: 12px;
 }
 .exs-range-plugin {
     margin: 0;
@@ -1306,7 +1319,7 @@ body.filters-modal .filters-ghost > .filters-body > .filters-meta > [data-order=
 body:not(.filters-modal) .filters > .filters-body > .filters-meta > .filters-count,
 body.filters-modal .filters-ghost > .filters-body > .filters-meta > .filters-count {
     white-space: nowrap;
-    color: #768a9d;
+    color: #546d85;
     font-size: 16px;
 }
 
@@ -1451,6 +1464,9 @@ body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-selec
     }
     body.filters-modal .filters .filters-body .filters-grid > .extra-select[data-field="price"] {
         max-width: initial !important;
+    }
+    .exs-trigger {
+    padding: 8px 32px 8px 10px;
     }
 }
 
