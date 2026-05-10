@@ -364,7 +364,7 @@
     const DESKTOP_FADE_CLEANUP_MS = DESKTOP_POPOVER_FADE_MS; // + 140;
 
     // Дистанция свайпа вниз (пикселей), чтобы закрылся поповер
-    const SWIPE_CLOSE_DISTANCE_PX = 40;
+    const SWIPE_CLOSE_DISTANCE_PX = 60;
 
     // Включить постепенную прозрачность ПОПОВЕРА при закрытии свайпом вниз
     const ENABLE_SWIPE_POPOVER_OPACITY = false;
