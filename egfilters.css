@@ -267,6 +267,9 @@ body.filters-modal .filters-ghost > .filters-body {
     grid-template-columns: repeat(7, 1fr);
     gap: 4px 0;
 }
+.datespicker-weekdays_strip {
+    display: none;
+}
 .datespicker-weekday {
     color: #889eb4;
     font-size: 16px;
@@ -1000,6 +1003,19 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     line-height: 1.5;
     white-space: nowrap;
 }
+.exs-custombox-hint {
+    display: block;
+    margin-top: 3px;
+    color: #adbdca;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.25;
+}
+.exs-custombox:has(.exs-custombox-hint) input ~ span:before,
+.exs-custombox:has(.exs-custombox-hint) input ~ span:after {
+    top: calc(4px + 0.75em) !important;
+}
 .exs-custombox input ~ span:before {
     content: '';
     box-sizing: content-box !important;
@@ -1131,14 +1147,50 @@ body.filters-modal .filters .extra-select_sort .exs-trigger {
     .exs-popover[data-field-key="dates"] {
         /* min-height: calc(90vh + 160px); */
     }
-    .exs-popover[data-field-key="dates"] .exs-header,
-    .exs-popover[data-field-key="dates"] .exs-close {
-        display: none !important;
+    .exs-popover[data-field-key="dates"] .exs-header {
+        text-align: center;
     }
     .exs-popover[data-field-key="dates"] .exs-body {
-    padding-top: 6px;
-    padding-bottom: 4px;
-}
+        padding-top: 6px;
+        padding-bottom: 4px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+    .exs-popover[data-field-key="dates"] .filters-dates,
+    .exs-popover[data-field-key="dates"] .filters-dates-picker,
+    .exs-popover[data-field-key="dates"] .datespicker {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+    .exs-popover[data-field-key="dates"] .datespicker {
+        gap: 0;
+    }
+    .exs-popover[data-field-key="dates"] .datespicker-nav {
+        display: none;
+    }
+    .exs-popover[data-field-key="dates"] .datespicker-month .datespicker-weekdays {
+        display: none;
+    }
+    .exs-popover[data-field-key="dates"] .datespicker-weekdays_strip {
+        display: grid;
+        flex: 0 0 auto;
+        margin-top: 0;
+        padding: 6px 0 8px 0;
+        background: #fff;
+    }
+    .exs-popover[data-field-key="dates"] .datespicker-calendars {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
 }
 
 @media (max-width: 768.25px) {
@@ -1469,3 +1521,5 @@ body.filters-modal .filters-ghost > .filters-body > .filters-grid > .extra-selec
     padding: 8px 32px 8px 10px;
     }
 }
+
+
