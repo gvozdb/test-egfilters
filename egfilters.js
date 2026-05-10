@@ -783,6 +783,7 @@
     let closeFiltersSheet = null;
     let overlayEl = null;
     let overlayMouseDown = false;
+    let overlayHideTimeout = null;
     let ghostEl = null;
 
     const lockScrollBody = (on) => {
@@ -796,30 +797,63 @@
         }
     };
     const ensureOverlay = () => {
-        if (!overlayEl) {
-            overlayEl = document.createElement("div");
-            overlayEl.className = "exs-overlay";
-
-            overlayEl.addEventListener("mousedown", () => {
-                overlayMouseDown = true;
-            }, { capture: true });
-
-            overlayEl.addEventListener("mouseup", () => {
-                if (overlayMouseDown) {
-                    if (filtersSheetOpen && typeof closeFiltersSheet === "function") {
-                        closeFiltersSheet();
-                    } else if (currentOpen) {
-                        currentOpen.close();
-                    }
-                }
-                overlayMouseDown = false;
-            }, { capture: true });
-
-            document.addEventListener("mouseup", (e) => {
-                if (e.target !== overlayEl) overlayMouseDown = false;
-            }, { capture: true });
-
+        if (overlayHideTimeout) {
+            clearTimeout(overlayHideTimeout);
+            overlayHideTimeout = null;
+        }
+        if (overlayEl) {
+            const fromOpacity = isMobile() ? getComputedStyle(overlayEl).opacity : "1";
+            overlayEl.remove();
+            overlayEl.dataset.hiding = "";
+            overlayEl.style.transition = "none";
+            overlayEl.style.opacity = fromOpacity;
             document.body.appendChild(overlayEl);
+            if (isMobile()) {
+                overlayEl.getBoundingClientRect();
+                requestAnimationFrame(() => {
+                    if (!overlayEl) return;
+                    overlayEl.style.transition = `opacity ${MOBILE_POPOVER_OPEN_MS}ms ease`;
+                    overlayEl.style.opacity = "1";
+                });
+            } else {
+                overlayEl.style.transition = "";
+                overlayEl.style.opacity = "1";
+            }
+            return;
+        }
+        overlayEl = document.createElement("div");
+        overlayEl.className = "exs-overlay";
+
+        overlayEl.addEventListener("mousedown", () => {
+            overlayMouseDown = true;
+        }, { capture: true });
+
+        overlayEl.addEventListener("mouseup", () => {
+            if (overlayMouseDown) {
+                if (filtersSheetOpen && typeof closeFiltersSheet === "function") {
+                    closeFiltersSheet();
+                } else if (currentOpen) {
+                    currentOpen.close();
+                }
+            }
+            overlayMouseDown = false;
+        }, { capture: true });
+
+        document.addEventListener("mouseup", (e) => {
+            if (e.target !== overlayEl) overlayMouseDown = false;
+        }, { capture: true });
+
+        if (isMobile()) {
+            overlayEl.style.opacity = "0";
+        }
+        document.body.appendChild(overlayEl);
+        if (isMobile()) {
+            overlayEl.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                if (!overlayEl) return;
+                overlayEl.style.transition = `opacity ${MOBILE_POPOVER_OPEN_MS}ms ease`;
+                overlayEl.style.opacity = "1";
+            });
         }
     };
     const moveOverlayOnTop = () => {
@@ -834,8 +868,25 @@
             return;
         }
         if (overlayEl) {
-            overlayEl.remove();
-            overlayEl = null;
+            if (isMobile()) {
+                if (overlayEl.dataset.hiding === "true") {
+                    overlayMouseDown = false;
+                    return;
+                }
+                const el = overlayEl;
+                el.dataset.hiding = "true";
+                el.style.transition = `opacity ${MOBILE_POPOVER_CLOSE_MS}ms ease`;
+                el.style.opacity = "0";
+                if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
+                overlayHideTimeout = setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                    if (overlayEl === el) overlayEl = null;
+                    overlayHideTimeout = null;
+                }, MOBILE_POPOVER_CLOSE_MS);
+            } else {
+                overlayEl.remove();
+                overlayEl = null;
+            }
         }
         overlayMouseDown = false;
     };
@@ -1217,14 +1268,15 @@
             }
         };
 
-        const restoreOpacity = () => {
+        const restoreOpacity = (opts = {}) => {
+            const { skipBackdrop = false } = opts;
             if (ENABLE_SWIPE_POPOVER_OPACITY) {
                 pop.style.opacity = String(startPopOpacity);
             } else {
                 pop.style.opacity = "";
             }
 
-            if (resolveBackdrop) {
+            if (!skipBackdrop && resolveBackdrop) {
                 const backdrop = resolveBackdrop();
                 if (backdrop) {
                     if (ENABLE_SWIPE_BACKDROP_OPACITY) {
@@ -1321,6 +1373,10 @@
             pop.dataset.open = "";
             pop.dataset.closing = "";
             pop.style.transition = "none";
+            if (resolveBackdrop) {
+                const backdrop = resolveBackdrop();
+                if (backdrop) backdrop.style.transition = "none";
+            }
             setSheetDragMeta(false);
             applyOpacity(0);
         };
@@ -1385,6 +1441,13 @@
                     const threshold = SWIPE_CLOSE_DISTANCE_PX;
                     const currentY = clampSheet(dy);
                     if (currentY > threshold) {
+                        if (resolveBackdrop) {
+                            const backdrop = resolveBackdrop();
+                            if (backdrop) {
+                                backdrop.style.transition = `opacity ${MOBILE_POPOVER_CLOSE_MS}ms ease`;
+                                backdrop.style.opacity = "0";
+                            }
+                        }
                         animateFromTo(pop, currentY, "translateY(100%)", MOBILE_POPOVER_OPEN_MS, "ease", () => {
                             api.close({ animatedFromY: null, alreadyAnimated: true });
                         });
@@ -1446,7 +1509,7 @@
 
         return () => {
             abortSwipeGesture();
-            restoreOpacity();
+            restoreOpacity({ skipBackdrop: true });
             pop.style.transform = "";
             pop.style.animation = "";
             pop.style.transition = "";
@@ -1838,11 +1901,7 @@
                 portalRestore = restore;
                 if (isMobile()) {
                     ensureOverlay();
-                    moveOverlayOnTop();
                     pop.style.opacity = "1";
-                    if (overlayEl) {
-                        overlayEl.style.opacity = "1";
-                    }
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
@@ -1953,6 +2012,10 @@
             let viewDate = minViewDate;
             let hoverDate = null;
             let hasReadInitialDataset = false;
+            const MOBILE_INITIAL_MONTHS = 3;
+            const MOBILE_MAX_MONTHS = 70;
+            let mobileLoadedCount = MOBILE_INITIAL_MONTHS;
+            let mobileLazyObserver = null;
             const skipClickByIso = new Map();
             const SKIP_CLICK_WINDOW_MS = 1200;
 
@@ -2275,8 +2338,44 @@
                 return monthEl;
             };
 
+            const setupMobileLazyLoading = (calendarsWrap) => {
+                if (!("IntersectionObserver" in window)) return;
+                const observeLast = () => {
+                    const months = calendarsWrap.querySelectorAll(".datespicker-month");
+                    if (!months.length) return;
+                    const last = months[months.length - 1];
+                    if (mobileLazyObserver) mobileLazyObserver.disconnect();
+                    mobileLazyObserver = new IntersectionObserver((entries) => {
+                        for (const entry of entries) {
+                            if (!entry.isIntersecting) continue;
+                            if (mobileLoadedCount >= MOBILE_MAX_MONTHS) {
+                                if (mobileLazyObserver) {
+                                    mobileLazyObserver.disconnect();
+                                    mobileLazyObserver = null;
+                                }
+                                return;
+                            }
+                            const cursor = addMonths(minViewDate, mobileLoadedCount);
+                            calendarsWrap.appendChild(renderMonth(cursor, ''));
+                            mobileLoadedCount++;
+                            observeLast();
+                            return;
+                        }
+                    }, { root: calendarsWrap, rootMargin: "200px 0px", threshold: 0 });
+                    mobileLazyObserver.observe(last);
+                };
+                observeLast();
+            };
+
             const renderCalendar = () => {
                 if (!datesCalendarWrap) return;
+                const isMobileLayout = mobileMedia.matches;
+                const prevCalendarsWrap = datesCalendarWrap.querySelector(".datespicker-calendars");
+                const savedScrollTop = prevCalendarsWrap ? prevCalendarsWrap.scrollTop : 0;
+                if (mobileLazyObserver) {
+                    mobileLazyObserver.disconnect();
+                    mobileLazyObserver = null;
+                }
                 datesCalendarWrap.innerHTML = "";
                 const datespickerRoot = document.createElement("div");
                 datespickerRoot.className = "datespicker";
@@ -2369,10 +2468,29 @@
                 nav.appendChild(nextBtn);
                 datespickerRoot.appendChild(nav);
 
+                const weekdaysStrip = document.createElement("div");
+                weekdaysStrip.className = "datespicker-weekdays datespicker-weekdays_strip";
+                WEEKDAYS_SHORT.forEach((name) => {
+                    const cell = document.createElement("div");
+                    cell.className = "datespicker-weekday";
+                    cell.textContent = name;
+                    weekdaysStrip.appendChild(cell);
+                });
+                datespickerRoot.appendChild(weekdaysStrip);
+
                 const calendarsWrap = document.createElement("div");
-                calendarsWrap.className = "datespicker-calendars";
-                calendarsWrap.appendChild(renderMonth(viewDate, 'datespicker-month_left'));
-                calendarsWrap.appendChild(renderMonth(nextMonth, 'datespicker-month_right'));
+                calendarsWrap.className = "datespicker-calendars js-exs-swipe-guard";
+                if (isMobileLayout) {
+                    if (mobileLoadedCount > MOBILE_MAX_MONTHS) mobileLoadedCount = MOBILE_MAX_MONTHS;
+                    let cursor = minViewDate;
+                    for (let i = 0; i < mobileLoadedCount; i++) {
+                        calendarsWrap.appendChild(renderMonth(cursor, ''));
+                        cursor = addMonths(cursor, 1);
+                    }
+                } else {
+                    calendarsWrap.appendChild(renderMonth(viewDate, 'datespicker-month_left'));
+                    calendarsWrap.appendChild(renderMonth(nextMonth, 'datespicker-month_right'));
+                }
                 datespickerRoot.appendChild(calendarsWrap);
 
                 calendarsWrap.addEventListener("mouseleave", () => {
@@ -2382,6 +2500,13 @@
                 });
 
                 datesCalendarWrap.appendChild(datespickerRoot);
+
+                if (isMobileLayout && savedScrollTop > 0) {
+                    calendarsWrap.scrollTop = savedScrollTop;
+                }
+                if (isMobileLayout) {
+                    setupMobileLazyLoading(calendarsWrap);
+                }
             };
 
             const commitDates = () => {
@@ -2418,20 +2543,42 @@
 
             const open = () => {
                 if (currentOpen && currentOpen.root !== root) currentOpen.close();
+                mobileLoadedCount = MOBILE_INITIAL_MONTHS;
                 setStagedFromApplied();
+                const isMobileLayout = mobileMedia.matches;
+                let scrollToMonthIndex = -1;
+                if (isMobileLayout && stagedDates[0]) {
+                    const target = startOfMonth(stagedDates[0]);
+                    const idx = (target.getFullYear() - minViewDate.getFullYear()) * 12
+                              + (target.getMonth() - minViewDate.getMonth());
+                    if (idx >= 0) {
+                        scrollToMonthIndex = idx;
+                        const needed = Math.min(idx + 2, MOBILE_MAX_MONTHS);
+                        if (needed > mobileLoadedCount) mobileLoadedCount = needed;
+                    }
+                }
                 renderCalendar();
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
                 if (isMobile()) {
                     ensureOverlay();
-                    moveOverlayOnTop();
                     pop.style.opacity = "1";
-                    if (overlayEl) {
-                        overlayEl.style.opacity = "1";
-                    }
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
+                }
+                if (isMobileLayout && scrollToMonthIndex > 0) {
+                    const scrollToTarget = () => {
+                        const calendarsWrap = pop.querySelector(".datespicker-calendars");
+                        if (!calendarsWrap) return;
+                        const months = calendarsWrap.querySelectorAll(".datespicker-month");
+                        const targetEl = months[scrollToMonthIndex];
+                        if (targetEl) {
+                            calendarsWrap.scrollTop = targetEl.offsetTop;
+                        }
+                    };
+                    scrollToTarget();
+                    requestAnimationFrame(scrollToTarget);
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -2453,6 +2600,7 @@
                 };
 
                 if (detachSwipe) { detachSwipe(); detachSwipe = null; }
+                if (mobileLazyObserver) { mobileLazyObserver.disconnect(); mobileLazyObserver = null; }
 
                 if (isMobile()) {
                     if (alreadyAnimated) {
@@ -2825,11 +2973,7 @@
                 portalRestore = restore;
                 if (isMobile()) {
                     ensureOverlay();
-                    moveOverlayOnTop();
                     pop.style.opacity = "1";
-                    if (overlayEl) {
-                        overlayEl.style.opacity = "1";
-                    }
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
@@ -2959,11 +3103,7 @@
                 portalRestore = restore;
                 if (isMobile()) {
                     ensureOverlay();
-                    moveOverlayOnTop();
                     pop.style.opacity = "1";
-                    if (overlayEl) {
-                        overlayEl.style.opacity = "1";
-                    }
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
@@ -3044,11 +3184,7 @@
                 portalRestore = restore;
                 if (isMobile()) {
                     ensureOverlay();
-                    moveOverlayOnTop();
                     pop.style.opacity = "1";
-                    if (overlayEl) {
-                        overlayEl.style.opacity = "1";
-                    }
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
@@ -3117,11 +3253,34 @@
     const scope    = filters.querySelector("[data-filters-scope]");
 
     let modalBackdrop = null;
+    let modalBackdropHideTimeout = null;
     let modalOpenedAsSheet = false;
     let detachModalSwipe = null;
 
     const createBackdrop = () => {
-        if (modalBackdrop) return;
+        if (modalBackdropHideTimeout) {
+            clearTimeout(modalBackdropHideTimeout);
+            modalBackdropHideTimeout = null;
+        }
+        const sheetOpenMs = ANIMATION_SPEED.filtersSheet.open;
+        if (modalBackdrop) {
+            modalBackdrop.dataset.hiding = "";
+            if (isMobile()) {
+                const fromOpacity = getComputedStyle(modalBackdrop).opacity;
+                modalBackdrop.style.transition = "none";
+                modalBackdrop.style.opacity = fromOpacity;
+                modalBackdrop.getBoundingClientRect();
+                requestAnimationFrame(() => {
+                    if (!modalBackdrop) return;
+                    modalBackdrop.style.transition = `opacity ${sheetOpenMs}ms ease`;
+                    modalBackdrop.style.opacity = "1";
+                });
+            } else {
+                modalBackdrop.style.transition = "";
+                modalBackdrop.style.opacity = "1";
+            }
+            return;
+        }
         modalBackdrop = document.createElement("div");
         modalBackdrop.className = "modal-backdrop";
         let downOnBackdrop = false;
@@ -3139,12 +3298,37 @@
         // modalBackdrop.addEventListener("touchstart", handleStart, { passive: true });
         // modalBackdrop.addEventListener("touchend", handleEnd, { passive: true });
 
+        if (isMobile()) {
+            modalBackdrop.style.opacity = "0";
+        }
         document.body.appendChild(modalBackdrop);
+        if (isMobile()) {
+            modalBackdrop.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                if (!modalBackdrop) return;
+                modalBackdrop.style.transition = `opacity ${sheetOpenMs}ms ease`;
+                modalBackdrop.style.opacity = "1";
+            });
+        }
     };
     const removeBackdrop = () => {
         if (!modalBackdrop) return;
-        modalBackdrop.remove();
-        modalBackdrop = null;
+        if (isMobile()) {
+            if (modalBackdrop.dataset.hiding === "true") return;
+            const el = modalBackdrop;
+            el.dataset.hiding = "true";
+            el.style.transition = `opacity ${FILTERS_SHEET_CLOSE_MS}ms ease`;
+            el.style.opacity = "0";
+            if (modalBackdropHideTimeout) clearTimeout(modalBackdropHideTimeout);
+            modalBackdropHideTimeout = setTimeout(() => {
+                if (el.parentNode) el.remove();
+                if (modalBackdrop === el) modalBackdrop = null;
+                modalBackdropHideTimeout = null;
+            }, FILTERS_SHEET_CLOSE_MS);
+        } else {
+            modalBackdrop.remove();
+            modalBackdrop = null;
+        }
     };
 
     const modalFocusTrap = (e) => {
@@ -3178,9 +3362,6 @@
             detachModalSwipe = null;
         }
         filters.style.opacity = "";
-        if (modalBackdrop) {
-            modalBackdrop.style.opacity = "";
-        }
         delete filters.dataset.open;
         delete filters.dataset.closing;
         filters.style.transform = "";
@@ -3200,9 +3381,6 @@
         if (modalOpenedAsSheet) {
             lockScrollBody(true);
             filters.style.opacity = "1";
-            if (modalBackdrop) {
-                modalBackdrop.style.opacity = "1";
-            }
             startKeyframe(filters, "open");
             detachModalSwipe = attachSwipe(filters, { close: closeModal }, { resolveBackdrop: () => modalBackdrop });
             closeFiltersSheet = closeModal;
