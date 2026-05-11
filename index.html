@@ -122,8 +122,8 @@
                             </div>
                         </div>
                         <div class="exs-hidden js-exs-hidden">
-                            <input type="hidden" name="dates[start]" value="2027-11-25">
-                            <input type="hidden" name="dates[end]" value="2027-12-25">
+                            <input type="hidden" name="dates[start]" value="">
+                            <input type="hidden" name="dates[end]" value="">
                         </div>
                     </div>
 
@@ -430,6 +430,24 @@
         <div class="item"></div>
     </div>
 </div>
+
+<!-- кнопка где угодно на странице -->
+<button type="button" data-eg-sheet-open="categories">Категории</button>
+
+<!-- сама плашка (в исходнике страницы или подгружается AJAX-ом — без разницы) -->
+<div class="eg-sheet" data-eg-sheet="categories" hidden>
+    <div class="eg-sheet-header">
+        <div class="eg-sheet-title">Категории</div>
+        <button type="button"
+                class="eg-sheet-close"
+                data-eg-sheet-close
+                aria-label="Закрыть">×</button>
+    </div>
+    <div class="eg-sheet-body">
+        <!-- любой твой контент: список категорий, карточки, что хочешь -->
+    </div>
+</div>
+
 
 <script src="./egfilters.js"></script>
 
