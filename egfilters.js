@@ -830,10 +830,10 @@
 
         overlayEl.addEventListener("mouseup", () => {
             if (overlayMouseDown) {
-                if (filtersSheetOpen && typeof closeFiltersSheet === "function") {
-                    closeFiltersSheet();
-                } else if (currentOpen) {
+                if (currentOpen) {
                     currentOpen.close();
+                } else if (filtersSheetOpen && typeof closeFiltersSheet === "function") {
+                    closeFiltersSheet();
                 }
             }
             overlayMouseDown = false;
@@ -863,10 +863,6 @@
         }
     };
     const removeOverlay = () => {
-        if (filtersSheetOpen) {
-            overlayMouseDown = false;
-            return;
-        }
         if (overlayEl) {
             if (isMobile()) {
                 if (overlayEl.dataset.hiding === "true") {
@@ -1110,7 +1106,9 @@
                 const style = pop.style;
                 style.position = "fixed";
                 style.top = (rect.bottom + 6) + "px";
-                style.width = rect.width + "px";
+                style.width = "auto";
+                const cssMinWidth = parseFloat(window.getComputedStyle(pop).minWidth) || 0;
+                style.minWidth = Math.max(rect.width, cssMinWidth) + "px";
                 style.right = "auto";
                 style.bottom = "auto";
                 style.zIndex = 11000;
@@ -1142,6 +1140,7 @@
                 style.left = "";
                 style.top = "";
                 style.width = "";
+                style.minWidth = "";
                 style.right = "";
                 style.bottom = "";
                 style.opacity = "";
@@ -1536,6 +1535,304 @@
         // document.addEventListener("click", handler, true);
     })();
 
+    /**
+     * Универсальная модалка/плашка. На десктопе — центрированная модалка,
+     * на мобиле — выезжающая снизу плашка со свайпом-закрытием, fade подложки,
+     * фокус-ловушкой, esc-закрытием, кликом по подложке. Используется и
+     * фильтрами, и любыми внешними потребителями (через [data-eg-sheet]).
+     *
+     * options:
+     *   bodyClass        — какие классы навешивать на <body> на время открытия
+     *   manageHidden     — переключать ли атрибут hidden у rootEl (для фильтров — false)
+     *   onBeforeOpen({ rootEl, trigger }) -> false отменяет открытие
+     *   onAfterOpen({ rootEl, trigger })
+     *   onBeforeClose({ rootEl })
+     *   onAfterClose({ rootEl, trigger })
+     */
+    function attachEgSheet(rootEl, options = {}) {
+        const {
+            bodyClass = "eg-sheet-open",
+            manageHidden = true,
+            onBeforeOpen = null,
+            onAfterOpen = null,
+            onBeforeClose = null,
+            onAfterClose = null,
+        } = options;
+
+        const bodyClassList = String(bodyClass).split(/\s+/).filter(Boolean);
+
+        let openFlag = false;
+        let closingFlag = false;
+        let openedAsSheet = false;
+        let backdropEl = null;
+        let backdropHideTimer = null;
+        let detachSwipeFn = null;
+        let lastTrigger = null;
+        let destroyed = false;
+
+        const sheetOpenMs = ANIMATION_SPEED.filtersSheet.open;
+
+        const createBackdrop = () => {
+            if (backdropHideTimer) {
+                clearTimeout(backdropHideTimer);
+                backdropHideTimer = null;
+            }
+            if (backdropEl) {
+                backdropEl.dataset.hiding = "";
+                if (isMobile()) {
+                    const fromOpacity = getComputedStyle(backdropEl).opacity;
+                    backdropEl.style.transition = "none";
+                    backdropEl.style.opacity = fromOpacity;
+                    backdropEl.getBoundingClientRect();
+                    requestAnimationFrame(() => {
+                        if (!backdropEl) return;
+                        backdropEl.style.transition = `opacity ${sheetOpenMs}ms ease`;
+                        backdropEl.style.opacity = "1";
+                    });
+                } else {
+                    backdropEl.style.transition = "";
+                    backdropEl.style.opacity = "1";
+                }
+                return;
+            }
+            backdropEl = document.createElement("div");
+            backdropEl.className = "modal-backdrop";
+            let downOnBackdrop = false;
+            backdropEl.addEventListener("mousedown", () => { downOnBackdrop = true; }, { passive: true });
+            backdropEl.addEventListener("mouseup", () => {
+                if (downOnBackdrop) close();
+                downOnBackdrop = false;
+            }, { passive: true });
+            if (isMobile()) backdropEl.style.opacity = "0";
+            document.body.appendChild(backdropEl);
+            if (isMobile()) {
+                backdropEl.getBoundingClientRect();
+                requestAnimationFrame(() => {
+                    if (!backdropEl) return;
+                    backdropEl.style.transition = `opacity ${sheetOpenMs}ms ease`;
+                    backdropEl.style.opacity = "1";
+                });
+            }
+        };
+
+        const removeBackdrop = () => {
+            if (!backdropEl) return;
+            if (isMobile()) {
+                if (backdropEl.dataset.hiding === "true") return;
+                const el = backdropEl;
+                el.dataset.hiding = "true";
+                el.style.transition = `opacity ${FILTERS_SHEET_CLOSE_MS}ms ease`;
+                el.style.opacity = "0";
+                if (backdropHideTimer) clearTimeout(backdropHideTimer);
+                backdropHideTimer = setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                    if (backdropEl === el) backdropEl = null;
+                    backdropHideTimer = null;
+                }, FILTERS_SHEET_CLOSE_MS);
+            } else {
+                backdropEl.remove();
+                backdropEl = null;
+            }
+        };
+
+        const onKeydown = (e) => {
+            if (!openFlag) return;
+            if (e.key === "Escape") {
+                e.stopPropagation();
+                close();
+                return;
+            }
+            if (e.key === "Tab") {
+                const focusables = rootEl.querySelectorAll(
+                    "button, input, select, textarea, a[href], [tabindex]:not([tabindex='-1'])"
+                );
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        const onSheetClick = (e) => {
+            if (!openFlag) return;
+            const closeBtn = e.target.closest("[data-eg-sheet-close]");
+            if (closeBtn && rootEl.contains(closeBtn)) {
+                e.preventDefault();
+                close();
+            }
+        };
+
+        const finalizeClose = () => {
+            openFlag = false;
+            closingFlag = false;
+            if (manageHidden) rootEl.hidden = true;
+            bodyClassList.forEach((c) => document.body.classList.remove(c));
+            lockScrollBody(false);
+            document.removeEventListener("keydown", onKeydown);
+            if (detachSwipeFn) { detachSwipeFn(); detachSwipeFn = null; }
+            rootEl.style.opacity = "";
+            delete rootEl.dataset.open;
+            delete rootEl.dataset.closing;
+            rootEl.style.transform = "";
+            rootEl.style.animation = "";
+            const trigger = lastTrigger;
+            lastTrigger = null;
+            openedAsSheet = false;
+            if (typeof onAfterClose === "function") onAfterClose({ rootEl, trigger });
+            if (trigger instanceof HTMLElement && document.contains(trigger)) {
+                trigger.focus({ preventScroll: true });
+            }
+        };
+
+        function open(trigger) {
+            if (destroyed || openFlag) return;
+            if (typeof onBeforeOpen === "function") {
+                const result = onBeforeOpen({ rootEl, trigger });
+                if (result === false) return;
+            }
+            openFlag = true;
+            openedAsSheet = isMobile();
+            lastTrigger = trigger || null;
+            if (manageHidden) rootEl.hidden = false;
+            bodyClassList.forEach((c) => document.body.classList.add(c));
+            createBackdrop();
+            lockScrollBody(true);
+            if (openedAsSheet) {
+                rootEl.style.opacity = "1";
+                startKeyframe(rootEl, "open");
+                detachSwipeFn = attachSwipe(rootEl, { close: (opts) => close(opts) }, { resolveBackdrop: () => backdropEl });
+            }
+            document.addEventListener("keydown", onKeydown);
+            const focusTarget = rootEl.querySelector("[data-eg-sheet-autofocus]")
+                || rootEl.querySelector("[data-eg-sheet-close]")
+                || rootEl.querySelector("button, input, select, textarea, a[href]");
+            if (focusTarget instanceof HTMLElement) focusTarget.focus({ preventScroll: true });
+            if (typeof onAfterOpen === "function") onAfterOpen({ rootEl, trigger });
+        }
+
+        function close(opts = {}) {
+            if (!openFlag || closingFlag) return;
+            closingFlag = true;
+            const { animatedFromY = null, alreadyAnimated = false } = opts;
+            if (typeof onBeforeClose === "function") onBeforeClose({ rootEl });
+            removeBackdrop();
+            if (openedAsSheet) {
+                if (alreadyAnimated) {
+                    finalizeClose();
+                    return;
+                }
+                if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
+                    animateFromTo(rootEl, animatedFromY, "translateY(100%)", FILTERS_SHEET_CLOSE_MS, "ease", finalizeClose);
+                } else {
+                    startKeyframe(rootEl, "close");
+                    setTimeout(finalizeClose, FILTERS_CLOSE_FINALIZE_MS);
+                }
+                setTimeout(() => {
+                    rootEl.style.transform = "";
+                    rootEl.style.animation = "";
+                }, MOBILE_ANIMATION_CLEANUP_MS);
+            } else {
+                finalizeClose();
+            }
+        }
+
+        rootEl.addEventListener("click", onSheetClick);
+        if (manageHidden && !rootEl.hasAttribute("hidden")) {
+            rootEl.hidden = true;
+        }
+
+        return {
+            open,
+            close,
+            get isOpen() { return openFlag; },
+            rootEl,
+            destroy() {
+                if (openFlag) {
+                    finalizeClose();
+                }
+                rootEl.removeEventListener("click", onSheetClick);
+                if (backdropEl) {
+                    if (backdropHideTimer) {
+                        clearTimeout(backdropHideTimer);
+                        backdropHideTimer = null;
+                    }
+                    backdropEl.remove();
+                    backdropEl = null;
+                }
+                destroyed = true;
+            },
+        };
+    }
+
+    /* === EgSheet: реестр инстансов + атрибутная инициализация ============ */
+    const egSheetInstances = new WeakMap();
+    const egSheetById = (id) => {
+        if (!id) return null;
+        try {
+            return document.querySelector(`[data-eg-sheet="${CSS.escape(id)}"]`);
+        } catch (err) {
+            return null;
+        }
+    };
+    const egSheetGet = (rootEl, opts) => {
+        if (!rootEl) return null;
+        let instance = egSheetInstances.get(rootEl);
+        if (!instance) {
+            instance = attachEgSheet(rootEl, opts);
+            egSheetInstances.set(rootEl, instance);
+        }
+        return instance;
+    };
+
+    document.addEventListener("click", (e) => {
+        const opener = e.target.closest("[data-eg-sheet-open]");
+        if (!opener) return;
+        const id = opener.getAttribute("data-eg-sheet-open");
+        if (!id) return;
+        const sheetEl = egSheetById(id);
+        if (!sheetEl) {
+            console.warn(`EgSheet: target [data-eg-sheet="${id}"] not found`);
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        const sheet = egSheetGet(sheetEl);
+        if (sheet) sheet.open(opener);
+    });
+
+    /* публичный API на window — чтобы можно было вручную дёрнуть из своего JS */
+    window.EgSheet = {
+        attach(rootEl, opts) {
+            return egSheetGet(rootEl, opts);
+        },
+        get(rootEl) {
+            return egSheetInstances.get(rootEl) || null;
+        },
+        getById(id) {
+            const el = egSheetById(id);
+            return el ? egSheetInstances.get(el) || null : null;
+        },
+        open(idOrEl, trigger) {
+            const el = (typeof idOrEl === "string") ? egSheetById(idOrEl) : idOrEl;
+            if (!el) return null;
+            const sheet = egSheetGet(el);
+            sheet?.open(trigger);
+            return sheet;
+        },
+        close(idOrEl) {
+            const el = (typeof idOrEl === "string") ? egSheetById(idOrEl) : idOrEl;
+            if (!el) return;
+            egSheetInstances.get(el)?.close();
+        },
+    };
+    /* === /EgSheet ========================================================= */
+
     const filtersOpenBadge = document.querySelector(".js-filters-open-badge");
     const standaloneChecks = [...document.querySelectorAll(".js-filters-standalone-checks input[type=\"checkbox\"]")];
     const extraSelectRegistry = new Map();
@@ -1913,12 +2210,14 @@
             const reallyHide = () => { if (pop) pop.hidden = true; };
 
             const close = (opts = {}) => {
+                if (close.__busy) return;
+                close.__busy = true;
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
 
                 const finalize = () => {
-                    // lockScrollBody(false);
+                    close.__busy = false;
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -2013,7 +2312,7 @@
             let hoverDate = null;
             let hasReadInitialDataset = false;
             const MOBILE_INITIAL_MONTHS = 3;
-            const MOBILE_MAX_MONTHS = 70;
+            const MOBILE_MAX_MONTHS = 12;
             let mobileLoadedCount = MOBILE_INITIAL_MONTHS;
             let mobileLazyObserver = null;
             const skipClickByIso = new Map();
@@ -2553,7 +2852,10 @@
                               + (target.getMonth() - minViewDate.getMonth());
                     if (idx >= 0) {
                         scrollToMonthIndex = idx;
-                        const needed = Math.min(idx + 2, MOBILE_MAX_MONTHS);
+                        // Need enough months AFTER the target so scrollHeight - clientHeight is
+                        // large enough to actually reach the target's offset; otherwise the
+                        // browser clamps scrollTop and the target lands below the top.
+                        const needed = Math.min(Math.max(idx + 4, MOBILE_INITIAL_MONTHS), MOBILE_MAX_MONTHS);
                         if (needed > mobileLoadedCount) mobileLoadedCount = needed;
                     }
                 }
@@ -2561,24 +2863,49 @@
                 if (pop) { pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
                 const { restore } = portalOpen(pop, btn);
                 portalRestore = restore;
+
+                // Scroll the mobile calendar to the month containing the selected start date so
+                // the month-name lands at the top of the scroll area. offsetTop is unreliable
+                // here (.datespicker-calendars is position: static, so offsetTop measures
+                // against a positioned ancestor) — use getBoundingClientRect deltas instead.
+                // The calendars wrap is hidden until scroll is applied to avoid a visible jump
+                // from the initial (top) position to the target month.
+                const shouldAutoScroll = isMobileLayout && scrollToMonthIndex >= 0;
+                const calendarsWrapForScroll = shouldAutoScroll
+                    ? pop.querySelector(".datespicker-calendars")
+                    : null;
+                if (calendarsWrapForScroll) {
+                    calendarsWrapForScroll.style.visibility = "hidden";
+                }
+                const scrollToSelectedMonth = () => {
+                    if (!calendarsWrapForScroll) return;
+                    const months = calendarsWrapForScroll.querySelectorAll(".datespicker-month");
+                    const targetEl = months[scrollToMonthIndex];
+                    if (!targetEl) return;
+                    const wrapRect = calendarsWrapForScroll.getBoundingClientRect();
+                    const targetRect = targetEl.getBoundingClientRect();
+                    calendarsWrapForScroll.scrollTop += targetRect.top - wrapRect.top;
+                };
+
                 if (isMobile()) {
                     ensureOverlay();
                     pop.style.opacity = "1";
                     startKeyframe(pop, "open");
                     detachSwipe = attachSwipe(pop, api, { resolveBackdrop: () => overlayEl });
                 }
-                if (isMobileLayout && scrollToMonthIndex > 0) {
-                    const scrollToTarget = () => {
-                        const calendarsWrap = pop.querySelector(".datespicker-calendars");
-                        if (!calendarsWrap) return;
-                        const months = calendarsWrap.querySelectorAll(".datespicker-month");
-                        const targetEl = months[scrollToMonthIndex];
-                        if (targetEl) {
-                            calendarsWrap.scrollTop = targetEl.offsetTop;
+
+                if (shouldAutoScroll) {
+                    const applyScrollAndReveal = () => {
+                        scrollToSelectedMonth();
+                        if (calendarsWrapForScroll) {
+                            calendarsWrapForScroll.style.visibility = "";
                         }
                     };
-                    scrollToTarget();
-                    requestAnimationFrame(scrollToTarget);
+                    // Try synchronously first (layout is forced by getBoundingClientRect),
+                    // then again on the next frame as a safety net for cases where the
+                    // freshly re-parented popover still needs a tick to settle its flex sizes.
+                    scrollToSelectedMonth();
+                    requestAnimationFrame(applyScrollAndReveal);
                 }
                 // lockScrollBody(true);
                 currentOpen = { root, pop, trigger: btn, close: api.close };
@@ -2587,12 +2914,14 @@
             const reallyHide = () => { if (pop) pop.hidden = true; };
 
             const close = (opts = {}) => {
+                if (close.__busy) return;
+                close.__busy = true;
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
 
                 const finalize = () => {
-                    // lockScrollBody(false);
+                    close.__busy = false;
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -2984,12 +3313,14 @@
             const reallyHide = () => { pop.hidden = true; };
 
             const close = (opts = {}) => {
+                if (close.__busy) return;
+                close.__busy = true;
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
 
                 const finalize = () => {
-                    // lockScrollBody(false);
+                    close.__busy = false;
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -3115,12 +3446,14 @@
             const reallyHide = () => { pop.hidden = true; };
 
             const close = (opts = {}) => {
+                if (close.__busy) return;
+                close.__busy = true;
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
 
                 const finalize = () => {
-                    // lockScrollBody(false);
+                    close.__busy = false;
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -3193,12 +3526,14 @@
             };
             const reallyHide = () => { if (pop) pop.hidden = true; };
             const close = (opts = {}) => {
+                if (close.__busy) return;
+                close.__busy = true;
                 const { animatedFromY = null, alreadyAnimated = false } = opts;
 
                 removeOverlay();
 
                 const finalize = () => {
-                    // lockScrollBody(false);
+                    close.__busy = false;
                     reallyHide();
                     if (portalRestore) { portalRestore(); portalRestore = null; }
                     btn.setAttribute("aria-expanded", "false");
@@ -3252,95 +3587,6 @@
     const applyAll = filters.querySelector(".js-filters-apply-all");
     const scope    = filters.querySelector("[data-filters-scope]");
 
-    let modalBackdrop = null;
-    let modalBackdropHideTimeout = null;
-    let modalOpenedAsSheet = false;
-    let detachModalSwipe = null;
-
-    const createBackdrop = () => {
-        if (modalBackdropHideTimeout) {
-            clearTimeout(modalBackdropHideTimeout);
-            modalBackdropHideTimeout = null;
-        }
-        const sheetOpenMs = ANIMATION_SPEED.filtersSheet.open;
-        if (modalBackdrop) {
-            modalBackdrop.dataset.hiding = "";
-            if (isMobile()) {
-                const fromOpacity = getComputedStyle(modalBackdrop).opacity;
-                modalBackdrop.style.transition = "none";
-                modalBackdrop.style.opacity = fromOpacity;
-                modalBackdrop.getBoundingClientRect();
-                requestAnimationFrame(() => {
-                    if (!modalBackdrop) return;
-                    modalBackdrop.style.transition = `opacity ${sheetOpenMs}ms ease`;
-                    modalBackdrop.style.opacity = "1";
-                });
-            } else {
-                modalBackdrop.style.transition = "";
-                modalBackdrop.style.opacity = "1";
-            }
-            return;
-        }
-        modalBackdrop = document.createElement("div");
-        modalBackdrop.className = "modal-backdrop";
-        let downOnBackdrop = false;
-
-        const handleStart = () => { downOnBackdrop = true; };
-        const handleEnd = () => {
-            if (downOnBackdrop) {
-                closeModal();
-            }
-            downOnBackdrop = false;
-        };
-
-        modalBackdrop.addEventListener("mousedown", handleStart, { passive: true });
-        modalBackdrop.addEventListener("mouseup", handleEnd, { passive: true });
-        // modalBackdrop.addEventListener("touchstart", handleStart, { passive: true });
-        // modalBackdrop.addEventListener("touchend", handleEnd, { passive: true });
-
-        if (isMobile()) {
-            modalBackdrop.style.opacity = "0";
-        }
-        document.body.appendChild(modalBackdrop);
-        if (isMobile()) {
-            modalBackdrop.getBoundingClientRect();
-            requestAnimationFrame(() => {
-                if (!modalBackdrop) return;
-                modalBackdrop.style.transition = `opacity ${sheetOpenMs}ms ease`;
-                modalBackdrop.style.opacity = "1";
-            });
-        }
-    };
-    const removeBackdrop = () => {
-        if (!modalBackdrop) return;
-        if (isMobile()) {
-            if (modalBackdrop.dataset.hiding === "true") return;
-            const el = modalBackdrop;
-            el.dataset.hiding = "true";
-            el.style.transition = `opacity ${FILTERS_SHEET_CLOSE_MS}ms ease`;
-            el.style.opacity = "0";
-            if (modalBackdropHideTimeout) clearTimeout(modalBackdropHideTimeout);
-            modalBackdropHideTimeout = setTimeout(() => {
-                if (el.parentNode) el.remove();
-                if (modalBackdrop === el) modalBackdrop = null;
-                modalBackdropHideTimeout = null;
-            }, FILTERS_SHEET_CLOSE_MS);
-        } else {
-            modalBackdrop.remove();
-            modalBackdrop = null;
-        }
-    };
-
-    const modalFocusTrap = (e) => {
-        if (!document.body.classList.contains("filters-modal")) return;
-        if (e.key !== "Tab") return;
-        const focusables = filters.querySelectorAll("button, input, [tabindex]:not([tabindex='-1'])");
-        if (!focusables.length) return;
-        const first = focusables[0], last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-
     const closeAllPopovers = () => {
         document.querySelectorAll(".exs-popover:not([hidden])").forEach(p => {
             const root = p.closest(".extra-select");
@@ -3348,71 +3594,35 @@
         });
     };
 
-    const finalizeModalClose = () => {
-        filtersSheetOpen = false;
-        closeFiltersSheet = null;
-        document.body.classList.remove("filters-modal");
-        lockScrollBody(false);
-        removeBackdrop();
-        resetSticky();
-        removeGhost();
-        document.removeEventListener("keydown", modalFocusTrap);
-        if (detachModalSwipe) {
-            detachModalSwipe();
-            detachModalSwipe = null;
-        }
-        filters.style.opacity = "";
-        delete filters.dataset.open;
-        delete filters.dataset.closing;
-        filters.style.transform = "";
-        filters.style.animation = "";
-        modalOpenedAsSheet = false;
-        openBtn?.focus({ preventScroll: true });
-    };
-
-    const openModal = () => {
-        closeAllPopovers();
-        resetSticky();
-        createGhost();
-        document.body.classList.add("filters-modal");
-        modalOpenedAsSheet = isMobile();
-        createBackdrop();
-        lockScrollBody(true);
-        if (modalOpenedAsSheet) {
-            lockScrollBody(true);
-            filters.style.opacity = "1";
-            startKeyframe(filters, "open");
-            detachModalSwipe = attachSwipe(filters, { close: closeModal }, { resolveBackdrop: () => modalBackdrop });
-            closeFiltersSheet = closeModal;
-        }
-        document.addEventListener("keydown", modalFocusTrap);
-        closeBtn?.focus({ preventScroll: true });
-    };
-
-    const closeModal = (opts = {}) => {
-        const { animatedFromY = null, alreadyAnimated = false } = opts;
-        closeAllPopovers();
-        removeBackdrop();
-
-        if (modalOpenedAsSheet) {
-            if (alreadyAnimated) {
-                finalizeModalClose();
-                return;
+    const filterSheet = attachEgSheet(filters, {
+        bodyClass: "filters-modal eg-sheet-open",
+        manageHidden: false,
+        onBeforeOpen: () => {
+            closeAllPopovers();
+            resetSticky();
+            createGhost();
+        },
+        onAfterOpen: () => {
+            if (isMobile()) {
+                filtersSheetOpen = true;
+                closeFiltersSheet = () => filterSheet.close();
             }
-            if (Number.isFinite(animatedFromY) && animatedFromY > 0) {
-                animateFromTo(filters, animatedFromY, "translateY(100%)", FILTERS_SHEET_CLOSE_MS, "ease", finalizeModalClose);
-            } else {
-                startKeyframe(filters, "close");
-                setTimeout(finalizeModalClose, FILTERS_CLOSE_FINALIZE_MS);
-            }
-            setTimeout(() => {
-                filters.style.transform = "";
-                filters.style.animation = "";
-            }, MOBILE_ANIMATION_CLEANUP_MS);
-        } else {
-            finalizeModalClose();
-        }
-    };
+            closeBtn?.focus({ preventScroll: true });
+        },
+        onBeforeClose: () => {
+            closeAllPopovers();
+        },
+        onAfterClose: () => {
+            filtersSheetOpen = false;
+            closeFiltersSheet = null;
+            resetSticky();
+            removeGhost();
+        },
+    });
+    egSheetInstances.set(filters, filterSheet);
+
+    const openModal = () => filterSheet.open(openBtn);
+    const closeModal = (opts) => filterSheet.close(opts);
 
     const applyModal = () => {
         extraSelectRegistry.forEach((api) => {
@@ -3426,11 +3636,7 @@
     };
 
     openBtn?.addEventListener("click", openModal);
-    closeBtn?.addEventListener("click", closeModal);
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && document.body.classList.contains("filters-modal")) closeModal();
-        // if (e.key === "Enter" && document.body.classList.contains("filters-modal")) applyModal();
-    });
+    closeBtn?.addEventListener("click", () => closeModal());
 
     resetAll?.addEventListener("click", () => {
         extraSelectRegistry.forEach((api) => {
